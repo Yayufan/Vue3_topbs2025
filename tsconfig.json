@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "useDefineForClassFields": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "strict": true,
+    "noLib": false,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "lib": ["esnext", "dom"],
+    "baseUrl": ".",
+    "allowJs": true, //原本為true  , 改為false 則 TypeScript 就不會嘗試編譯 .js 檔案：
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["vite/client", "unplugin-icons/types/vue", "element-plus/global"],
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+    "allowSyntheticDefaultImports": true /* 允许默認导入 */,
+    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
+
+    "jsx": "preserve",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment"
+  },
+  "exclude": ["node_modules", "dist", "**/*.js"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "src/typings/**/*.d.ts",
+    "mock/**/*.ts",
+    "vite.config.ts",
+    "src/typings/components.d.ts"
+  ]
+}
