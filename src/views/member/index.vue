@@ -57,20 +57,15 @@
 
       <el-table class="member-table" :data="memberList.records" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
-        <el-table-column fixed prop="code" label="會員編號" width="90">
-          <template #default="scope">
-            <el-text v-if="scope.row.code">HA{{ scope.row.code.toString().padStart(4, '0') }}</el-text>
-          </template>
-        </el-table-column>
-        <el-table-column fixed prop="name" label="姓名" width="90" />
-        <el-table-column prop="phone" label="手機" width="120" />
-        <el-table-column prop="birthday" label="生日" width="120">
-          <template #default="scope">
-            <el-text>{{ formatToMinguo(scope.row.birthday) }}</el-text>
-          </template>
-        </el-table-column> <el-table-column prop="idCard" label="身份證字號" width="110" />
+
+        <el-table-column fixed prop="firstName" label="名字" width="90" />
+        <el-table-column fixed prop="lastName" label="姓氏" width="90" />
         <el-table-column prop="email" label="信箱" />
-        <el-table-column prop="status" label="審核狀態" min-width="40">
+        <el-table-column prop="country" label="國家" />
+        <el-table-column prop="remitAccountLast5" label="帳戶後五碼" width="100" />
+
+
+        <el-table-column prop="status" label="繳費狀態" width="80">
           <template #default="scope">
             <span v-if="scope.row.status == '1'" style="color: green;">審核通過</span>
             <span v-else-if="scope.row.status == '2'" style="color: red;">駁回申請</span>
@@ -159,35 +154,28 @@
           <el-form label-position="top" label-width="auto" :model="updateMemberForm" :rules="updateMemberFormRules"
             ref="updateMemberFormRef">
 
-            <el-form-item label="姓名" prop="name">
-              <el-input v-model="updateMemberForm.name" />
+            <el-form-item label="E-Mail" prop="email">
+              <el-input v-model="updateMemberForm.email" />
             </el-form-item>
 
-            <el-form-item label="身份證字號" prop="idCard">
-              <el-input v-model="updateMemberForm.idCard" />
+            <el-form-item label="名字" prop="firstName">
+              <el-input v-model="updateMemberForm.firstName" />
             </el-form-item>
 
-            <el-form-item label="出生日期" prop="birthday">
-              <el-date-picker v-model="updateMemberForm.birthday" type="date" format="YYYY-MM-DD"
-                @change="updateMemberForm.birthday = parseFromMinguo(updateMemberForm.birthday)" locale="zh-TW">
-              </el-date-picker>
+            <el-form-item label="姓氏" prop="lastName">
+              <el-input v-model="updateMemberForm.lastName" />
             </el-form-item>
 
-
-            <el-form-item label="性別" prop="gender">
-              <el-radio-group v-model="updateMemberForm.gender">
-                <el-radio value="男">男</el-radio>
-                <el-radio value="女">女</el-radio>
-                <el-radio value="其他">其他 :</el-radio>
-              </el-radio-group>
-              <el-input class="gender-other" v-if="updateMemberForm.gender === '其他'"
-                v-model="updateMemberForm.genderOther">
-              </el-input>
+            <el-form-item label="國家" prop="country">
+              <el-input v-model="updateMemberForm.country" />
             </el-form-item>
 
-            <el-form-item label="服務單位" prop="department">
-              <el-input v-model="updateMemberForm.department" placeholder="服務單位">
+            <el-form-item label="帳號末五碼" prop="remitAccountLast5">
+              <el-input v-model="updateMemberForm.remitAccountLast5" />
+            </el-form-item>
 
+            <el-form-item label="單位" prop="affiliation">
+              <el-input v-model="updateMemberForm.affiliation">
               </el-input>
             </el-form-item>
 
@@ -197,14 +185,6 @@
 
             <el-form-item label="連絡電話" prop="phone">
               <el-input v-model="updateMemberForm.phone" />
-            </el-form-item>
-
-            <el-form-item label="地址" prop="contactAddress">
-              <el-input v-model="updateMemberForm.contactAddress" />
-            </el-form-item>
-
-            <el-form-item label="E-Mail" prop="email">
-              <el-input v-model="updateMemberForm.email" />
             </el-form-item>
 
             <el-form-item label="審核狀態" prop="status">
@@ -250,7 +230,7 @@ import { ref, reactive } from 'vue'
 import { Delete, Plus } from '@element-plus/icons-vue'
 import { scrollbarProps, type FormInstance, type FormRules } from 'element-plus'
 
-import { getMemberApi, getAllMemberApi, getMemberByPaginationApi, getMemberByPaginationByStatusApi, getMemberCountApi, getMemberCountByStatusApi, updateMemberApi, deleteMemberApi, batchDeleteMemberApi, downloadMemberExcelApi, assignTagsToMember } from '@/api/member'
+import { getMemberByPaginationByStatusApi, getMemberCountApi, updateMemberApi, deleteMemberApi, batchDeleteMemberApi, downloadMemberExcelApi, assignTagsToMember } from '@/api/member'
 import { getAllTagsApi } from '@/api/tag'
 
 
@@ -305,16 +285,16 @@ const setTagEffect = (status: number) => {
 
 let memberList = reactive<Record<string, any>>({
   records: [{
-    name: '',
-    email: '',
-    phone: '',
-    department: '',
-    contactAddress: '',
-    jobTitle: '',
-    gender: '',
-    genderOther: '',
-    idCard: '',
-    birthday: '',
+    memberId: 0,
+    email: "",
+    firstName: "",
+    lastName: "",
+    country: "",
+    remitAccountLast5: "",
+    affiliation: "",
+    jobTitle: "",
+    phone: "",
+    status: "",
     tagSet: [],
   }]
 })
@@ -457,73 +437,44 @@ const cancelClick = () => {
 const updateMemberFormRef = ref()
 
 let updateMemberForm = reactive({
-  "name": "",
-  "email": "",
-  "phone": "",
-  "department": "",
-  "contactAddress": "",
-  "jobTitle": "",
-  "gender": "",
-  "genderOther": "",
-  "idCard": "",
-  "birthday": "",
-  "status": "",
+  memberId: "",
+  email: "",
+  firstName: "",
+  lastName: "",
+  country: "",
+  remitAccountLast5: "",
+  affiliation: "",
+  jobTitle: "",
+  phone: "",
+  status: "",
+
 })
 
 
 //編輯表單的校驗規則
 const updateMemberFormRules = reactive<FormRules>({
-  name: [
+  firstName: [
     {
       required: true,
-      message: '姓名不能為空',
+      message: '名字不能為空',
       trigger: 'change',
     },
   ],
-  idCard: [
+  lastName: [
     {
       required: true,
-      message: '身份證字號不能為空',
+      message: '姓氏不能為空',
       trigger: 'change',
     },
   ],
-  birthday: [
+  country: [
     {
       required: true,
-      message: '生日不能為空',
+      message: '國家不能為空',
       trigger: 'change',
     },
-    {
-      type: "date",
-      message: '必須為日期',
-      trigger: 'change',
-    },
-    {
-      validator: (rule, value, callback) => {
-        const age = new Date().getFullYear() - new Date(value).getFullYear();
-        if (age < 18) {
-          callback(new Error('年齡不能低於18歲'));
-        } else {
-          callback();
-        }
-      },
-      trigger: 'change',
-    }
+  ],
 
-  ],
-  gender: [
-    { required: true, message: '請選擇生理性別', trigger: 'change' },
-    {
-      validator: (rule, value, callback) => {
-        if (value === '其他' && !updateMemberForm.genderOther) {
-          callback(new Error('請填寫其他性別說明'));
-        } else {
-          callback();
-        }
-      },
-      trigger: 'change',
-    },
-  ],
   phone: [
     {
       required: true,
@@ -540,6 +491,20 @@ const updateMemberFormRules = reactive<FormRules>({
     {
       type: 'email',
       message: '請輸入正確的E-mail格式',
+      trigger: 'change',
+    },
+  ],
+  affiliation: [
+    {
+      required: true,
+      message: '單位不能為空',
+      trigger: 'change',
+    },
+  ],
+  jobTitle: [
+    {
+      required: true,
+      message: '職稱不能為空',
       trigger: 'change',
     },
   ],
