@@ -125,12 +125,12 @@ let memberList = reactive<Record<string, any>>({
 })
 
 const getMember = async (page: number, size: number) => {
-  let res = await getMemberOrder(page, size, "0", input.value)
+  let res = await getMemberOrder(page, size, "1", input.value)
   Object.assign(memberList, res.data)
 }
 
 const getMemberCount = async () => {
-  let res = await getMemberCountByOrderStatusApi("0")
+  let res = await getMemberCountByOrderStatusApi("1")
   memberCount.value = res.data
 }
 

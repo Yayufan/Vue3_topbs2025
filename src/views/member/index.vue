@@ -67,9 +67,10 @@
 
         <el-table-column prop="status" label="繳費狀態" width="80">
           <template #default="scope">
-            <span v-if="scope.row.status == '1'" style="color: green;">審核通過</span>
-            <span v-else-if="scope.row.status == '2'" style="color: red;">駁回申請</span>
-            <span v-else>未審核</span>
+            <span v-if="scope.row.status == '1'" style="color: green;">已繳費-待確認</span>
+            <span v-else-if="scope.row.status == '2'" style="color: green;">繳費成功</span>
+            <span v-else-if="scope.row.status == '3'" style="color: green;">繳費失敗</span>
+            <span v-else>未繳費</span>
           </template>
         </el-table-column>
 
