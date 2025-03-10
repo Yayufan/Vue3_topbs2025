@@ -101,6 +101,27 @@ export function getMemberCountByOrderStatusApi(status: string): AxiosPromise {
 }
 
 /**
+ * 根據繳費狀態,獲取相符會員的列表
+ *
+ * @param page - 當前頁碼
+ * @param size - 每頁大小
+ * @param status - 訂單狀態（可選參數）
+ * @returns
+ */
+export function getMemberOrder(page: number, size: number, status?: string, queryText?: string): AxiosPromise {
+  return request({
+    url: "/member/member-and-order",
+    method: "get",
+    params: {
+      page,
+      size,
+      status,
+      queryText
+    },
+  });
+}
+
+/**
  * 新增會員
  * @param data
  * @returns

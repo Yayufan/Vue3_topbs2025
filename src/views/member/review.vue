@@ -31,23 +31,13 @@
 
       <el-table class="news-table" :data="memberList.records" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
-        <el-table-column fixed prop="name" label="姓名" width="90" />
-        <el-table-column label="性別" width="90">
-          <template #default="scope">
-            <el-text v-if="scope.row.genderOther">{{ scope.row.genderOther }}</el-text>
-            <el-text v-else>{{ scope.row.gender }}</el-text>
-          </template>
-        </el-table-column>
-        <el-table-column prop="phone" label="手機" width="120" />
-        <el-table-column prop="birthday" label="生日" width="120">
-          <template #default="scope">
-            <el-text>{{
-              Number(scope.row.birthday.split("-")[0]) - 1911 + "-" + scope.row.birthday.split("-").slice(1).join("-")
-              }}</el-text>
-          </template>
-        </el-table-column>
-        <el-table-column prop="idCard" label="身份證字號" />
-        <!-- <el-table-column prop="email" label="信箱" width="220" /> -->
+        <el-table-column fixed prop="lastName" label="姓氏" width="90" />
+        <el-table-column fixed prop="firstName" label="名字" width="90" />
+
+        <el-table-column prop="email" label="信箱" />
+        <el-table-column prop="phone" label="手機" width="140" />
+        <el-table-column prop="country" label="國家" width="100" />
+        <el-table-column prop="remitAccountLast5" label="帳號末五碼" width="100" />
 
         <el-table-column fixed="right" label="操作" width="150">
           <!-- 透過#default="scope" , 獲取到當前的對象值 , scope.row則是拿到當前那個row的數據  -->
@@ -55,8 +45,9 @@
             <el-button type="primary" size="small" @click="approvalRow(scope.row)">
               通過
             </el-button>
-            <el-button type="danger" size="small" @click="failedRow(scope.row)">
-              不通過</el-button>
+            <!-- <el-button type="danger" size="small" @click="failedRow(scope.row)">
+              不通過
+            </el-button> -->
           </template>
         </el-table-column>
       </el-table>
@@ -81,8 +72,10 @@
 import { ref, reactive } from 'vue'
 import { Delete, Plus } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
-// import { getOrganDonationConsentCountByStatusApi, getOrganDonationConsentByPaginationByStatusApi, updateOrganDonationConsentApi, batchUpdateOrganDonationConsentApi } from '@/api/organDonationConsent'
-import { getMemberByPaginationApi, getMemberByPaginationByStatusApi, getMemberCountApi, getMemberCountByOrderStatusApi, updateMemberApi, batchUpdateMemberApi, deleteMemberApi, batchDeleteMemberApi, downloadMemberExcelApi } from '@/api/member'
+
+import { getMemberOrder, getMemberCountByOrderStatusApi, updateMemberApi, batchUpdateMemberApi, } from '@/api/member'
+
+import { updateOrdersApi } from '@/api/order'
 
 
 //獲取路由
@@ -108,21 +101,31 @@ let input = ref('')
 //獲取未審核的同意書List
 let memberList = reactive<Record<string, any>>({
   records: [{
-    name: '',
-    email: '',
-    phone: '',
-    department: '',
-    contactAddress: '',
-    jobTitle: '',
-    gender: '',
-    genderOther: '',
-    idCard: '',
-    birthday: '',
+    memberId: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    country: "",
+    category: 0,
+    affiliation: "",
+    jobTitle: "",
+    phone: "",
+    remitAccountLast5: "",
+    ordersList: [
+      {
+        ordersId: "",
+        memberId: "",
+        itemsSummary: "",
+        totalAmount: 0,
+        status: 0,
+
+      }
+    ]
   }]
 })
 
 const getMember = async (page: number, size: number) => {
-  let res = await getMemberByPaginationByStatusApi(page, size, "0", input.value)
+  let res = await getMemberOrder(page, size, "0", input.value)
   Object.assign(memberList, res.data)
 }
 
@@ -157,12 +160,12 @@ const failedRow = (member: any): void => {
     type: 'warning'
   }).then(async () => {
 
-    Object.assign(updateMember, member)
+    Object.assign(updateMemberRegistrationFeeOrder, member)
     //將審核狀態更改為駁回
-    updateMember.status = "2"
+    updateMemberRegistrationFeeOrder.status = "3"
 
     // 用户選擇確認，繼續操作
-    await updateMemberApi(updateMember)
+    await updateMemberApi(updateMemberRegistrationFeeOrder)
     ElMessage.success('廢除成功');
 
     getMember(1, 10)
@@ -208,25 +211,28 @@ const failedList = () => {
 
 /**------------編輯內容相關操作---------------------- */
 
-let updateMember = reactive<Record<string, any>>({
+let updateMemberRegistrationFeeOrder = reactive<Record<string, any>>({
 
 })
 
 //會員審核通過
 const approvalRow = async (member: any) => {
 
-  Object.assign(updateMember, member)
-  //將審核狀態更改為通過
-  updateMember.status = "1"
+  console.log("這是Member的註冊費訂單: ", member.ordersList[0])
+
+  Object.assign(updateMemberRegistrationFeeOrder, member.ordersList[0])
+  // //將審核狀態更改為通過(付款成功)
+  updateMemberRegistrationFeeOrder.status = "2"
 
   try {
-    await updateMemberApi(updateMember)
+    await updateOrdersApi(updateMemberRegistrationFeeOrder)
     ElMessage.success("審核通過")
     getMember(currentPage.value, 10)
 
   } catch (err) {
     console.log(err)
   }
+
 }
 
 const approvalList = async () => {
