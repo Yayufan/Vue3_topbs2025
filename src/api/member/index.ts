@@ -85,14 +85,14 @@ export function getMemberCountApi(): AxiosPromise {
 }
 
 /**
- * 根據審核狀態,獲取相符會員的總數
+ * 根據繳費狀態,獲取相符會員的總數
  *
  * @param status
  * @returns
  */
-export function getMemberCountByStatusApi(status: string): AxiosPromise {
+export function getMemberCountByOrderStatusApi(status: string): AxiosPromise {
   return request({
-    url: "/member/count-by-status",
+    url: "/member/count-by-order-status",
     method: "get",
     params: {
       status,

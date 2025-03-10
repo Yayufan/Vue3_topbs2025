@@ -2,7 +2,7 @@
 <template>
   <section class="member-section">
     <el-card class="member-card">
-      <h1>會員申請審核</h1>
+      <h1>繳費確認審核</h1>
 
       <!-- 如果要用兩種註冊方式再考慮使用這個 -->
       <div class="function-bar">
@@ -43,7 +43,7 @@
           <template #default="scope">
             <el-text>{{
               Number(scope.row.birthday.split("-")[0]) - 1911 + "-" + scope.row.birthday.split("-").slice(1).join("-")
-            }}</el-text>
+              }}</el-text>
           </template>
         </el-table-column>
         <el-table-column prop="idCard" label="身份證字號" />
@@ -82,7 +82,7 @@ import { ref, reactive } from 'vue'
 import { Delete, Plus } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 // import { getOrganDonationConsentCountByStatusApi, getOrganDonationConsentByPaginationByStatusApi, updateOrganDonationConsentApi, batchUpdateOrganDonationConsentApi } from '@/api/organDonationConsent'
-import { getMemberApi, getAllMemberApi, getMemberByPaginationApi, getMemberByPaginationByStatusApi, getMemberCountApi, getMemberCountByStatusApi, updateMemberApi, batchUpdateMemberApi, deleteMemberApi, batchDeleteMemberApi, downloadMemberExcelApi } from '@/api/member'
+import { getMemberByPaginationApi, getMemberByPaginationByStatusApi, getMemberCountApi, getMemberCountByOrderStatusApi, updateMemberApi, batchUpdateMemberApi, deleteMemberApi, batchDeleteMemberApi, downloadMemberExcelApi } from '@/api/member'
 
 
 //獲取路由
@@ -127,7 +127,7 @@ const getMember = async (page: number, size: number) => {
 }
 
 const getMemberCount = async () => {
-  let res = await getMemberCountByStatusApi("0")
+  let res = await getMemberCountByOrderStatusApi("0")
   memberCount.value = res.data
 }
 

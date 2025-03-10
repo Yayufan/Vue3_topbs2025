@@ -124,7 +124,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/member/review.vue"),
         name: "memberReview",
         meta: {
-          title: "會員審核",
+          title: "繳費審核",
           icon: "el-icon-Finished",
           hidden: false,
           roles: ["ADMIN"],
