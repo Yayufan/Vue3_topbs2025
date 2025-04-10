@@ -89,21 +89,124 @@ const getDataAndEditorLoaded = async () => {
   //   // Handle file upload here
   // })
 
+  let mergeTags = {}
+  switch (emailTemplate.category) {
+    case 'poster':
+      mergeTags = {
+        absType: {
+          name: '稿件類型',
+          value: '{{absType}}',
+        },
+        absProp: {
+          name: '文章性質',
+          value: '{{absProp}}',
+        },
+        absTitle: {
+          name: '文章標題',
+          value: '{{absTitle}}',
+        },
+        absAuthor: {
+          name: '第一作者',
+          value: '{{firstAuthor}}',
+        },
+        speaker: {
+          name: '講者',
+          value: '{{speaker}}',
+        },
+        speakerAffiliation: {
+          name: '講者所屬單位',
+          value: '{{speakerAffiliation}}',
+        },
+        correspondingAuthor: {
+          name: '通訊作者',
+          value: '{{correspondingAuthor}}',
+        },
+        correspondingAuthorEmail: {
+          name: '通訊作者信箱',
+          value: '{{correspondingAuthorEmail}}',
+        },
+        correspondingAuthorAffiliation: {
+          name: '通訊作者所屬單位',
+          value: '{{correspondingAuthorAffiliation}}',
+        },
+      }
+      break;
+    case 'all':
+      mergeTags = {
+        member: {
+          name: '會員頭銜',
+          value: '{{title}}',
+        },
+        firstName: {
+          name: '會員姓名',
+          value: '{{firstName}}',
+        },
+        lastName: {
+          name: '會員姓氏',
+          value: '{{lastName}}',
+        },
+        email: {
+          name: '會員信箱',
+          value: '{{email}}',
+        },
+        phone: {
+          name: '會員電話',
+          value: '{{phone}}',
+        },
+        country: {
+          name: '會員國家',
+          value: '{{country}}',
+        },
+        affliation: {
+          name: '會員所屬單位',
+          value: '{{affiliation}}',
+        },
+        jobTitle: {
+          name: '會員職稱',
+          value: '{{jobTitle}}',
+        },
+        category: {
+          name: '會員類別',
+          value: '{{category}}',
+        },
+      }
+      break;
+    case 'reviewer':
+      mergeTags = {
+        absTypeList: {
+          name: '稿件類型',
+          value: '{{absTypeList}}',
+        },
+        email: {
+          name: '審稿人信箱',
+          value: '{{email}}',
+        },
+        name: {
+          name: '審稿人姓名',
+          value: '{{name}}',
+        },
+        phone: {
+          name: '審稿人電話',
+          value: '{{phone}}',
+        },
+        account: {
+          name: '審稿人帳號',
+          value: '{{account}}',
+        },
+        password: {
+          name: '審稿人密碼',
+          value: '{{password}}',
+        }
+      }
+
+
+  }
+
   //當編輯器載入完成,解鎖save按鈕
   emailEditor.value.editor.addEventListener('editor:ready', function () {
     console.log('editor:ready')
 
-    emailEditor.value.editor.setMergeTags({
-
-      member_name: {
-        name: 'Member Name',
-        value: '{{memberName}}',
-      },
-      member_code: {
-        name: 'Member Code',
-        value: '{{memberCode}}',
-      },
-    });
+    emailEditor.value.editor.setMergeTags(mergeTags);
 
     isDisabled.value = false;
   });
