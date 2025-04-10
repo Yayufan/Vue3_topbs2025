@@ -35,12 +35,14 @@ service.interceptors.response.use(
       return response;
     }
 
-    if (code == '401') {
-      localStorage.removeItem("Authorization")
+    if (code == "401") {
+      localStorage.removeItem("Authorization");
+    }
+    if (response.status == 200 && response.data instanceof Blob) {
+      return response;
     }
     ElMessage.error(msg || "系统出错");
     return Promise.reject(new Error(msg || "Error"));
-
   },
   (error: any) => {
     if (error.response.data) {

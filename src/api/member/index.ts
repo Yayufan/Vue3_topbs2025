@@ -108,7 +108,12 @@ export function getMemberCountByOrderStatusApi(status: string): AxiosPromise {
  * @param status - 訂單狀態（可選參數）
  * @returns
  */
-export function getMemberOrder(page: number, size: number, status?: string, queryText?: string): AxiosPromise {
+export function getMemberOrder(
+  page: number,
+  size: number,
+  status?: string,
+  queryText?: string
+): AxiosPromise {
   return request({
     url: "/member/member-and-order",
     method: "get",
@@ -116,7 +121,7 @@ export function getMemberOrder(page: number, size: number, status?: string, quer
       page,
       size,
       status,
-      queryText
+      queryText,
     },
   });
 }

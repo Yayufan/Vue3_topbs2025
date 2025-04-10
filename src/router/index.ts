@@ -215,6 +215,99 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/abstract",
+    component: Layout,
+    name: "abstract", // 用于 keep-alive, 必须与SFC自动推导或者显示声明的组件name一致
+    // https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
+    meta: {
+      title: "稿件管理",
+      icon: "el-icon-Message",
+      //affix: true,
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/abstract/index.vue"),
+        name: "abstract-manage",
+        meta: {
+          title: "稿件列表",
+          icon: "el-icon-PriceTag",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+      {
+        path: "/distribution",
+        component: () => import("@/views/abstract/distribution.vue"),
+        name: "abstract-distribution1",
+        meta: {
+          title: "稿件分發",
+          icon: "el-icon-PriceTag",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+    ],
+  },
+  {
+    path: "/abstract-reviewer",
+    component: Layout,
+    name: "abstract-reviewer", // 用于 keep-alive, 必须与SFC自动推导或者显示声明的组件name一致
+    // https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
+    meta: {
+      title: "審稿委員管理",
+      icon: "el-icon-Message",
+      //affix: true,
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/abstract-reviewer/index.vue"),
+        name: "abstract-reviewer-manage",
+        meta: {
+          title: "審稿委員列表",
+          icon: "el-icon-PriceTag",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+    ],
+  },
+  {
+    path: "/test",
+    component: Layout,
+    name: "test", // 用于 keep-alive, 必须与SFC自动推导或者显示声明的组件name一致
+    // https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
+    meta: {
+      title: "測試",
+      icon: "el-icon-Message",
+      //affix: true,
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/test-upload/index.vue"),
+        name: "test1",
+        meta: {
+          title: "",
+          icon: "el-icon-PriceTag",
+          hidden: true,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+    ],
+  },
 
   //器捐協會沒有類別管理
   // {
@@ -296,9 +389,6 @@ export const constantRoutes: RouteRecordRaw[] = [
           keepAlive: true,
         },
       },
-
-
-
     ],
   },
 

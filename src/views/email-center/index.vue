@@ -37,6 +37,13 @@
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
         <el-table-column fixed prop="name" label="名稱" width="200" />
+        <el-table-column fixed prop="name" label="名稱" width="150">
+          <template #default="scope">
+            <el-tag v-if="scope.row.category === 'poster'" type="primary">投稿者</el-tag>
+            <el-tag v-if="scope.row.category === 'reviewer'" type="warning">審稿委員</el-tag>
+            <el-tag v-if="scope.row.category === 'all'">會員</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column fit prop="description" label="描述" />
         <el-table-column prop="createTime" label="創建時間" width="200" />
         <el-table-column prop="updateTime" label="修改時間" width="200" />
@@ -76,6 +83,14 @@
 
           <el-form-item label="名稱" :label-width="formLabelWidth" prop="name">
             <el-input v-model="insertEmailTemplateFormData.name" />
+          </el-form-item>
+
+          <el-form-item label="分類" :label-width="formLabelWidth" prop="name">
+            <el-select v-model="insertEmailTemplateFormData.category">
+              <el-option label="全部" value="all" />
+              <el-option label="投稿者" value="poster" />
+              <el-option label="審稿委員" value="reviewer" />
+            </el-select>
           </el-form-item>
 
           <el-form-item label="描述" :label-width="formLabelWidth" prop="description">
@@ -207,6 +222,7 @@ const form = ref()
 //表單數據
 const insertEmailTemplateFormData = reactive({
   name: '',
+  category: '',
   description: '',
 })
 
