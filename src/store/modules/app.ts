@@ -25,11 +25,12 @@ export const useAppStore = defineStore("app", () => {
    * 根据語言标识读取对应的語言包
    */
   const locale = computed(() => {
-    if (language?.value == "en") {
-      return en;
-    } else {
-      return zhCn;
-    }
+    return en;
+    // if (language?.value == "en") {
+    //   return en;
+    // } else {
+    //   return zhCn;
+    // }
   });
 
   // actions
