@@ -54,7 +54,6 @@
 <script lang="ts" setup>
 import { getPaperPageApi, downloadAllAbstractFileApi } from '@/api/abstract';
 import { getPaperReviewerPageApi } from '@/api/abstract-reviewer';
-import { c } from 'vite/dist/node/types.d-aGj9QkWt';
 
 
 const currentPage = ref(1)
