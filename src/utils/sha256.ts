@@ -1,6 +1,5 @@
-import CryptoJS from "crypto-js";
 import request from "@/utils/request";
-import { c } from "vite/dist/node/types.d-aGj9QkWt";
+import fileRequest from "@/utils/largeFileRequest";
 
 export async function hashFile(file: File) {
   let startTime = new Date().getTime();
@@ -52,44 +51,55 @@ export async function hashFile(file: File) {
   const hashArray = new Uint8Array(finalHash);
   const hash = arrayBufferToHex(hashArray);
 
+  console.log("hash", hash);
+  console.log(chunks.length, "chunks");
+
   // 帶著 hash 去後端查詢是否存在該文件, 回傳 true 或 false
-  let res = await slideCheck(hash);
-  console.log("res", res);
+  // let res = await slideCheck(hash);
+  // console.log("res", res);
 
-  if (!res.data.exist) {
-    console.log("文件不存在, 開始上傳");
+  let res = {
+    hash: hash,
+    chunks: chunks,
+    file: file,
+  };
 
-    const MAX_CONCURRENT = 5; // 設置最大併發數量
-    const uploadChunk = async (chunk: Blob, index: number) => {
-      // 設置要回傳的 chunk info
-      const data = {
-        fileName: file.name,
-        fileType: file.type,
-        fileSha256: hash,
-        chunkIndex: index,
-        totalChunks: chunks.length,
-      };
+  return res;
 
-      const formData = new FormData();
-      formData.append("file", chunk);
-      formData.append("data", JSON.stringify(data));
-      await slideUpload(formData);
-    };
+  // if (!res.data.exist) {
+  //   console.log("文件不存在, 開始上傳");
 
-    // 將 chunks 陣列中的每個 chunk 轉換為 Promise
-    const uploadTasks = chunks.map(
-      (chunk, index) => () => uploadChunk(chunk, index)
-    );
-    await limitConcurrency(uploadTasks, MAX_CONCURRENT);
-  } else {
-    console.log("文件已存在");
-    let baseUrl = import.meta.env.VITE_MINIO_API_URL;
-    console.log("baseUrl", baseUrl);
-    let url = `${baseUrl}/topbs2025/${res.data.path}`;
-    window.open(url, "_blank");
-  }
+  //   const MAX_CONCURRENT = 5; // 設置最大併發數量
+  //   const uploadChunk = async (chunk: Blob, index: number) => {
+  //     // 設置要回傳的 chunk info
+  //     const data = {
+  //       fileName: file.name,
+  //       fileType: file.type,
+  //       fileSha256: hash,
+  //       chunkIndex: index,
+  //       totalChunks: chunks.length,
+  //     };
 
-  return hash;
+  //     const formData = new FormData();
+  //     formData.append("file", chunk);
+  //     formData.append("data", JSON.stringify(data));
+  //     await slideUpload(formData);
+  //   };
+
+  //   // 將 chunks 陣列中的每個 chunk 轉換為 Promise
+  //   const uploadTasks = chunks.map(
+  //     (chunk, index) => () => uploadChunk(chunk, index)
+  //   );
+  //   await limitConcurrency(uploadTasks, MAX_CONCURRENT);
+  // } else {
+  //   console.log("文件已存在");
+  //   let baseUrl = import.meta.env.VITE_MINIO_API_URL;
+  //   console.log("baseUrl", baseUrl);
+  //   let url = `${baseUrl}/topbs2025/${res.data.path}`;
+  //   window.open(url, "_blank");
+  // }
+
+  // return hash;
 }
 
 /**
@@ -138,20 +148,70 @@ function arrayBufferToHex(buffer: Uint8Array): string {
     .join("");
 }
 
-function slideCheck(data: string) {
+export async function slideCheck(data: string) {
   console.log("slideUpload", data);
-  return request({
+  let res = await request({
     url: "/paper/slide-check",
     method: "get",
     params: {
       sha256: data,
     },
   });
+  return res;
 }
 
-function slideUpload(data: any) {
+export async function slideUpload(
+  checkResult: any,
+  file: File,
+  hash: string,
+  chunks: Blob[],
+  percentage: Ref<number>
+) {
+  if (!checkResult.data.exist) {
+    console.log("文件不存在, 開始上傳");
+
+    const MAX_CONCURRENT = 5; // 設置最大併發數量
+    const uploadChunk = async (chunk: Blob, index: number) => {
+      // 設置要回傳的 chunk info
+      const data = {
+        fileName: file.name,
+        fileType: file.type,
+        fileSha256: hash,
+        chunkIndex: index,
+        totalChunks: chunks.length,
+      };
+
+      const formData = new FormData();
+      formData.append("file", chunk);
+      formData.append("data", JSON.stringify(data));
+      if (data == null) {
+        console.log(console.log(index));
+        console.log("data is null");
+      }
+      await slideUploadApi(formData);
+    };
+
+    // 將 chunks 陣列中的每個 chunk 轉換為 Promise
+    const uploadTasks = chunks.map(
+      (chunk, index) => () => uploadChunk(chunk, index)
+    );
+    await limitConcurrency(uploadTasks, MAX_CONCURRENT, percentage);
+    console.log("上傳完成");
+    percentage.value = 100; // 上傳完成後設置為 100%
+    console.log(percentage.value);
+  } else {
+    console.log("文件已存在");
+    percentage.value = 100;
+    let baseUrl = import.meta.env.VITE_MINIO_API_URL;
+    console.log("baseUrl", baseUrl);
+    let url = `${baseUrl}/topbs2025/${checkResult.data.path}`;
+    window.open(url, "_blank");
+  }
+}
+
+function slideUploadApi(data: any) {
   console.log("slideUpload", data);
-  return request({
+  return fileRequest({
     url: "/paper/slide-upload",
     method: "post",
     data,
@@ -165,16 +225,20 @@ function slideUpload(data: any) {
  */
 function limitConcurrency(
   tasks: (() => Promise<void>)[],
-  maxConcurrent: number
+  maxConcurrent: number,
+  percentage: Ref<number>
 ) {
   const results: Promise<void>[] = []; // 用於存儲所有的 Promise
   let index = 0; // 當前執行的任務索引
+  let completedTasks = 0;
 
   // 在完成一個任務後，開始下一個任務
   const next = async () => {
     while (index < tasks.length) {
       const taskIndex = index++;
       await tasks[taskIndex]();
+      completedTasks++;
+      percentage.value = Math.floor((completedTasks / tasks.length) * 89) + 10; // 加上初始的 10%
     }
   };
 

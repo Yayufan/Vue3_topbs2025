@@ -5,26 +5,24 @@
       <el-button size="small" type="primary">Upload</el-button>
       <div slot="tip" class="el-upload__tip">only upload word file with size less than 20mb</div>
     </el-upload>
-    <p>hash: {{ hashCode }}</p>
-    <p>hash2: {{ hashCode2 }}</p>
-    <p>spend: {{ spendTime }}</p>
-    <p>spend2: {{ spendTime2 }}</p>
 
-    <el-button @click="reset">reset</el-button>
+    <el-progress :percentage="percentage" :stroke-width="15" striped striped-flow />
+
+    <p>hashCode: {{ hashCode }}</p>
+
+
   </div>
 </template>
 <script lang="ts" setup>
 import { type UploadProps, type UploadUserFile, type UploadFile, type UploadFiles, type UploadInstance, type UploadRawFile, genFileId } from 'element-plus';
-import { hashFile } from '@/utils/sha256';
+import { hashFile, slideCheck, slideUpload } from '@/utils/sha256';
+import { hash } from 'crypto';
 
-const hashCode = ref<string>('');
-const hashCode2 = ref<string>('');
-const spendTime = ref<number>(0);
-const spendTime2 = ref<number>(0);
 
 
 const upload = ref<UploadInstance>()
 
+/**-------------------------------------------------------------- */
 const handleExceed: UploadProps['onExceed'] = (files) => {
   upload.value!.clearFiles()
   const file = files[0] as UploadRawFile
@@ -32,12 +30,13 @@ const handleExceed: UploadProps['onExceed'] = (files) => {
   upload.value!.handleStart(file)
 }
 
-const reset = () => {
-  hashCode.value = '';
-  hashCode2.value = '';
-  spendTime.value = 0;
-  spendTime2.value = 0;
-}
+/**-------------------------------------------------------------- */
+const hashCode = ref<string>('')
+const totalChunks = ref<number>(0)
+const percentage = ref<number>(0)
+
+
+
 
 const handleUpload: UploadProps['onChange'] = async (file: UploadUserFile, uploadFiles) => {
   console.log('file', file);
@@ -48,25 +47,14 @@ const handleUpload: UploadProps['onChange'] = async (file: UploadUserFile, uploa
 
 
   if (file.status === 'ready' && file.size && file.raw) {
-
-    hashCode.value = await hashFile(file.raw)
-    // console.log('file.raw', file.raw);
-    // let start = new Date().getTime();
-    // console.log(start)
-    // await hashFile(file.raw).then((hash) => {
-    //   console.log('File hash:', hash);
-    //   hashCode.value = hash;
-    // });
-    // let end = new Date().getTime();
-    // spendTime.value = end - start;
-    // start = new Date().getTime();
-    // await hashFile2(file.raw).then((hash) => {
-    //   console.log('File hash2:', hash);
-    //   hashCode2.value = hash;
-    // // });
-    // console.log(end)
-    // end = new Date().getTime();
-    // spendTime2.value = end - start;
+    percentage.value = 0;
+    percentage.value += 1;
+    let res = await hashFile(file.raw)
+    hashCode.value = res.hash;
+    totalChunks.value = res.chunks.length;
+    percentage.value += 9;
+    let checkResult = await slideCheck(hashCode.value)
+    await slideUpload(checkResult, res.file, res.hash, res.chunks, percentage)
   }
 
 }

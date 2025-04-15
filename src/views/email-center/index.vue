@@ -87,7 +87,7 @@
 
           <el-form-item label="分類" :label-width="formLabelWidth" prop="name">
             <el-select v-model="insertEmailTemplateFormData.category">
-              <el-option label="全部" value="all" />
+              <el-option label="會員" value="all" />
               <el-option label="投稿者" value="poster" />
               <el-option label="審稿委員" value="reviewer" />
             </el-select>

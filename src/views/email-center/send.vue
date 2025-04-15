@@ -20,10 +20,31 @@
       <el-form-item label="主旨" prop="subject">
         <el-input v-model="sendMailFormData.subject" />
       </el-form-item>
+      <el-button type="primary" @click="openDialog">選擇標籤</el-button>
     </el-form>
+    <el-tag color="black">本次發送對象 :</el-tag>
+    <el-tag v-for="item in selectTags" :color="item.color">{{ item.name }}</el-tag>
 
     <EmailEditor :tools="tools" locale='zh-TW' class="vue-email-editor" ref="emailEditor"
       v-on:load="getDataAndEditorLoaded" :options="emailOptions" />
+
+    <el-dialog v-model="isOpen" title="選擇標籤" width="50%">
+      <el-transfer class="transfer" v-model="selectTags" :data="optionList" :titles="['可選標籤', '已選標籤']"
+        :filterable="true">
+        <template #default="{ option }">
+          <el-tag :color="option.color" round>{{ option.label }}</el-tag>
+        </template>
+        <template #left-footer>
+          <div class="pagination-box">
+            <el-pagination layout="prev, pager, next" :total="Number(tagList.length)" @current-change="" />
+          </div>
+        </template>
+      </el-transfer>
+      <template #footer>
+        <el-button type="primary" @click="closeDialog">確定</el-button>
+        <el-button @click="isOpen = false">取消</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -32,6 +53,7 @@ import { EmailEditor, } from 'vue-email-editor'
 import { getEmailTemplateApi, sendEmailApi, updateEmailTemplateApi } from '@/api/emailTemplate'
 import { ref, reactive } from 'vue'
 import { FormInstance, FormRules } from 'element-plus'
+import { getAllTagsApi } from '@/api/tag'
 
 const router = useRouter()
 
@@ -406,6 +428,7 @@ const sendMail = async (sendMailFormRef: FormInstance | undefined) => {
   }
   sendMailFormData.htmlContent = optimizeForOutlook(htmlContent);
   sendMailFormData.plainText = plainText
+  sendMailFormData.tagList = selectTags.value
   console.log("emailTemplate資料: ", sendMailFormData)
 
   if (!sendMailFormRef) return;
@@ -427,6 +450,39 @@ const sendMail = async (sendMailFormRef: FormInstance | undefined) => {
   })
 }
 
+/**======================================================= */
+const tagList = reactive<any>([])
+const optionList = reactive<any>([])
+
+const selectTags = ref<any>([])
+
+const getTagList = async () => {
+  let res = await getAllTagsApi()
+  console.log("獲取標籤列表", res.data)
+  Object.assign(tagList, res.data)
+  tagList.forEach((item: any) => {
+    optionList.push({
+      key: item,
+      label: item.name,
+      color: item.color,
+    })
+  })
+}
+
+const isOpen = ref(false)
+const openDialog = () => {
+  isOpen.value = true
+}
+
+const closeDialog = () => {
+  isOpen.value = false
+  console.log(selectTags.value)
+}
+
+
+onMounted(() => {
+  getTagList()
+})
 
 
 
@@ -448,5 +504,16 @@ const sendMail = async (sendMailFormRef: FormInstance | undefined) => {
     margin: 3% auto;
   }
 
+}
+
+:deep(.el-tag__content) {
+  color: white !important;
+  font-size: 14px;
+}
+
+.transfer {
+  display: flex !important;
+
+  justify-content: center !important;
 }
 </style>
