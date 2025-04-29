@@ -86,6 +86,8 @@
           <el-form-item label="類別" :label-width="formLabelWidth" prop="type">
             <el-select v-model="insertTagFormData.type" placeholder="請選擇類別">
               <el-option label="會員" value="member" />
+              <el-option label="稿件" value="paper" />
+              <el-option label="審稿委員" value="paperReviewer" />
             </el-select>
           </el-form-item>
 
@@ -135,6 +137,8 @@
           <el-form-item label="類別" prop="type">
             <el-select v-model="updateTagForm.type" placeholder="請選擇類別">
               <el-option label="會員" value="member" />
+              <el-option label="稿件" value="paper" />
+              <el-option label="審稿委員" value="paperReviewer" />
             </el-select>
           </el-form-item>
 
@@ -155,11 +159,15 @@
         </template>
       </el-drawer>
 
-      <el-dialog v-if="addMemberDialogIsVisible" v-model="addMemberDialogIsVisible" title="新增會員"
-        :before-close="cancelAdd">
-        <h3>標籤: <el-tag :color="addMemberTag.color" class="tag-box" round>{{ addMemberTag.name }}</el-tag></h3>
+      <!-- <el-dialog v-if="addMemberDialogIsVisible" v-model="addMemberDialogIsVisible" title="新增會員"
+        :before-close="cancelAdd" width="800">
+        <h3>標籤: <el-tag :color="addMemberTag.color" class="tag-box" round>{{ addMemberTag.name }}</el-tag></h3> -->
 
-        <div class="search-bar">
+      <MemberTag v-if="addTag.type === 'member'" :addTag="addTag" @close="closeDialog" />
+      <PaperTag v-if="addTag.type === 'paper'" :add-tag="addTag" @close="closeDialog" />
+      <PaperReviewerTag v-if="addTag.type === 'paperReviewer'" :add-tag="addTag" @close="closeDialog" />
+
+      <!-- <div class="search-bar">
           <el-input v-model="input" style="width: 240px" placeholder="輸入內容,Enter查詢"
             @keydown.enter="getMemberListByPagination(currentPage, 10)" />
 
@@ -186,22 +194,23 @@
         <el-table :data="allMemberList.records" ref="memberTableRef" :row-key="getRowKey" @select="handleMemberSelect"
           empty-text="查無資料">
           <el-table-column type="selection" width="55" :reserve-selection="true" />
-          <el-table-column prop="name" label="名稱" />
+          <el-table-column prop="firstName" label="名稱" />
+          <el-table-column prop="lastName" label="姓氏" width="100" />
           <el-table-column prop="email" label="Email" />
-          <el-table-column prop="phone" label="電話" />
-        </el-table>
+          <el-table-column prop="phone" label="電話" width="150" />
+        </el-table> -->
 
-        <!-- 
+      <!-- 
       分頁插件 total為總資料數(這邊設置20筆),  default-page-size代表每頁顯示資料(預設為10筆,這邊設置為5筆) 
       current-page當前頁數,官方建議使用v-model與current-page去與自己設定的變量做綁定,
     -->
-        <div class="example-pagination-block member-pagination">
+      <!-- <div class="example-pagination-block member-pagination">
           <el-pagination layout="prev, pager, next" :page-count="Number(allMemberList.pages)"
             :default-page-size="Number(allMemberList.size)" v-model:current-page="memberCurrentPage"
             :hide-on-single-page="true" />
-        </div>
+        </div> -->
 
-        <template #footer>
+      <!-- <template #footer>
           <div class="dialog-footer">
             <ElButton @click="cancelAdd">取消</ElButton>
             <ElButton type="primary" @click="cliclAddMember">
@@ -209,7 +218,7 @@
             </ElButton>
           </div>
         </template>
-      </el-dialog>
+      </el-dialog> -->
     </el-card>
   </section>
 </template>
@@ -218,7 +227,10 @@ import { addTagApi, assignMemberToTagApi, deleteTagApi, getAllTagsApi, getTagsBy
 import { getMemberByPaginationApi, getMemberByPaginationByStatusApi } from '@/api/member'
 import type { FormInstance, FormRules } from 'element-plus'
 import { typeEnums } from '@/enums/TypeEnum'
-import { s } from 'vite/dist/node/types.d-aGj9QkWt'
+
+import MemberTag from './memberTag.vue'
+import PaperTag from './paperTag.vue'
+import PaperReviewerTag from './paperReviewerTag.vue'
 
 const formLabelWidth = '70px'
 const route = useRoute()
@@ -410,7 +422,7 @@ let input = ref('')
 let filterStatus = ref('')
 
 watch(filterStatus, (value, oldValue) => {
-  getMemberListByPagination(memberCurrentPage.value, 10)
+  // getMemberListByPagination(memberCurrentPage.value, 10)
 })
 
 const resetQueryText = (): void => {
@@ -419,9 +431,10 @@ const resetQueryText = (): void => {
 }
 
 
-let addMemberTag = reactive({
+let addTag = reactive({
   tagId: '',
   name: '',
+  type: '',
   description: '',
   color: '',
 })
@@ -434,7 +447,7 @@ watch(memberCurrentPage, (value, oldValue) => {
 /** 開啟新增會員 Dialog */
 const toggleMemberDialog = (tag: any) => {
   addMemberDialogIsVisible.value = true
-  Object.assign(addMemberTag, tag) // 獲取要新增的標籤
+  Object.assign(addTag, tag) // 獲取要新增的標籤
   getMemberListByPagination(1, 10)
 }
 
@@ -466,7 +479,7 @@ const getMemberListByPagination = async (page: number, size: number) => {
 
   /** 判斷獲得的回傳資料是否已擁有該 tag 或是目前已經新增至已勾選的 set 內 */
   res.data.records.forEach((record: any) => {
-    if ((record.tagSet && record.tagSet.some((tag: any) => tag.tagId === addMemberTag.tagId)) || submitMemeberSet.has(record.memberId)) {
+    if ((record.tagSet && record.tagSet.some((tag: any) => tag.tagId === addTag.tagId)) || submitMemeberSet.has(record.memberId)) {
       memberTableRef.value.toggleRowSelection(record, true);
       /** 新增預設勾選資料進 set 內 */
       submitMemeberSet.add(record.memberId)
@@ -494,7 +507,7 @@ const cliclAddMember = async () => {
    *  targetMemberIdList: 所有含有這個 tag 的 member
    */
   let data = {
-    tagId: addMemberTag.tagId,
+    tagId: addTag.tagId,
     targetMemberIdList: Array.from(submitMemeberSet)
   }
   try {
@@ -515,10 +528,21 @@ const cancelAdd = () => {
   resetQueryText();
 }
 
+const closeDialog = () => {
+  Object.assign(addTag, {
+    tagId: '',
+    name: '',
+    type: '',
+    description: '',
+    color: ''
+  })
+  addMemberDialogIsVisible.value = false
+}
+
 /**-------------------掛載頁面時執行-------------------- */
 
 onMounted(() => {
-  getMemberListByPagination(1, 10)
+  // getMemberListByPagination(1, 10)
   getTagsByPagination(1, 10)
 })
 </script>

@@ -21,21 +21,23 @@ export function setupPermission() {
 
         //查看現在userStore有沒有內容
         if (userStore.user.roleList) {
-          console.log('原本的 userStore user', userStore.user)
+          console.log("原本的 userStore user", userStore.user);
         } else {
           try {
             await userStore.getUserInfo();
-            console.log('新的userStore user', userStore.user)
+            console.log("新的userStore user", userStore.user);
           } catch (err) {
             next(`/login?redirect=${to.path}`);
             NProgress.done();
           }
         }
 
-        //獲取菜單權限路由 
+        //獲取菜單權限路由
         const permissionStore = usePermissionStore();
         //每次都拿這個這個角色在去生成一次他的動態路由
-        const accessRoutes = await permissionStore.generateRoutes(userStore.user.roleList);
+        const accessRoutes = await permissionStore.generateRoutes(
+          userStore.user.roleList
+        );
 
         // console.log('在permission裡生成的動態路由', accessRoutes)
         // console.log('路由器', router)
@@ -54,8 +56,6 @@ export function setupPermission() {
         }
 
         // next()
-
-
       }
     } else {
       // 未登录可以访问白名单页面
@@ -66,7 +66,6 @@ export function setupPermission() {
         NProgress.done();
       }
     }
-
 
     // next()
     /** 
