@@ -37,7 +37,7 @@
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
         <el-table-column fixed prop="name" label="名稱" width="200" />
-        <el-table-column fixed prop="name" label="名稱" width="150">
+        <el-table-column fixed prop="name" label="類型" width="150">
           <template #default="scope">
             <el-tag v-if="scope.row.category === 'poster'" type="primary">投稿者</el-tag>
             <el-tag v-if="scope.row.category === 'reviewer'" type="warning">審稿委員</el-tag>
