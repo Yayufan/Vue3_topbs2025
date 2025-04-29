@@ -209,3 +209,28 @@ export function assignTagsToMember(data: any): AxiosPromise {
     data,
   });
 }
+
+export function getUnpaidMemberApi(
+  page: number,
+  queryText: string
+): AxiosPromise {
+  return request({
+    url: "/member/unpaid-member",
+    method: "get",
+    params: {
+      page: page,
+      size: 10,
+      queryText: queryText,
+    },
+  });
+}
+
+export function updateUnpaidMemberApi(memberId: string): AxiosPromise {
+  return request({
+    url: "/member/unpaid-member",
+    method: "put",
+    data: {
+      memberId: memberId,
+    },
+  });
+}

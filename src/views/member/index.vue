@@ -38,18 +38,22 @@
           <el-option label="全選" value="">
             <span>全選</span>
           </el-option>
-          <el-option label="未審核" value="0">
-            <span>未審核</span>
+          <el-option label="未繳費" :value="0">
+            <span>未繳費</span>
           </el-option>
-          <el-option label="審核通過" value="1">
-            <span style="color:green;">審核通過</span>
+          <el-option label="待審核" :value="1">
+            <span style="color:gray;">已繳費-待確認</span>
           </el-option>
-          <el-option label="駁回申請" value="2">
-            <span style="color:red;">駁回申請</span>
+          <el-option label="繳費成功" :value="2">
+            <span style="color:green;">繳費成功</span>
+          </el-option>
+          <el-option label="繳費失敗" :value="3">
+            <span style="color:red;">繳費失敗</span>
           </el-option>
 
           <template #label="{ label, value }">
-            <span :style="{ color: value == '1' ? 'green' : value == '-1' ? 'red' : 'black' }">{{ label }}</span>
+            <span :style="{ color: value == '1' ? 'gray' : value == '2' ? 'green' : value == '3' ? 'red' : 'black' }">{{
+              label }}</span>
           </template>
         </el-select>
 
@@ -65,11 +69,11 @@
         <el-table-column prop="remitAccountLast5" label="帳戶後五碼" width="100" />
 
 
-        <el-table-column prop="status" label="繳費狀態" width="80">
+        <el-table-column prop="status" label="繳費狀態">
           <template #default="scope">
-            <span v-if="scope.row.status == '1'" style="color: green;">已繳費-待確認</span>
-            <span v-else-if="scope.row.status == '2'" style="color: green;">繳費成功</span>
-            <span v-else-if="scope.row.status == '3'" style="color: green;">繳費失敗</span>
+            <span v-if="scope.row.status == 1" style="color: gray;">已繳費-待確認</span>
+            <span v-else-if="scope.row.status == 2" style="color: green;">繳費成功</span>
+            <span v-else-if="scope.row.status == 3" style="color: red;">繳費失敗</span>
             <span v-else>未繳費</span>
           </template>
         </el-table-column>
@@ -167,13 +171,39 @@
               <el-input v-model="updateMemberForm.lastName" />
             </el-form-item>
 
+            <el-form-item label="中文姓名" prop="chineseName">
+              <el-input v-model="updateMemberForm.chineseName" placeholder="中文名" style="width: 240px;" />
+            </el-form-item>
+
             <el-form-item label="國家" prop="country">
               <el-input v-model="updateMemberForm.country" />
+            </el-form-item>
+
+            <el-form-item label="身份證字號/護照號碼" prop="idCard">
+              <el-input v-model="updateMemberForm.idCard" />
+            </el-form-item>
+
+            <el-form-item label="帳號" prop="email">
+              <!-- <el-input v-model="updateMemberForm.food" disabled /> -->
+              <el-radio-group v-model="updateMemberForm.food" style="margin-left: 1rem;">
+                <el-radio value="葷">葷</el-radio>
+                <el-radio value="素">素</el-radio>
+              </el-radio-group>
+            </el-form-item>
+
+            <el-form-item label="食物禁忌" prop="foodTaboo">
+              <el-input v-model="updateMemberForm.foodTaboo" placeholder="食物禁忌" style="width: 240px;" />
             </el-form-item>
 
             <el-form-item label="帳號末五碼" prop="remitAccountLast5">
               <el-input v-model="updateMemberForm.remitAccountLast5" />
             </el-form-item>
+
+            <el-form-item label="抬頭" prop="receipt">
+              <el-input v-model="updateMemberForm.receipt" />
+            </el-form-item>
+
+
 
             <el-form-item label="單位" prop="affiliation">
               <el-input v-model="updateMemberForm.affiliation">
@@ -189,19 +219,24 @@
             </el-form-item>
 
             <el-form-item label="審核狀態" prop="status">
-              <el-select v-model="updateMemberForm.status" placeholder="Select" style="width: 240px;">
-                <el-option label="未審核" value="0">
-                  <span>未審核</span>
+              <el-select v-model="updateMemberForm.status" disabled placeholder="Select" style="width: 240px;">
+                <el-option label="未繳費" :value="0">
+                  <span>未繳費</span>
                 </el-option>
-                <el-option label="審核通過" value="1">
-                  <span style="color:green;">審核通過</span>
+                <el-option label="待審核" :value="1">
+                  <span style="color:gray;">已繳費-待確認</span>
                 </el-option>
-                <el-option label="駁回申請" value="2">
-                  <span style="color:red;">駁回申請</span>
+                <el-option label="繳費成功" :value="2">
+                  <span style="color:green;">繳費成功</span>
+                </el-option>
+                <el-option label="繳費失敗" :value="3">
+                  <span style="color:red;">繳費失敗</span>
                 </el-option>
 
                 <template #label="{ label, value }">
-                  <span :style="{ color: value == '1' ? 'green' : value == '-1' ? 'red' : 'black' }">{{ label }}</span>
+                  <span
+                    :style="{ color: value == '1' ? 'gray' : value == '2' ? 'green' : value == '3' ? 'red' : 'black' }">{{
+                      label }}</span>
                 </template>
               </el-select>
 
@@ -290,6 +325,7 @@ let memberList = reactive<Record<string, any>>({
     firstName: "",
     lastName: "",
     country: "",
+    idCard: "",
     remitAccountLast5: "",
     affiliation: "",
     jobTitle: "",
@@ -439,6 +475,7 @@ const updateMemberFormRef = ref()
 let updateMemberForm = reactive({
   memberId: "",
   email: "",
+  chineseName: "",
   firstName: "",
   lastName: "",
   country: "",
@@ -447,7 +484,11 @@ let updateMemberForm = reactive({
   jobTitle: "",
   phone: "",
   status: "",
-
+  food: "",
+  foodTaboo: "",
+  receipt: "",
+  idCard: "",
+  category: "",
 })
 
 
@@ -539,7 +580,6 @@ const confirmClick = async () => {
 
 const editRow = (member: any): void => {
   Object.assign(updateMemberForm, member)
-  console.log(updateMemberForm)
   drawer.value = true
 }
 
