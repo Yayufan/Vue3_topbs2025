@@ -48,6 +48,25 @@
         <el-table-column prop="absType" label="投稿類別" width="100"></el-table-column>
         <el-table-column prop="absProp" label="文章屬性" width="100"></el-table-column>
         <el-table-column prop="absTitle" label="稿件主題"></el-table-column>
+        <el-table-column prop="tagSet" label="標籤" min-width="40" align="center">
+          <template #default="scope">
+            <el-popover v-if="scope.row.tagList.length > 0" placement="left-start" title="標籤" :width="200"
+              trigger="hover">
+              <template #reference>
+                <el-tag v-if="findFirstVaildTag(scope.row.tagList)" size="large" round
+                  :color="findFirstVaildTag(scope.row.tagList).color" effect="light">{{
+                    findFirstVaildTag(scope.row.tagList).name }}</el-tag>
+              </template>
+              <template #default>
+                <div v-for="tag in scope.row.tagList" :key="tag.tagId" class="tag-item">
+                  <el-tag v-if="tag.status === 0" size="large" round :color="tag.color">{{
+                    tag.name }}</el-tag>
+                </div>
+              </template>
+            </el-popover>
+
+          </template>
+        </el-table-column>
         <el-table-column prop="firstAuthor" label="第一作者" width="150"></el-table-column>
         <el-table-column prop="status" label="審核狀態" width="100">
           <template #default="scope">
@@ -187,6 +206,15 @@ const updatePaper = async () => {
 }
 
 
+const findFirstVaildTag = (tagSet: any) => {
+  for (let i = 0; i < tagSet.length; i++) {
+    if (tagSet[i].status === 0) {
+      return tagSet[i];
+    }
+  }
+  return '';
+}
+
 
 onMounted(() => {
   getPaperList()
@@ -217,5 +245,14 @@ onMounted(() => {
   justify-content: space-between;
   margin-bottom: 20px;
 
+}
+
+:deep(.el-tag__content) {
+  color: white;
+  font-size: 14px;
+}
+
+:deep(.el-tag__close) {
+  color: red;
 }
 </style>
