@@ -234,3 +234,11 @@ export function updateUnpaidMemberApi(memberId: string): AxiosPromise {
     },
   });
 }
+
+export function addVipMemberApi(data: any): AxiosPromise {
+  return request({
+    url: "/member/admin",
+    method: "post",
+    data,
+  });
+}

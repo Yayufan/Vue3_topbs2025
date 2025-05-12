@@ -7,7 +7,7 @@
       <!-- 如果要用兩種註冊方式再考慮使用這個 -->
       <div class="function-bar">
         <div class="display-count">
-          未審核人數為： {{ memberCount }} 人
+          未審核人數為： {{ memberList.total }} 人
         </div>
         <div class="btn-box">
           <!-- <el-button type="primary" @click="approvalList" :disabled="selectList.length > 0 ? false : true">
@@ -32,13 +32,29 @@
         <el-table-column type="selection" width="55" />
         <!-- <el-table-column fixed prop="lastName" label="姓氏" width="90" />
         <el-table-column fixed prop="firstName" label="名字" width="90" /> -->
-        <el-table-column prop="chineseName" label="中文姓名"></el-table-column>
-
-        <el-table-column prop="email" label="信箱" />
-        <el-table-column prop="idCard" label="身分證字號" width="200" />
-        <el-table-column prop="phone" label="手機" width="140" />
+        <el-table-column prop="chineseName" label="中文姓名" width="100"></el-table-column>
         <el-table-column prop="country" label="國家" width="100" />
         <el-table-column prop="remitAccountLast5" label="戶頭末五碼" width="100" />
+        <el-table-column label="繳費金額" width="150">
+          <template #default="scope">
+            <el-text v-if="isEarlyBird && scope.row.category === 1">700</el-text>
+            <el-text v-if="!isEarlyBird && scope.row.category === 1">1000</el-text>
+            <el-text v-if="isEarlyBird && scope.row.category === 2">600</el-text>
+            <el-text v-if="!isEarlyBird && scope.row.category === 2">1200</el-text>
+            <el-text v-if="isEarlyBird && scope.row.category === 3">1000</el-text>
+            <el-text v-if="!isEarlyBird && scope.row.category === 3">1500</el-text>
+          </template>
+        </el-table-column>
+        <el-table-column prop="idCard" label="身分證字號" width="200" />
+        <el-table-column prop="category" label="會員類別" width="200">
+          <template #default="scope">
+            {{ scope.row.category === 1 ? 'member' : scope.row.category === 2 ? 'others' : scope.row.category === 3 ?
+              'non-member' : 'VIP' }}
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="email" label="信箱" />
+        <el-table-column prop="phone" label="手機" width="140" />
 
         <el-table-column fixed="right" label="操作" width="150">
           <!-- 透過#default="scope" , 獲取到當前的對象值 , scope.row則是拿到當前那個row的數據  -->
@@ -86,6 +102,20 @@ const router = useRouter()
 //formLabel 寬度
 const formLabelWidth = '140px'
 
+const earlyBirdDate = ref('2025/9/30')
+
+const isEarlyBird = ref(false)
+
+const checkEarlyBird = (date: string) => {
+  const now = new Date()
+  const earlyBird = new Date(date)
+  if (now < earlyBird) {
+    isEarlyBird.value = true
+  } else {
+    isEarlyBird.value = false
+  }
+}
+
 
 /**--------------顯示數據相關---------------------------- */
 
@@ -130,6 +160,7 @@ const getMember = async (page: number, size: number) => {
   // let res = await getMemberOrder(page, size, "1", input.value)
   let res = await getUnpaidMemberApi(page, input.value);
   Object.assign(memberList, res.data)
+  console.log("memberList", memberList)
 }
 
 const getMemberCount = async () => {
@@ -165,6 +196,7 @@ const updateUnpaidMember = async (memberId: string) => {
 onMounted(() => {
   getMemberCount()
   getMember(1, 10)
+  checkEarlyBird(earlyBirdDate.value)
 })
 
 

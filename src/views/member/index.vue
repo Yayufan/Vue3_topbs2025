@@ -14,11 +14,11 @@
 
         <div class="btn-box">
 
-          <!-- <el-button type="primary" @click="toggleAddDialog">
+          <el-button type="primary" @click="toggleAddDialog">
             新增<el-icon class="el-icon--right">
               <Plus />
             </el-icon>
-          </el-button> -->
+          </el-button>
 
           <el-button type="danger" @click="deleteList" :disabled="deleteSelectList.length > 0 ? false : true">
             刪除<el-icon class="el-icon--right">
@@ -105,9 +105,9 @@
             <el-button link type="success" size="small" @click="toggleTagsDialog(scope.row)">
               Tags
             </el-button>
-            <el-button link type="primary" size="small" @click="editRow(scope.row)">
+            <!-- <el-button link type="primary" size="small" @click="editRow(scope.row)">
               Edit
-            </el-button>
+            </el-button> -->
             <el-button link type="danger" size="small" @click="deleteRow(scope.row.memberId)">
               Delete</el-button>
 
@@ -149,7 +149,7 @@
 
 
       <!-- 修改時的Drawer -->
-      <el-drawer v-model="drawer" title="I am the title">
+      <el-drawer v-model="drawer" title="I am the title" :size="drawerSize">
 
         <template #header>
           <h4>資料修改</h4>
@@ -254,6 +254,104 @@
         </template>
 
       </el-drawer>
+
+
+      <el-dialog v-model="dialogFormVisible" title="新增會員" :width="dialogWidth">
+        <el-form class="insert-form" label-position="top" label-width="auto" :model="insertMemberFormData" ref="form"
+          :rules="insertFormRules" :show-message="true">
+          <el-form-item label="國家" prop="country">
+            <el-select v-model="insertMemberFormData.country" filterable @change="changedCountry" placeholder="國家">
+              <el-option v-for="item in countries" :value="item" :label="item" :key="item"></el-option>
+            </el-select>
+          </el-form-item>
+
+          <el-form-item class="title-form-item" label="稱謂" prop="title">
+            <el-radio-group class="title-radio-group" v-model="insertMemberFormData.title" placeholder="稱謂">
+              <el-radio label="Prof." value="Prof."></el-radio>
+              <el-radio label="Dr." value="Dr."></el-radio>
+              <el-radio label="Mr." value="Mr."></el-radio>
+              <el-radio label="Ms." value="Ms."></el-radio>
+            </el-radio-group>
+
+          </el-form-item>
+          <el-form-item v-if="insertMemberFormData.country === 'Taiwan'" label="中文姓名" prop="chineseName">
+            <el-input v-model="insertMemberFormData.chineseName" placeholder="中文名" />
+          </el-form-item>
+          <el-form-item label="英文名" prop="firstName">
+            <el-input v-model="insertMemberFormData.firstName" placeholder="名字" />
+          </el-form-item>
+          <el-form-item label="英文姓氏" prop="lastName">
+            <el-input v-model="insertMemberFormData.lastName" placeholder="姓氏" />
+          </el-form-item>
+          <el-form-item v-if="insertMemberFormData.country !== 'Taiwan'" label="中文姓名">
+            <el-input v-model="insertMemberFormData.chineseName" placeholder="中文名" />
+          </el-form-item>
+          <el-form-item label="E-mail" prop="email">
+            <el-input v-model="insertMemberFormData.email" placeholder="E-mail" />
+          </el-form-item>
+          <el-form-item label="密碼" prop="password">
+            <el-input v-model="insertMemberFormData.password" placeholder="密碼" type="password" />
+          </el-form-item>
+          <el-form-item label="確認密碼" prop="confirmPassword">
+            <el-input v-model="insertMemberFormData.confirmPassword" placeholder="確認密碼" type="password" />
+          </el-form-item>
+          <el-form-item label="所屬機構" prop="affiliation">
+            <el-input v-model="insertMemberFormData.affiliation" placeholder="單位" />
+          </el-form-item>
+          <el-form-item label="職稱" prop="jobTitle">
+            <el-input v-model="insertMemberFormData.jobTitle" placeholder="職稱" />
+          </el-form-item>
+          <el-form-item label="身份證字號/護照號碼" prop="idCard">
+            <el-input v-model="insertMemberFormData.idCard" placeholder="身份證字號/護照號碼" />
+          </el-form-item>
+          <div class="phone-section">
+            <el-form-item label="國碼" prop="countryCode" class="country-code">
+              <el-input v-model="insertMemberFormData.countryCode" />
+            </el-form-item>
+            -
+            <el-form-item label="連絡電話" prop="phone" class="phone">
+              <el-input v-model="insertMemberFormData.phone" placeholder="連絡電話" />
+            </el-form-item>
+          </div>
+          <el-form-item label="食物偏好" prop="food">
+            <el-radio-group v-model="insertMemberFormData.food" style="margin-left: 1rem;">
+              <el-radio value="葷">葷</el-radio>
+              <el-radio value="素">素</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="食物禁忌" prop="foodTaboo">
+            <el-input v-model="insertMemberFormData.foodTaboo" placeholder="食物禁忌" style="width: 240px;" />
+          </el-form-item>
+          <el-form-item label="抬頭" prop="receipt">
+            <el-input v-model="insertMemberFormData.receipt" placeholder="抬頭" />
+          </el-form-item>
+          <el-form-item class="category required" label="Category">
+            <el-radio-group v-model="insertMemberFormData.category">
+              <el-radio :value="1">Member</el-radio>
+              <el-form-item v-if="insertMemberFormData.category === 1 && insertMemberFormData.country !== 'Taiwan'"
+                prop="categoryExtra">
+                <el-select v-model="insertMemberFormData.categoryExtra" class="category-select">
+                  <el-option label="JBCS" value="JBCS"></el-option>
+                  <el-option label="JOPBS" value="JOPBS"></el-option>
+                  <el-option label="KBCS" value="KBCS"></el-option>
+                  <el-option label="HKSBS " value="HKSBS "></el-option>
+                </el-select>
+              </el-form-item>
+              <el-radio :value="2">Others(Trainee/Nurse/Reasearcher)</el-radio>
+              <el-radio :value="3">Non-member</el-radio>
+            </el-radio-group>
+          </el-form-item>
+
+
+        </el-form>
+        <template #footer>
+          <div style="flex: auto">
+            <el-button @click="dialogFormVisible = false">取消</el-button>
+            <el-button type="primary" @click="submitInsertForm(form)">送出</el-button>
+          </div>
+        </template>
+
+      </el-dialog>
     </el-card>
 
   </section>
@@ -263,11 +361,15 @@
 <script setup lang='ts'>
 
 import { ref, reactive } from 'vue'
-import { Delete, Plus } from '@element-plus/icons-vue'
+import { Delete, Phone, Plus } from '@element-plus/icons-vue'
 import { scrollbarProps, type FormInstance, type FormRules } from 'element-plus'
-import { getMemberByPaginationByStatusApi, getMemberCountApi, updateMemberApi, deleteMemberApi, batchDeleteMemberApi, downloadMemberExcelApi, assignTagsToMember } from '@/api/member'
+import { getMemberByPaginationByStatusApi, getMemberCountApi, updateMemberApi, deleteMemberApi, batchDeleteMemberApi, downloadMemberExcelApi, assignTagsToMember, addVipMemberApi } from '@/api/member'
 import { getAllTagsApi } from '@/api/tag'
 
+import countriesData from '@/assets/data/countries.json'
+import { title } from 'process'
+
+const countries = ref(countriesData)
 
 
 
@@ -420,12 +522,225 @@ const form = ref()
 
 //表單數據
 const insertMemberFormData = reactive({
+  title: 'Prof.',
+  firstName: '',
+  lastName: '',
+  chineseName: '',
   email: '',
   password: '',
-  name: '',
-  department: '',
+  confirmPassword: '',
+  affiliation: '',
   jobTitle: '',
+  idCard: '',
+  country: '',
+  receipt: '',
   phone: '',
+  countryCode: '',
+  phoneNum: '',
+  food: '葷',
+  foodTaboo: '',
+  category: 1,
+  categoryExtra: '',
+  verificationCode: '',
+  verificationKey: ''
+})
+
+const changedCountry = () => {
+
+}
+
+const checkChineseName = (rule: any, value: string, callback: any) => {
+  if (insertMemberFormData.country === 'Taiwan' && !value) {
+    callback(new Error('請輸入中文姓名'))
+  } else {
+    callback()
+  }
+}
+
+const checkConfirmPassword = (rule: any, value: string, callback: any) => {
+  if (insertMemberFormData.password !== value) {
+    callback(new Error('兩次密碼不一致'))
+  } else {
+    callback()
+  }
+}
+
+const codeMap: Record<string, number> = {
+  A: 10,
+  B: 11,
+  C: 12,
+  D: 13,
+  E: 14,
+  F: 15,
+  G: 16,
+  H: 17,
+  I: 34,
+  J: 18,
+  K: 19,
+  L: 20,
+  M: 21,
+  N: 22,
+  O: 35,
+  P: 23,
+  Q: 24,
+  R: 25,
+  S: 26,
+  T: 27,
+  U: 28,
+  V: 29,
+  W: 32,
+  X: 30,
+  Y: 31,
+  Z: 33,
+};
+
+const checkIdCard = (rule: any, value: string, callback: any) => {
+  if (insertMemberFormData.country !== 'Taiwan') {
+    if (!value) {
+      return callback(new Error("請輸入身份證字號/護照號碼"));
+    } else {
+      return callback();
+    }
+  } else {
+
+    if (!/^[A-Z][0-9]{9}$/.test(value)) {
+      callback({ valid: false, message: "身份證格式不正確" });
+    }
+
+    const placeCode = codeMap[value[0]];
+    if (!placeCode) {
+      callback({ valid: false, message: "首碼無效" });
+    }
+
+    const bodyCode = value.substring(1, 9);
+    const lastCode = value[9];
+    const calHead = (num: number): number =>
+      Math.floor(num / 10) * 1 + (num % 10) * 9;
+    const calBody = (code: string): number => {
+      let sum = 0;
+      for (let i = 0; i < code.length; i++) {
+        sum += parseInt(code[i]) * (8 - i);
+      }
+      return sum;
+    };
+    const idSum =
+      calHead(placeCode) + calBody(bodyCode) + parseInt(lastCode) * 1;
+    const isValid = idSum % 10 === 0;
+    if (!isValid) {
+      callback({ valid: false, message: "身分證號不合法" });
+    } else {
+      callback();
+    }
+  }
+}
+
+const insertFormRules = reactive<FormRules>({
+  firstName: [
+    {
+      required: true,
+      message: '名字不能為空',
+      trigger: 'blur',
+    },
+  ],
+  lastName: [
+    {
+      required: true,
+      message: '姓氏不能為空',
+      trigger: 'blur',
+    },
+  ],
+  country: [
+    {
+      required: true,
+      message: '國家不能為空',
+      trigger: 'blur',
+    },
+  ],
+  email: [
+    {
+      required: true,
+      message: 'E-mail不能為空',
+      trigger: 'blur',
+    },
+    {
+      type: 'email',
+      message: '請輸入正確的E-mail格式',
+      trigger: 'blur',
+    },
+  ],
+  affiliation: [
+    {
+      required: true,
+      message: '單位不能為空',
+      trigger: 'blur',
+    },
+  ],
+  jobTitle: [
+    {
+      required: true,
+      message: '職稱不能為空',
+      trigger: 'blur',
+    },
+  ],
+
+  chineseName: {
+    required: true,
+    message: '中文姓名不能為空',
+    trigger: 'blur',
+  },
+
+  password: [
+    {
+      required: true,
+      message: '密碼不能為空',
+      trigger: 'blur',
+    },
+  ],
+
+  confirmPassword: [
+    {
+      required: true,
+      message: '請再次輸入密碼',
+      trigger: 'blur',
+    },
+    {
+      validator: checkConfirmPassword,
+      trigger: 'blur',
+    },
+  ],
+  idCard: {
+    required: true,
+    // message: '身份證字號/護照號碼不能為空',
+    validator: checkIdCard,
+    trigger: 'blur',
+  },
+  categoryExtra: {
+    required: true,
+    message: '請選擇類別',
+    validator: (rule: any, value: string, callback: any) => {
+      if (!value) {
+        callback(new Error('請選擇類別'))
+      } else {
+        callback()
+      }
+    },
+    trigger: 'blur',
+  },
+  countryCode: {
+    required: true,
+    message: '國碼不能為空',
+    trigger: 'change',
+  },
+  phone: {
+    required: true,
+    message: '連絡電話不能為空',
+    trigger: 'blur',
+  },
+  title: {
+    required: true,
+    message: '稱謂不能為空',
+    trigger: 'blur',
+  },
 })
 
 
@@ -442,8 +757,10 @@ const submitInsertForm = (form: FormInstance | undefined) => {
     if (valid) {
       try {
         //呼叫父組件給的新增function API
-        // await addMemberApi(insertMemberFormData)
+        await addVipMemberApi(insertMemberFormData)
         ElMessage.success('新增成功');
+        form.resetFields()
+        dialogFormVisible.value = false
         getMemberByPagination(currentPage.value, 10)
 
       } catch (err: any) {
@@ -490,7 +807,6 @@ let updateMemberForm = reactive({
   idCard: "",
   category: "",
 })
-
 
 //編輯表單的校驗規則
 const updateMemberFormRules = reactive<FormRules>({
@@ -556,6 +872,16 @@ const updateMemberFormRules = reactive<FormRules>({
       trigger: 'change',
     },
   ],
+  chineseName: {
+    required: true,
+    message: '中文姓名不能為空',
+    trigger: 'change',
+  },
+  title: {
+    required: true,
+    message: '稱謂不能為空',
+    trigger: 'change',
+  },
 
 })
 
@@ -583,17 +909,6 @@ const editRow = (member: any): void => {
   drawer.value = true
 }
 
-const formatToMinguo = (dateString: string): string => {
-  const [year, month, day] = dateString.split('-');
-  const minguoYear = (Number(year) - 1911).toString();
-  return `${minguoYear}-${month}-${day}`;
-};
-
-const parseFromMinguo = (minguoString: string): string => {
-  const [minguoYear, month, day] = minguoString.split('-');
-  const year = (Number(minguoYear) + 1911).toString();
-  return `${year}-${month}-${day}`;
-};
 
 
 /**-------------------標籤-------------------- */
@@ -643,6 +958,22 @@ const submitTagsList = async () => {
   tagsDialogIsOpen.value = false;
 }
 
+/**====================處理新增與修改RWD================== */
+const dialogWidth = ref('45%')
+const drawerSize = ref('45%')
+
+
+const handleDialogWidthAndDrawerSize = () => {
+  if (window.innerWidth < 768) {
+    dialogWidth.value = '90%'
+    drawerSize.value = '90%'
+  } else {
+    dialogWidth.value = '45%'
+    drawerSize.value = '45%'
+  }
+
+}
+
 
 
 /**-------------------掛載頁面時執行-------------------- */
@@ -651,6 +982,9 @@ onMounted(() => {
   getMemberByPagination(1, 10)
   getMemberCount()
   getTagsList()
+
+  window.addEventListener('resize', handleDialogWidthAndDrawerSize);
+
 })
 
 
@@ -754,5 +1088,70 @@ onMounted(() => {
 
 :deep(.el-tag__close) {
   color: red;
+}
+
+.insert-form {
+  padding: 2rem;
+  width: 80%;
+  margin-inline: auto;
+
+  .el-select {
+    width: 100%;
+  }
+
+  .el-input {
+    width: 100%;
+  }
+
+  .category {
+
+    :deep(.el-radio-group) {
+      flex-direction: column;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+    }
+
+    :deep(.el-form-item__error) {
+      position: absolute;
+      top: 0.5rem;
+      left: 10rem;
+      width: 20rem;
+
+      @media screen and (max-width: 768px) {
+        left: 13rem;
+      }
+    }
+
+    :deep(.el-select) {
+      width: 150px;
+    }
+
+  }
+
+  .phone-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 1rem;
+
+    .country-code {
+      width: 30%;
+    }
+
+    .phone {
+      width: 70%;
+    }
+  }
+
+  .title-form-item {
+    width: 100%;
+
+    .title-radio-group {
+      width: 100%
+    }
+  }
+
+
 }
 </style>

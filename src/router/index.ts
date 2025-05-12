@@ -1,3 +1,4 @@
+import { tr } from "element-plus/es/locale";
 import {
   createRouter,
   createWebHashHistory,
@@ -226,7 +227,7 @@ export const constantRoutes: RouteRecordRaw[] = [
       //affix: true,
       keepAlive: true,
       alwaysShow: false,
-      hidden: true,
+      hidden: false,
     },
     children: [
       {
@@ -248,7 +249,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         meta: {
           title: "稿件分發",
           icon: "el-icon-PriceTag",
-          hidden: false,
+          hidden: true,
           roles: ["ADMIN"],
           keepAlive: true,
         },
