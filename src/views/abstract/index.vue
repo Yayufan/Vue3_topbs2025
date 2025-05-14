@@ -5,7 +5,7 @@
 
       <div class="function-bar">
         <div class="display-count">
-          <div>當前查詢數量為： {{ paperList.total }} 人</div>
+          <div>當前查詢數量為： {{ paperList.total }} 件</div>
         </div>
 
         <div class="btn-box">
@@ -16,13 +16,18 @@
       <div class="search-bar">
         <el-input v-model="input" style="width: 240px" placeholder="輸入內容,Enter查詢" @input="getPaperList()" />
 
-        <el-select v-model="filterAbsType" style="width: 240px;" class="filter-abs-type"
-          placeholder="請選擇投稿類型"></el-select>
-        <el-select v-model="filterAbsProp" style="width: 240px;" class="filter-abs-prop"
-          placeholder="請選擇文章屬性"></el-select>
+        <el-select v-model="filterAbsType" style="width: 240px;" class="filter-abs-type" placeholder="請選擇投稿類型"
+          @change="getPaperList()">
+          <el-option value="Poster Presentation"></el-option>
+          <el-option value="Video Presentation"></el-option>
+          <el-option value="Young Investigator"></el-option>
+          <el-option value="" label="All"></el-option>
+        </el-select>
+        <!-- <el-select v-model="filterAbsProp" style="width: 240px;" class="filter-abs-prop"
+          placeholder="請選擇文章屬性"></el-select> -->
 
 
-        <el-select v-model="filterStatus" style="width: 240px;" class="filter-status" placeholder="請選擇">
+        <!-- <el-select v-model="filterStatus" style="width: 240px;" class="filter-status" placeholder="請選擇">
           <el-option label="全選" value="">
             <span>全選</span>
           </el-option>
@@ -39,15 +44,34 @@
           <template #label="{ label, value }">
             <span :style="{ color: value == '1' ? 'green' : value == '-1' ? 'red' : 'black' }">{{ label }}</span>
           </template>
-        </el-select>
+</el-select> -->
 
       </div>
 
 
       <el-table :data="paperList.records" style="width: 100%">
-        <el-table-column prop="absType" label="投稿類別" width="100"></el-table-column>
-        <el-table-column prop="absProp" label="文章屬性" width="100"></el-table-column>
+        <el-table-column prop="absType" label="投稿類別" width="200"></el-table-column>
+        <!-- <el-table-column prop="absProp" label="文章屬性" width="100"></el-table-column> -->
         <el-table-column prop="absTitle" label="稿件主題"></el-table-column>
+        <el-table-column prop="tagSet" label="標籤" min-width="40" align="center">
+          <template #default="scope">
+            <el-popover v-if="scope.row.tagList.length > 0" placement="left-start" title="標籤" :width="200"
+              trigger="hover">
+              <template #reference>
+                <el-tag v-if="findFirstVaildTag(scope.row.tagList)" size="large" round
+                  :color="findFirstVaildTag(scope.row.tagList).color" effect="light">{{
+                    findFirstVaildTag(scope.row.tagList).name }}</el-tag>
+              </template>
+              <template #default>
+                <div v-for="tag in scope.row.tagList" :key="tag.tagId" class="tag-item">
+                  <el-tag v-if="tag.status === 0" size="large" round :color="tag.color">{{
+                    tag.name }}</el-tag>
+                </div>
+              </template>
+            </el-popover>
+
+          </template>
+        </el-table-column>
         <el-table-column prop="firstAuthor" label="第一作者" width="150"></el-table-column>
         <el-table-column prop="status" label="審核狀態" width="100">
           <template #default="scope">
@@ -61,26 +85,43 @@
             <el-button link type="success" @click="toggleEdit(scope.row)">
               Edit
             </el-button>
+            <el-button v-for="item in scope.row.paperFileUpload" type="primary" link @click="openFile(item.path)">下載{{
+              item.type.split('_')[1] }}</el-button>
           </template>
         </el-table-column>
       </el-table>
+      <div class="pagination-box">
+        <el-pagination layout="prev, pager, next" :page-count="Number(paperList.pages)"
+          :default-page-size="Number(paperList.size)" v-model:current-page="currentPage" :hide-on-single-page="true" />
+      </div>
     </el-card>
     <el-drawer v-model="isEdit" title="詳細資訊">
       <p>投稿類別 : {{ reviewPaper.absType }}</p>
-      <p>文章屬性 : {{ reviewPaper.absProp }}</p>
+      <el-divider></el-divider>
       <p>稿件主題 : {{ reviewPaper.absTitle }}</p>
+      <el-divider></el-divider>
       <p>第一作者 : {{ reviewPaper.firstAuthor }}</p>
+      <el-divider></el-divider>
+      <p v-if="reviewPaper.absType === 'Young Investigator'">第一作者生日 : {{ reviewPaper.firstAuthorBirthday }}</p>
+      <el-divider v-if="reviewPaper.absType === 'Young Investigator'"></el-divider>
       <p>主要講者 : {{ reviewPaper.speaker }}</p>
+      <el-divider></el-divider>
       <p>講者單位 : {{ reviewPaper.speakerAffiliation }}</p>
+      <el-divider></el-divider>
       <p>通訊作者 : {{ reviewPaper.correspondingAuthor }}</p>
+      <el-divider></el-divider>
       <p>通訊作者Email : {{ reviewPaper.correspondingAuthorEmail }}</p>
+      <el-divider></el-divider>
       <p>通訊作者電話 : {{ reviewPaper.correspondingAuthorPhone }}</p>
+      <el-divider></el-divider>
       <p>所有作者 : {{ reviewPaper.allAuthor }}</p>
+      <el-divider></el-divider>
       <p>所有作者單位 : {{ reviewPaper.allAuthorAffiliation }}</p>
-      <div class="download-box">
+      <el-divider></el-divider>
+      <!-- <div class="download-box">
         <el-button v-for="item in reviewPaper.paperFileUpload" type="primary" link @click="openFile(item.path)">下載{{
           item.type.split('_')[1] }}</el-button>
-      </div>
+      </div> -->
 
       <el-form :model-="updateForm">
         <el-form-item label="發表編號" prop="publicationNumber">
@@ -95,7 +136,7 @@
         <el-form-item label="報告時間" prop="reportTime">
           <el-input v-model="updateForm.reportTime"></el-input>
         </el-form-item>
-        <el-form-item label="審核狀態" prop="status">
+        <!-- <el-form-item label="審核狀態" prop="status">
           <el-select v-model="updateForm.status" placeholder="請選擇審核狀態" style="width: 100%">
             <el-option label="未審核" :value="0">
               <span>未審核</span>
@@ -111,7 +152,7 @@
               <span :style="{ color: value == '1' ? 'green' : value == '-1' ? 'red' : 'black' }">{{ label }}</span>
             </template>
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item>
           <el-button type="primary" @click="updatePaper">更新</el-button>
           <el-button @click="isEdit = false">關閉</el-button>
@@ -126,7 +167,6 @@
 </template>
 <script lang="ts" setup>
 import { getPaperPageApi, updatePaperApi } from '@/api/abstract';
-import { update } from 'lodash';
 
 
 
@@ -148,6 +188,10 @@ watch(filterStatus, (value, oldValue) => {
   getPaperList()
 })
 
+watch(currentPage, (value, oldValue) => {
+  getPaperList()
+})
+
 /**-------------------------------------------- */
 const isEdit = ref(false);
 
@@ -158,6 +202,10 @@ const toggleEdit = (paper: any) => {
   // Object.assign(updateForm, paper);
   updateForm.paperId = paper.paperId;
   updateForm.status = paper.status;
+  updateForm.publicationNumber = paper.publicationNumber;
+  updateForm.publicationGroup = paper.publicationGroup;
+  updateForm.reportLocation = paper.reportLocation;
+  updateForm.reportTime = paper.reportTime;
   console.log(updateForm)
 }
 
@@ -187,6 +235,15 @@ const updatePaper = async () => {
 }
 
 
+const findFirstVaildTag = (tagSet: any) => {
+  for (let i = 0; i < tagSet.length; i++) {
+    if (tagSet[i].status === 0) {
+      return tagSet[i];
+    }
+  }
+  return '';
+}
+
 
 onMounted(() => {
   getPaperList()
@@ -202,6 +259,12 @@ onMounted(() => {
   .abstract-card {
     margin-top: 2%;
     margin-bottom: 2%;
+
+    .pagination-box {
+      margin-top: 2%;
+      display: flex;
+      justify-content: center;
+    }
   }
 
   h1 {
@@ -209,13 +272,24 @@ onMounted(() => {
     font-size: 2rem;
     margin: 1% 0;
   }
+
+
 }
 
 .search-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   margin-bottom: 20px;
 
+}
+
+:deep(.el-tag__content) {
+  color: white;
+  font-size: 14px;
+}
+
+:deep(.el-tag__close) {
+  color: red;
 }
 </style>

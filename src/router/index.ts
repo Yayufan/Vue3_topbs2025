@@ -1,3 +1,4 @@
+import { tr } from "element-plus/es/locale";
 import {
   createRouter,
   createWebHashHistory,
@@ -226,6 +227,7 @@ export const constantRoutes: RouteRecordRaw[] = [
       //affix: true,
       keepAlive: true,
       alwaysShow: false,
+      hidden: false,
     },
     children: [
       {
@@ -247,7 +249,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         meta: {
           title: "稿件分發",
           icon: "el-icon-PriceTag",
-          hidden: false,
+          hidden: true,
           roles: ["ADMIN"],
           keepAlive: true,
         },
@@ -265,6 +267,7 @@ export const constantRoutes: RouteRecordRaw[] = [
       //affix: true,
       keepAlive: true,
       alwaysShow: false,
+      hidden: true,
     },
     children: [
       {
@@ -292,12 +295,40 @@ export const constantRoutes: RouteRecordRaw[] = [
       //affix: true,
       keepAlive: true,
       alwaysShow: false,
+      hidden: true,
     },
     children: [
       {
         path: "",
         component: () => import("@/views/test-upload/index.vue"),
         name: "test1",
+        meta: {
+          title: "",
+          icon: "el-icon-PriceTag",
+          hidden: true,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+    ],
+  },
+  {
+    path: "/speaker",
+    component: Layout,
+    name: "speaker", // 用于 keep-alive, 必须与SFC自动推导或者显示声明的组件name一致
+    // https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
+    meta: {
+      title: "受邀講者列表",
+      icon: "el-icon-Message",
+      //affix: true,
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/invited-speaker/index.vue"),
+        name: "speaker-list",
         meta: {
           title: "",
           icon: "el-icon-PriceTag",

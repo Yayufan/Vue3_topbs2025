@@ -7,10 +7,10 @@
       <!-- 如果要用兩種註冊方式再考慮使用這個 -->
       <div class="function-bar">
         <div class="display-count">
-          未審核人數為： {{ memberCount }} 人
+          未審核人數為： {{ memberList.total }} 人
         </div>
         <div class="btn-box">
-          <el-button type="primary" @click="approvalList" :disabled="selectList.length > 0 ? false : true">
+          <!-- <el-button type="primary" @click="approvalList" :disabled="selectList.length > 0 ? false : true">
             批量通過<el-icon class="el-icon--right">
               <Plus />
             </el-icon>
@@ -20,29 +20,46 @@
             批量駁回<el-icon class="el-icon--right">
               <Delete />
             </el-icon>
-          </el-button>
+          </el-button> -->
         </div>
       </div>
 
       <div class="search-bar">
-        <el-input v-model="input" style="width: 240px" placeholder="輸入內容,Enter查詢"
-          @keydown.enter="getMember(currentPage, 10)" />
+        <el-input v-model="input" style="width: 240px" placeholder="輸入內容,Enter查詢" @input="getMember(currentPage, 10)" />
       </div>
 
-      <el-table class="news-table" :data="memberList.records" @selection-change="handleSelectionChange">
+      <el-table class="news-table" :data="memberList.records">
         <el-table-column type="selection" width="55" />
-        <el-table-column fixed prop="lastName" label="姓氏" width="90" />
-        <el-table-column fixed prop="firstName" label="名字" width="90" />
+        <!-- <el-table-column fixed prop="lastName" label="姓氏" width="90" />
+        <el-table-column fixed prop="firstName" label="名字" width="90" /> -->
+        <el-table-column prop="chineseName" label="中文姓名" width="100"></el-table-column>
+        <el-table-column prop="country" label="國家" width="100" />
+        <el-table-column prop="remitAccountLast5" label="戶頭末五碼" width="100" />
+        <el-table-column label="繳費金額" width="150">
+          <template #default="scope">
+            <el-text v-if="isEarlyBird && scope.row.category === 1">700</el-text>
+            <el-text v-if="!isEarlyBird && scope.row.category === 1">1000</el-text>
+            <el-text v-if="isEarlyBird && scope.row.category === 2">600</el-text>
+            <el-text v-if="!isEarlyBird && scope.row.category === 2">1200</el-text>
+            <el-text v-if="isEarlyBird && scope.row.category === 3">1000</el-text>
+            <el-text v-if="!isEarlyBird && scope.row.category === 3">1500</el-text>
+          </template>
+        </el-table-column>
+        <el-table-column prop="idCard" label="身分證字號" width="200" />
+        <el-table-column prop="category" label="會員類別" width="200">
+          <template #default="scope">
+            {{ scope.row.category === 1 ? 'member' : scope.row.category === 2 ? 'others' : scope.row.category === 3 ?
+              'non-member' : 'VIP' }}
+          </template>
+        </el-table-column>
 
         <el-table-column prop="email" label="信箱" />
         <el-table-column prop="phone" label="手機" width="140" />
-        <el-table-column prop="country" label="國家" width="100" />
-        <el-table-column prop="remitAccountLast5" label="帳號末五碼" width="100" />
 
         <el-table-column fixed="right" label="操作" width="150">
           <!-- 透過#default="scope" , 獲取到當前的對象值 , scope.row則是拿到當前那個row的數據  -->
           <template #default="scope">
-            <el-button type="primary" size="small" @click="approvalRow(scope.row)">
+            <el-button type="primary" size="small" @click="updateUnpaidMember(scope.row.memberId)">
               通過
             </el-button>
             <!-- <el-button type="danger" size="small" @click="failedRow(scope.row)">
@@ -73,7 +90,7 @@ import { ref, reactive } from 'vue'
 import { Delete, Plus } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 
-import { getMemberOrder, getMemberCountByOrderStatusApi, updateMemberApi, batchUpdateMemberApi, } from '@/api/member'
+import { getMemberOrder, getMemberCountByOrderStatusApi, updateMemberApi, batchUpdateMemberApi, getUnpaidMemberApi, updateUnpaidMemberApi } from '@/api/member'
 
 import { updateOrdersApi } from '@/api/order'
 
@@ -84,6 +101,20 @@ const route = useRoute()
 const router = useRouter()
 //formLabel 寬度
 const formLabelWidth = '140px'
+
+const earlyBirdDate = ref('2025/9/30')
+
+const isEarlyBird = ref(false)
+
+const checkEarlyBird = (date: string) => {
+  const now = new Date()
+  const earlyBird = new Date(date)
+  if (now < earlyBird) {
+    isEarlyBird.value = true
+  } else {
+    isEarlyBird.value = false
+  }
+}
 
 
 /**--------------顯示數據相關---------------------------- */
@@ -99,34 +130,15 @@ let input = ref('')
 
 
 //獲取未審核的同意書List
-let memberList = reactive<Record<string, any>>({
-  records: [{
-    memberId: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    country: "",
-    category: 0,
-    affiliation: "",
-    jobTitle: "",
-    phone: "",
-    remitAccountLast5: "",
-    ordersList: [
-      {
-        ordersId: "",
-        memberId: "",
-        itemsSummary: "",
-        totalAmount: 0,
-        status: 0,
+let memberList = reactive<Record<string, any>>({})
 
-      }
-    ]
-  }]
-})
 
 const getMember = async (page: number, size: number) => {
-  let res = await getMemberOrder(page, size, "1", input.value)
+  // let res = await getMemberOrder(page, size, "1", input.value)
+  let res = await getUnpaidMemberApi(page, input.value);
+  memberList
   Object.assign(memberList, res.data)
+  console.log("memberList", memberList)
 }
 
 const getMemberCount = async () => {
@@ -142,123 +154,18 @@ watch(currentPage, (value, oldValue) => {
 
 /** --------- 審核通過/駁回 相關variable及function -------------- */
 
-//勾選的對象列表
-let selectList = reactive<Record<string, any>[]>([])
-
-//當checkbox狀態改變時的function,val是一個數組對象
-const handleSelectionChange = (val: any) => {
-  //重製selectList,移除所有屬性
-  selectList.length = 0
-  Object.assign(selectList, val)
-}
-
-//駁回同意書申請
-const failedRow = (member: any): void => {
-  ElMessageBox.confirm(`確定要駁回此申請嗎？`, '確認廢除', {
-    confirmButtonText: '確定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
-
-    Object.assign(updateMemberRegistrationFeeOrder, member)
-    //將審核狀態更改為駁回
-    updateMemberRegistrationFeeOrder.status = "3"
-
-    // 用户選擇確認，繼續操作
-    await updateMemberApi(updateMemberRegistrationFeeOrder)
-    ElMessage.success('廢除成功');
-
-    getMember(1, 10)
-
-  }).catch((err) => {
-    console.log(err)
-  });
-}
-
-//批量駁回同意書申請的function
-const failedList = () => {
-  if (selectList.length >= 1) {
-    ElMessageBox.confirm(`確定要駁回${selectList.length}個申請嗎？`, '確認駁回', {
-      confirmButtonText: '確定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }).then(async () => {
-
-      //從List 中透過map方法映射資料, 修改status狀態 和 donateOrgans轉為array 並傳給後端
-      let transData = selectList.map(item => {
-        return {
-          ...(item),
-          status: "2",
-          // donateOrgans: item.donateOrgans ? item.donateOrgans.split(",") : [] // 確保 donateOrgans 存在
-        };
-      })
-
-      await batchUpdateMemberApi(transData)
-      ElMessage.success("批量審核駁回")
-
-
-      getMember(1, 10)
-
-    }).catch((err) => {
-      console.log(err)
-    })
-
+const updateUnpaidMember = async (memberId: string) => {
+  let res: any = await updateUnpaidMemberApi(memberId)
+  if (res.code === 200) {
+    ElMessage.success("審核通過")
+    getMember(currentPage.value, 10)
   } else {
-    ElMessage.error("請至少勾選一筆資料進行刪除")
+    ElMessage.error(res.msg)
   }
 }
-
 
 /**------------編輯內容相關操作---------------------- */
 
-let updateMemberRegistrationFeeOrder = reactive<Record<string, any>>({
-
-})
-
-//會員審核通過
-const approvalRow = async (member: any) => {
-
-  console.log("這是Member的註冊費訂單: ", member.ordersList[0])
-
-  Object.assign(updateMemberRegistrationFeeOrder, member.ordersList[0])
-  // //將審核狀態更改為通過(付款成功)
-  updateMemberRegistrationFeeOrder.status = "2"
-
-  try {
-    await updateOrdersApi(updateMemberRegistrationFeeOrder)
-    ElMessage.success("審核通過")
-    getMember(currentPage.value, 10)
-
-  } catch (err) {
-    console.log(err)
-  }
-
-}
-
-const approvalList = async () => {
-  if (selectList.length >= 1) {
-
-    //從List 中透過map方法映射資料, 修改status狀態 和 donateOrgans轉為array 並傳給後端
-    let transData = selectList.map(item => {
-      return {
-        ...(item),
-        status: "1",
-      };
-    })
-
-    try {
-      await batchUpdateMemberApi(transData)
-      ElMessage.success("批量審核通過")
-      getMember(currentPage.value, 10)
-
-    } catch (err) {
-      console.log(err)
-    }
-  } else {
-    ElMessage.error("請至少勾選一筆資料進行操作")
-  }
-
-}
 
 
 
@@ -267,6 +174,7 @@ const approvalList = async () => {
 onMounted(() => {
   getMemberCount()
   getMember(1, 10)
+  checkEarlyBird(earlyBirdDate.value)
 })
 
 

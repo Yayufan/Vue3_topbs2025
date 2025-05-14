@@ -19,14 +19,14 @@
     max-height="1200" empty-text="Empty">
     <el-table-column type="selection" width="55" />
 
-    <el-table-column fixed label="縮圖" width="150">
+    <!-- <el-table-column fixed label="縮圖" width="150">
       <template #default="scope">
         <div class="demo-image__preview">
-          <el-image style="width: 100px; height: 100px" loading="lazy"
-            :src="protocol + '//' + hostname + '/minio' + scope.row.coverThumbnailUrl" fit="fill" />
+          <el-image style="width: 100px; height: 100px" loading="lazy" :src="envMinio + scope.row.coverThumbnailUrl"
+            fit="fill" />
         </div>
       </template>
-    </el-table-column>
+</el-table-column> -->
 
     <el-table-column prop="type" label="類別" width="120" />
     <el-table-column prop="title" label="標題" min-width="200" />
@@ -72,7 +72,13 @@
         <el-input type="textarea" v-model="articleFormData.description" autocomplete="off" />
       </el-form-item>
 
-      <el-form-item :label="'縮圖上傳(建議解析度 800*600)'" :label-width="formLabelWidth">
+      <el-form-item label="發布日期" :label-width="formLabelWidth" prop="announcementDate">
+        <!-- <el-data-picker v-model="articleFormData.announcementDate" autocomplete="off" /> -->
+        <el-date-picker v-model="articleFormData.announcementDate" type="date" placeholder="Pick a day"
+          format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+      </el-form-item>
+
+      <!-- <el-form-item :label="'縮圖上傳(建議解析度 800*600)'" :label-width="formLabelWidth">
 
         <el-upload class="thumbnail-uploader" :action="envAPI + '/upload/img'" :show-file-list="false"
           :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
@@ -82,7 +88,8 @@
           </el-icon>
         </el-upload>
 
-      </el-form-item>
+      </el-form-item> -->
+
 
     </el-form>
 
@@ -145,6 +152,7 @@ const protocol = window.location.protocol; // 获取当前协议 (例如 "http:"
 const hostname = window.location.hostname; // 获取当前域名 (例如 "www.example.com")
 
 const envAPI = import.meta.env.VITE_APP_BASE_API;
+const envMinio = import.meta.env.VITE_MINIO_API_URL;
 
 
 /** ---------------- 一般資料顯示 --------------------- */
@@ -204,12 +212,22 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
   return true
 }
 
+// 日期格式
+const formatDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // getMonth() 返回的月份是 0-11
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 //是否顯示表單dialog
 const dialogFormVisible = ref(false)
 
 //顯示新增Dialog
 const toggleAddDialog = () => {
   dialogFormVisible.value = true
+  console.log(articleFormData)
+
 }
 
 //表單實例
@@ -220,8 +238,10 @@ const articleFormData = reactive({
   type: '',
   title: '',
   description: null,
+  announcementDate: formatDate(new Date()),
   groupType: ''
 })
+
 
 articleFormData.groupType = props.group
 
@@ -257,7 +277,14 @@ const articleRules = reactive<FormRules>({
       message: '內容長度不能超過 255 字符',
       trigger: 'blur'
     }
-  ]
+  ],
+  announcementDate: [
+    {
+      required: true,
+      message: '日期不能為空',
+      trigger: 'blur',
+    },
+  ],
 })
 
 /**

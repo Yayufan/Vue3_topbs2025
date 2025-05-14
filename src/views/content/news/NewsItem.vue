@@ -18,8 +18,12 @@
             <el-form-item label="文章描述" prop="description">
               <el-input type="textarea" v-model="article.description" autocomplete="off" />
             </el-form-item>
+            <el-form-item label="公告日期" prop="announcementDate">
+              <el-date-picker v-model="article.announcementDate" type="date" placeholder="Pick a day"
+                format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+            </el-form-item>
           </div>
-          <div class="img-box">
+          <!-- <div class="img-box">
 
             <el-form-item label="縮圖上傳" label-position="top">
 
@@ -33,7 +37,7 @@
 
             </el-form-item>
 
-          </div>
+          </div> -->
         </div>
 
         <div style="text-align: right;">
@@ -43,8 +47,8 @@
       </el-form>
 
       <!-- 文章附件上傳組件 -->
-      <AttachmentComponent :articleId="id" :getApi="getAllArticleAttachmentApi" :addApi="addArticleAttachmentApi"
-        :deleteApi="deleteArticleAttachmentApi" />
+      <!-- <AttachmentComponent :articleId="id" :getApi="getAllArticleAttachmentApi" :addApi="addArticleAttachmentApi"
+        :deleteApi="deleteArticleAttachmentApi" /> -->
 
       <!-- CKEditor5 編輯器組件   -->
       <CustomCKEditor :scope="scope" :htmlContent="article.content" :updateContent="updateContent">
@@ -79,10 +83,12 @@ const article = reactive<Record<string, any>>({
   type: '',
   title: '',
   description: null,
+  announcementDate: '',
   content: '',
   coverThumbnailUrl: ''
 
 });
+
 
 //方法,子傳父
 const updateContent = (newValue: string) => {
@@ -170,6 +176,7 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
 //獲取文章
 const getArticle = async () => {
   let res = await getArticleApi(id)
+  console.log(res.data.announcementDate)
   Object.assign(article, res.data)
 }
 
@@ -252,7 +259,10 @@ const submitArticleForm = (form: FormInstance) => {
 
 onMounted(async () => {
   await getArticle()
-  imageUrl.value = protocol + '//' + hostname + '/minio' + article.coverThumbnailUrl
+  // imageUrl.value = protocol + '//' + hostname + '/minio' + article.coverThumbnailUrl
+
+  imageUrl.value = import.meta.env.VITE_MINIO_API_URL + article.coverThumbnailUrl;
+  console.log(imageUrl.value)
 })
 
 </script>
