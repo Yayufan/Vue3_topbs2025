@@ -375,8 +375,11 @@ const getImageSizeFromDesign = (design: any) => {
         if (content.type === 'image') {
 
           // 計算寬度資訊 
-          let widthPercent = Number(content.values.src.maxWidth.replace('%', '')) / 100;
-          let maxWidth = Math.round(content.values.src.width * widthPercent);
+          let maxWidth = content.values.src.width > 600 ? 600 : content.values.src.width;
+          if (content.values.src.maxWidth) {
+            let widthPercent = Number(content.values.src.maxWidth.replace('%', '')) / 100;
+            maxWidth = Math.round(content.values.src.width * widthPercent);
+          }
           imageInfoList.push({
             position: content.values.textAlign,
             maxWidthString: maxWidth.toString()

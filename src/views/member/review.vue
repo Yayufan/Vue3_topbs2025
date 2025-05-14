@@ -130,35 +130,13 @@ let input = ref('')
 
 
 //獲取未審核的同意書List
-let memberList = reactive<Record<string, any>>({
-  records: [{
-    memberId: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    country: "",
-    category: 0,
-    affiliation: "",
-    jobTitle: "",
-    phone: "",
-    remitAccountLast5: "",
-    ordersList: [
-      {
-        ordersId: "",
-        memberId: "",
-        itemsSummary: "",
-        totalAmount: 0,
-        status: 0,
-
-      }
-    ]
-  }]
-})
+let memberList = reactive<Record<string, any>>({})
 
 
 const getMember = async (page: number, size: number) => {
   // let res = await getMemberOrder(page, size, "1", input.value)
   let res = await getUnpaidMemberApi(page, input.value);
+  memberList
   Object.assign(memberList, res.data)
   console.log("memberList", memberList)
 }

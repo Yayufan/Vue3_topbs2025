@@ -325,8 +325,8 @@
           <el-form-item label="抬頭" prop="receipt">
             <el-input v-model="insertMemberFormData.receipt" placeholder="抬頭" />
           </el-form-item>
-          <el-form-item class="category required" label="Category">
-            <el-radio-group v-model="insertMemberFormData.category">
+          <el-form-item class="category required" label="類別" prop="category">
+            <!-- <el-radio-group v-model="insertMemberFormData.category">
               <el-radio :value="1">Member</el-radio>
               <el-form-item v-if="insertMemberFormData.category === 1 && insertMemberFormData.country !== 'Taiwan'"
                 prop="categoryExtra">
@@ -339,7 +339,14 @@
               </el-form-item>
               <el-radio :value="2">Others(Trainee/Nurse/Reasearcher)</el-radio>
               <el-radio :value="3">Non-member</el-radio>
-            </el-radio-group>
+            </el-radio-group> -->
+
+            <el-select v-model="insertMemberFormData.category">
+              <el-option label="MVP" :value="4"></el-option>
+              <el-option label="講者" :value="5"></el-option>
+              <el-option label="座長" :value="6"></el-option>
+              <el-option label="Staff" :value="7"></el-option>
+            </el-select>
           </el-form-item>
 
 
@@ -539,7 +546,7 @@ const insertMemberFormData = reactive({
   phoneNum: '',
   food: '葷',
   foodTaboo: '',
-  category: 1,
+  category: 4,
   categoryExtra: '',
   verificationCode: '',
   verificationKey: ''
@@ -724,6 +731,11 @@ const insertFormRules = reactive<FormRules>({
         callback()
       }
     },
+    trigger: 'blur',
+  },
+  category: {
+    required: true,
+    message: '請選擇類別',
     trigger: 'blur',
   },
   countryCode: {
