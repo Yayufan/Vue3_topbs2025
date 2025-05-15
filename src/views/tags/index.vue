@@ -164,6 +164,7 @@
         <h3>標籤: <el-tag :color="addMemberTag.color" class="tag-box" round>{{ addMemberTag.name }}</el-tag></h3> -->
 
       <MemberTag v-if="addTag.type === 'member'" :addTag="addTag" @close="closeDialog" />
+      <AttendeesTag v-if="addTag.type === 'attendees'" :addTag="addTag" @close="closeDialog"></AttendeesTag>
       <PaperTag v-if="addTag.type === 'paper'" :add-tag="addTag" @close="closeDialog" />
       <PaperReviewerTag v-if="addTag.type === 'paperReviewer'" :add-tag="addTag" @close="closeDialog" />
 
@@ -231,7 +232,7 @@ import { typeEnums } from '@/enums/TypeEnum'
 import MemberTag from './memberTag.vue'
 import PaperTag from './paperTag.vue'
 import PaperReviewerTag from './paperReviewerTag.vue'
-
+import AttendeesTag from './attendeesTag.vue'
 const formLabelWidth = '70px'
 const route = useRoute()
 const router = useRouter()
