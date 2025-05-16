@@ -65,11 +65,11 @@
         <el-table-column fixed prop="firstName" label="名字" width="90" />
         <el-table-column fixed prop="lastName" label="姓氏" width="90" />
         <el-table-column prop="email" label="信箱" />
-        <el-table-column prop="country" label="國家" />
+        <el-table-column prop="country" label="國家" width="100" />
         <el-table-column prop="remitAccountLast5" label="帳戶後五碼" width="100" />
 
 
-        <el-table-column prop="status" label="繳費狀態">
+        <el-table-column prop="status" label="繳費狀態" width="120">
           <template #default="scope">
             <span v-if="scope.row.status == 1" style="color: gray;">已繳費-待確認</span>
             <span v-else-if="scope.row.status == 2" style="color: green;">繳費成功</span>
@@ -78,7 +78,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="tagSet" label="標籤" min-width="40" align="center">
+        <el-table-column prop="tagSet" label="標籤" min-width="40" align="center" width="150">
           <template #default="scope">
             <el-popover v-if="scope.row.tagSet.length > 0" placement="left-start" title="標籤" :width="200"
               trigger="hover">
@@ -99,7 +99,7 @@
         </el-table-column>
 
 
-        <el-table-column fixed="right" label="操作" width="150">
+        <el-table-column label="操作" width="150">
           <!-- 透過#default="scope" , 獲取到當前的對象值 , scope.row則是拿到當前那個row的數據  -->
           <template #default="scope">
             <el-button link type="success" size="small" @click="toggleTagsDialog(scope.row)">
