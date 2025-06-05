@@ -29,18 +29,18 @@
 
       <el-table class="news-table" :data="attendeeList.records" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
-        <el-table-column fixed prop="lastName" label="姓氏" width="90">
+        <el-table-column fixed prop="firstName" label="名字" width="90">
           <template #default="scope">
             {{ scope.row.member.firstName }}
           </template>
         </el-table-column>
-        <el-table-column fixed prop="lastName" label="名字" width="90">
+        <el-table-column fixed prop="lastName" label="姓氏" width="90">
           <template #default="scope">
             {{ scope.row.member.lastName }}
           </template>
         </el-table-column>
 
-        <el-table-column fixed prop="lastName" label="身分證" width="190">
+        <el-table-column fixed prop="idCard" label="身分證" width="190">
           <template #default="scope">
             {{ scope.row.member.idCard }}
           </template>

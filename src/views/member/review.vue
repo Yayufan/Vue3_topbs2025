@@ -48,8 +48,8 @@
         <el-table-column prop="idCard" label="身分證字號" width="200" />
         <el-table-column prop="category" label="會員類別" width="200">
           <template #default="scope">
-            {{ scope.row.category === 1 ? 'member' : scope.row.category === 2 ? 'others' : scope.row.category === 3 ?
-              'non-member' : 'VIP' }}
+            {{ memberEnums[scope.row.category] }}
+
           </template>
         </el-table-column>
 
@@ -89,6 +89,8 @@
 import { ref, reactive } from 'vue'
 import { Delete, Plus } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
+
+import { memberEnums } from '@/enums/memberEnum'
 
 import { getMemberOrder, getMemberCountByOrderStatusApi, updateMemberApi, batchUpdateMemberApi, getUnpaidMemberApi, updateUnpaidMemberApi } from '@/api/member'
 
