@@ -378,7 +378,7 @@ const getImageSizeFromDesign = (design: any) => {
           let maxWidth = content.values.src.width > 600 ? 600 : content.values.src.width;
           if (content.values.src.maxWidth) {
             let widthPercent = Number(content.values.src.maxWidth.replace('%', '')) / 100;
-            maxWidth = Math.round(content.values.src.width * widthPercent);
+            maxWidth = Math.round(content.values.src.width * widthPercent) > 600 ? 600 : Math.round(content.values.src.width * widthPercent);
           }
           imageInfoList.push({
             position: content.values.textAlign,

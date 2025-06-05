@@ -225,7 +225,7 @@ export const constantRoutes: RouteRecordRaw[] = [
           roles: ["ADMIN"],
           keepAlive: true,
         },
-      },
+      }
     ],
   },
   {
