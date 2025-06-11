@@ -27,7 +27,7 @@ export default {
   // 導航栏国际化
   navbar: {
     dashboard: "首頁",
-    logout: "註銷登出",
+    logout: "登出",
     document: "項目文檔",
     gitee: "項目地址",
   },

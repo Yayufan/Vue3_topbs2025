@@ -41,3 +41,26 @@ export function batchDeletePaperReviewerApi(ids: any) {
     data: ids,
   });
 }
+
+export function uploadPaperReviewerFileApi(data: FormData) {
+  return request({
+    url: "/paper-reviewer-file",
+    method: "post",
+    data,
+  });
+}
+
+export function updatePaperReviewerFileApi(data: FormData) {
+  return request({
+    url: "/paper-reviewer-file",
+    method: "put",
+    data,
+  })
+}
+
+export function deletePaperReviewerFileApi(id: any) {
+  return request({
+    url: `/paper-reviewer-file/${id}`,
+    method: "delete",
+  })
+}

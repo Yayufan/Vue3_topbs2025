@@ -59,7 +59,6 @@ const mixLeftMenus = computed(() => permissionStore.mixLeftMenus); // 混合布�
 
 
 
-console.log('最小菜單', mixLeftMenus.value)
 
 
 watch(
