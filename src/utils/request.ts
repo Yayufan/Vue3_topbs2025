@@ -12,8 +12,11 @@ const service = axios.create({
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const accessToken = localStorage.getItem("Authorization");
+    const reviewerAccessToken = localStorage.getItem("Authorization-paper-reviewer");
     if (accessToken) {
       config.headers.Authorization = accessToken;
+    } else if (reviewerAccessToken) {
+      config.headers['Authorization-paper-reviewer'] = reviewerAccessToken;
     }
     return config;
   },
@@ -36,6 +39,15 @@ service.interceptors.response.use(
     }
 
     if (code == "401") {
+      console.log("token 过期,重新登录");
+      if (localStorage.getItem("Authorization-paper-reviewer")) {
+        localStorage.removeItem("Authorization-paper-reviewer");
+        localStorage.setItem("paper-reviewer-logout", "true");
+        const userStore = useUserStoreHook();
+        userStore.resetReviewerToken().then(() => {
+          location.reload();
+        });
+      }
       localStorage.removeItem("Authorization");
     }
     if (response.status == 200 && response.data instanceof Blob) {
@@ -55,9 +67,15 @@ service.interceptors.response.use(
           type: "warning",
         }).then(() => {
           const userStore = useUserStoreHook();
-          userStore.resetToken().then(() => {
-            location.reload();
-          });
+          if (localStorage.getItem("Authorization-paper-reviewer")) {
+            userStore.resetReviewerToken().then(() => {
+              location.reload();
+            });
+          } else {
+            userStore.resetToken().then(() => {
+              location.reload();
+            });
+          }
         });
       } else {
         ElMessage.error(msg || "系统出错");

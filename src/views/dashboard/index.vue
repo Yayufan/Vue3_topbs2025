@@ -6,7 +6,7 @@
           <div class="flex h-full items-center">
             <img class="w-20 h-20 mr-5 rounded-full" src="/public/bunny.gif" />
             <div>
-              <p>{{ greetings }}</p>
+              <p>{{ }}</p>
               <p class="text-sm text-gray">
                 今日天氣晴朗
               </p>
@@ -241,20 +241,20 @@ onMounted(() => {
 const userStore = useUserStore();
 const date: Date = new Date();
 
-const greetings = computed(() => {
-  const hours = date.getHours();
-  if (hours >= 6 && hours < 8) {
-    return "晨起披衣出草堂，軒窗已自喜微涼🌅！";
-  } else if (hours >= 8 && hours < 12) {
-    return "上午好，" + userStore.user.nickName + "！";
-  } else if (hours >= 12 && hours < 18) {
-    return "下午好，" + userStore.user.nickName + "！";
-  } else if (hours >= 18 && hours < 24) {
-    return "晚上好，" + userStore.user.nickName + "！";
-  } else {
-    return "偷偷向銀河要了一把碎星，只等你閉上眼睛撒入你的夢中，晚安🌛！";
-  }
-});
+// const greetings = computed(() => {
+//   const hours = date.getHours();
+//   if (hours >= 6 && hours < 8) {
+//     return "晨起披衣出草堂，軒窗已自喜微涼🌅！";
+//   } else if (hours >= 8 && hours < 12) {
+//     return "上午好，" + userStore.user.nickName || userStore.user.name + "！";
+//   } else if (hours >= 12 && hours < 18) {
+//     return "下午好，" + userStore.user.nickName || userStore.user.name + "！";
+//   } else if (hours >= 18 && hours < 24) {
+//     return "晚上好，" + userStore.user.nickName || userStore.user.name + "！";
+//   } else {
+//     return "偷偷向銀河要了一把碎星，只等你閉上眼睛撒入你的夢中，晚安🌛！";
+//   }
+// });
 
 const duration = 5000;
 

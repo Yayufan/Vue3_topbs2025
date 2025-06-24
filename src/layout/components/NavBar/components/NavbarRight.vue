@@ -29,7 +29,10 @@
           <a target="_blank" href="https://juejin.cn/post/7228990409909108793">
             <el-dropdown-item>{{ $t("navbar.document") }}</el-dropdown-item>
           </a> -->
-          <el-dropdown-item divided @click="logout">
+          <el-dropdown-item v-if="!isReviewer" divided @click="logout">
+            {{ $t("navbar.logout") }}
+          </el-dropdown-item>
+          <el-dropdown-item v-else divided @click="reviewerLogout">
             {{ $t("navbar.logout") }}
           </el-dropdown-item>
         </el-dropdown-menu>
@@ -66,11 +69,14 @@ const isMobile = computed(() => appStore.device === DeviceEnum.MOBILE);
 
 const { isFullscreen, toggle } = useFullscreen();
 
+const isReviewer = localStorage.getItem("Authorization-paper-reviewer") ?
+  true : false;
+
 /**
  * 注销
  */
 function logout() {
-  ElMessageBox.confirm("确定注销并退出系统吗？", "提示", {
+  ElMessageBox.confirm("确定登出系統嗎？", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
@@ -83,6 +89,25 @@ function logout() {
       })
       .then(() => {
         router.push(`/login?redirect=${route.fullPath}`);
+      });
+  });
+}
+
+function reviewerLogout() {
+  console.log(123)
+  ElMessageBox.confirm("确定登出系統嗎？", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+    lockScroll: false,
+  }).then(() => {
+    userStore
+      .reviewerLogout()
+      .then(() => {
+        tagsViewStore.delAllViews();
+      })
+      .then(() => {
+        router.push(`/reviewer-login?redirect=${route.fullPath}`);
       });
   });
 }

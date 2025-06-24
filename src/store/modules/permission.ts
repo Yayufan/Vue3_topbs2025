@@ -1,5 +1,5 @@
 import { RouteRecordRaw } from "vue-router";
-import { constantRoutes } from "@/router";
+import { constantRoutes, adminDynamicRoutes, reviewerDynamicRoutes } from "@/router";
 import { store } from "@/store";
 import { listRoutes } from "@/api/menu";
 
@@ -100,13 +100,19 @@ export const usePermissionStore = defineStore("permission", () => {
    * @param roles 用户角色集合
    * @returns
    */
-  function generateRoutes(roles: string[]) {
-
+  async function generateRoutes(roles: string[]) {
+    let dynamicRoutes = reactive([]) as RouteRecordRaw[];
+    if (roles.includes('paperReviewer')) {
+      Object.assign(dynamicRoutes, reviewerDynamicRoutes);
+    } else if (roles.includes('ROOT')) {
+      //超级管理员,擁有所有權限,直接使用後臺接口獲取的動態路由
+      Object.assign(dynamicRoutes, adminDynamicRoutes);
+    }
     //不啟用動態路由時,直接將空數組作為代替,讓他去與設定好的靜態路由去做拼接
-    setRoutes([]);
+    setRoutes(dynamicRoutes);
 
     //同時也返回一個空數組,沒有效果,但是能讓/plugins/permission.ts再調用時TS編譯不報錯
-    return []
+    return dynamicRoutes;
 
     //需要啟用動態路由需要後臺配合,需要時再開啟
     /*

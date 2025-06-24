@@ -64,7 +64,7 @@
 
         <el-table-column fixed prop="firstName" label="名字" width="90" />
         <el-table-column fixed prop="lastName" label="姓氏" width="90" />
-        <el-table-column prop="email" label="信箱" />
+        <el-table-column prop="email" label="信箱" width="250" />
         <el-table-column prop="country" label="國家" width="100" />
         <el-table-column prop="remitAccountLast5" label="帳戶後五碼" width="100" />
 
@@ -99,15 +99,15 @@
         </el-table-column>
 
 
-        <el-table-column label="操作" width="150">
+        <el-table-column label="操作" width="200">
           <!-- 透過#default="scope" , 獲取到當前的對象值 , scope.row則是拿到當前那個row的數據  -->
           <template #default="scope">
             <el-button link type="success" size="small" @click="toggleTagsDialog(scope.row)">
               Tags
             </el-button>
-            <!-- <el-button link type="primary" size="small" @click="editRow(scope.row)">
-              Edit
-            </el-button> -->
+            <el-button link type="primary" size="small" @click="editRow(scope.row)">
+              View
+            </el-button>
             <el-button link type="danger" size="small" @click="deleteRow(scope.row.memberId)">
               Delete</el-button>
 
@@ -152,73 +152,82 @@
       <el-drawer v-model="drawer" title="I am the title" :size="drawerSize">
 
         <template #header>
-          <h4>資料修改</h4>
+          <h4>檢視資料</h4>
         </template>
 
         <template #default>
-          <el-form label-position="top" label-width="auto" :model="updateMemberForm" :rules="updateMemberFormRules"
-            ref="updateMemberFormRef">
+          <el-form label-position="top" label-width="auto" :model="updateMemberForm" ref="updateMemberFormRef">
 
             <el-form-item label="E-Mail" prop="email">
-              <el-input v-model="updateMemberForm.email" />
+              <el-input disabled v-model="updateMemberForm.email" />
             </el-form-item>
 
             <el-form-item label="名字" prop="firstName">
-              <el-input v-model="updateMemberForm.firstName" />
+              <el-input disabled v-model="updateMemberForm.firstName" />
             </el-form-item>
 
             <el-form-item label="姓氏" prop="lastName">
-              <el-input v-model="updateMemberForm.lastName" />
+              <el-input disabled v-model="updateMemberForm.lastName" />
             </el-form-item>
 
             <el-form-item label="中文姓名" prop="chineseName">
-              <el-input v-model="updateMemberForm.chineseName" placeholder="中文名" style="width: 240px;" />
+              <el-input disabled v-model="updateMemberForm.chineseName" placeholder="中文名" style="width: 240px;" />
             </el-form-item>
 
             <el-form-item label="國家" prop="country">
-              <el-input v-model="updateMemberForm.country" />
+              <el-input disabled v-model="updateMemberForm.country" />
             </el-form-item>
 
             <el-form-item label="身份證字號/護照號碼" prop="idCard">
-              <el-input v-model="updateMemberForm.idCard" />
+              <el-input disabled v-model="updateMemberForm.idCard" />
             </el-form-item>
 
-            <el-form-item label="帳號" prop="email">
+            <el-form-item label="飲食偏好" prop="email">
               <!-- <el-input v-model="updateMemberForm.food" disabled /> -->
-              <el-radio-group v-model="updateMemberForm.food" style="margin-left: 1rem;">
+              <el-radio-group disabled v-model="updateMemberForm.food" style="margin-left: 1rem;">
                 <el-radio value="葷">葷</el-radio>
                 <el-radio value="素">素</el-radio>
               </el-radio-group>
             </el-form-item>
 
             <el-form-item label="食物禁忌" prop="foodTaboo">
-              <el-input v-model="updateMemberForm.foodTaboo" placeholder="食物禁忌" style="width: 240px;" />
+              <el-input disabled v-model="updateMemberForm.foodTaboo" placeholder="食物禁忌" style="width: 240px;" />
             </el-form-item>
 
             <el-form-item label="帳號末五碼" prop="remitAccountLast5">
-              <el-input v-model="updateMemberForm.remitAccountLast5" />
+              <el-input disabled v-model="updateMemberForm.remitAccountLast5" />
             </el-form-item>
 
             <el-form-item label="抬頭" prop="receipt">
-              <el-input v-model="updateMemberForm.receipt" />
+              <el-input disabled v-model="updateMemberForm.receipt" />
             </el-form-item>
 
 
+            <el-form-item label="註冊費" prop="amount">
+              <el-input disabled v-model="updateMemberForm.amount" />
+            </el-form-item>
+
+            <el-form-item label="會員類別">
+              <el-select disabled v-model="updateMemberForm.category">
+                <el-option v-for="item in 7" :label="memberEnums[item]" :value="item"></el-option>
+              </el-select>
+            </el-form-item>
+
 
             <el-form-item label="單位" prop="affiliation">
-              <el-input v-model="updateMemberForm.affiliation">
+              <el-input disabled v-model="updateMemberForm.affiliation">
               </el-input>
             </el-form-item>
 
             <el-form-item label="職稱" prop="jobTitle">
-              <el-input v-model="updateMemberForm.jobTitle" />
+              <el-input disabled v-model="updateMemberForm.jobTitle" />
             </el-form-item>
 
             <el-form-item label="連絡電話" prop="phone">
-              <el-input v-model="updateMemberForm.phone" />
+              <el-input disabled v-model="updateMemberForm.phone" />
             </el-form-item>
 
-            <el-form-item label="審核狀態" prop="status">
+            <el-form-item label="繳費狀態" prop="status">
               <el-select v-model="updateMemberForm.status" disabled placeholder="Select" style="width: 240px;">
                 <el-option label="未繳費" :value="0">
                   <span>未繳費</span>
@@ -242,14 +251,15 @@
 
             </el-form-item>
 
+
           </el-form>
         </template>
 
 
         <template #footer>
           <div style="flex: auto">
-            <el-button @click="cancelClick">取消</el-button>
-            <el-button type="primary" @click="confirmClick()">送出</el-button>
+            <!-- <el-button @click="cancelClick">取消</el-button>
+            <el-button type="primary" @click="confirmClick()">送出</el-button> -->
           </div>
         </template>
 
@@ -375,6 +385,8 @@ import { getAllTagsApi } from '@/api/tag'
 
 import countriesData from '@/assets/data/countries.json'
 import { title } from 'process'
+
+import { memberEnums } from '@/enums/memberEnum'
 
 const countries = ref(countriesData)
 
@@ -817,7 +829,8 @@ let updateMemberForm = reactive({
   foodTaboo: "",
   receipt: "",
   idCard: "",
-  category: "",
+  category: 1,
+  amount: "",
 })
 
 //編輯表單的校驗規則
@@ -919,6 +932,7 @@ const confirmClick = async () => {
 const editRow = (member: any): void => {
   Object.assign(updateMemberForm, member)
   drawer.value = true
+  console.log(updateMemberForm)
 }
 
 

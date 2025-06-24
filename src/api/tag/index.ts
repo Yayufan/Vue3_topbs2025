@@ -72,3 +72,31 @@ export function assignPaperReviewerToTagApi(data: any) {
     data,
   });
 }
+
+export function findMemberIdListByTagIdApi(tagId: string): AxiosPromise {
+  return request({
+    url: `/tag/member/${tagId}`,
+    method: "get",
+  });
+}
+
+export function findAttendeesIdListByTagIdApi(tagId: string): AxiosPromise {
+  return request({
+    url: `/tag/attendees/${tagId}`,
+    method: "get",
+  });
+}
+
+export function findPaperIdListByTagIdApi(tagId: string): AxiosPromise {
+  return request({
+    url: `/tag/paper/${tagId}`,
+    method: "get",
+  });
+}
+
+export function findPaperReviewerIdListByTagIdApi(tagId: string): AxiosPromise {
+  return request({
+    url: `/tag/paper-reviewer/${tagId}`,
+    method: "get",
+  });
+}

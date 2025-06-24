@@ -24,6 +24,9 @@
         <el-checkbox v-model="sendEmailDto.isTest" label="是否為測試信件" />
         <el-input v-if="sendEmailDto.isTest" v-model="sendEmailDto.testEmail" placeholder="請輸入測試信箱" />
       </el-form-item>
+      <el-form-item prop="attachment">
+        <el-checkbox v-model="sendEmailDto.includeOfficialAttachment" label="是否附帶公文" />
+      </el-form-item>
 
 
       <el-button type="primary" @click="openDialog">選擇標籤</el-button>
@@ -378,7 +381,7 @@ const getImageSizeFromDesign = (design: any) => {
           let maxWidth = content.values.src.width > 600 ? 600 : content.values.src.width;
           if (content.values.src.maxWidth) {
             let widthPercent = Number(content.values.src.maxWidth.replace('%', '')) / 100;
-            maxWidth = Math.round(content.values.src.width * widthPercent);
+            maxWidth = Math.round(content.values.src.width * widthPercent) > 600 ? 600 : Math.round(content.values.src.width * widthPercent);
           }
           imageInfoList.push({
             position: content.values.textAlign,

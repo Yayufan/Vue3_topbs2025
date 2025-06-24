@@ -24,9 +24,10 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="" width="150">
+        <el-table-column label="" width="200">
           <template #default="scope">
             <el-button link type="success" @click="toggleEditReviewer(scope.row)">Edit</el-button>
+            <el-button link type="primary" @click="toggleAddFile(scope.row)">Files</el-button>
             <el-button link type="danger" @click="deleteReviewer(scope.row)">Delete</el-button>
           </template>
         </el-table-column>
@@ -123,12 +124,54 @@
       </el-form>
     </el-drawer>
 
+    <el-dialog v-model="isAddFileVisible" title="新增檔案" width="50%">
+      <el-table :data="addFileReviewer.paperReviewerFileList" style="width: 100%;">
+        <el-table-column label="檔名" prop="fileName"></el-table-column>
+        <el-table-column label="操作" prop="fileSize" width="250">
+          <template #default="scope">
+            <el-button link type="success"
+              @click="toggleUpdateFile(addFileReviewer.paperReviewerId, scope.row.paperReviewerFileId)">Update</el-button>
+            <el-button link type="danger" @click="deleteReviewerFile(scope.row.paperReviewerFileId)">Delete</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <el-form label-position="top" v-if="addFileReviewer.paperReviewerFileList.length !== 3">
+        <el-form-item label="檔案上傳">
+          <el-upload ref="uploadRef" class="upload" drag action="" :auto-upload="false" :limit="1"
+            :on-exceed="handleExceed" :on-change="handleChange" :on-remove="handleRemove">
+            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+          </el-upload>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleUploadFile">上傳</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+
+    <el-dialog v-model="isUpdateFileVisible" title="更新檔案" width="50%">
+
+      <el-form label-position="top">
+        <el-form-item label="檔案上傳">
+          <el-upload ref="uploadRef" class="upload" drag action="" :auto-upload="false" :limit="1"
+            :on-exceed="handleExceed" :on-change="handleChange" :on-remove="handleRemove">
+            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+          </el-upload>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleUpdateFile">上傳</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+
 
   </section>
 </template>
 <script setup lang="ts">
-import { addPaperReviewerApi, batchDeletePaperReviewerApi, deletePaperReviewerApi, editPaperReviewerApi, getPaperReviewerPageApi } from '@/api/abstract-reviewer';
-import type { FormInstance, FormRules } from 'element-plus';
+import { addPaperReviewerApi, batchDeletePaperReviewerApi, deletePaperReviewerApi, deletePaperReviewerFileApi, editPaperReviewerApi, getPaperReviewerPageApi, updatePaperReviewerFileApi, uploadPaperReviewerFileApi } from '@/api/abstract-reviewer';
+import { tryCatch } from '@/utils/tryCatch';
+import { genFileId, type FormInstance, type FormRules, type UploadInstance, type UploadProps, type UploadRawFile, type UploadUserFile } from 'element-plus';
+import { update } from 'lodash';
 
 
 const currentPage = ref(1)
@@ -142,6 +185,8 @@ const getReviewerList = async (page: number, size: number) => {
   })
 
   Object.assign(reviewerList, res.data)
+
+  console.log('審稿委員列表', reviewerList)
 
 
 
@@ -286,9 +331,122 @@ const deleteList = () => {
   } else {
     ElMessage.error("請至少勾選一筆資料進行刪除")
   }
+
 }
 
+/**---------------------------------------------------------------- */
+const addFileReviewer = reactive<any>({});
+const uploadRef = ref<UploadInstance>()
+const isAddFileVisible = ref(false)
+const toggleAddFile = (row: any) => {
+  console.log('row', row)
+  Object.assign(addFileReviewer, row)
+  isAddFileVisible.value = !isAddFileVisible.value
+}
+let formData = new FormData()
 
+const handleExceed: UploadProps['onExceed'] = (files: File[], fileList: UploadUserFile[]) => {
+  console.log('handleExceed', files)
+  console.log('fileList', fileList)
+
+  if (uploadRef.value) {
+    uploadRef.value.clearFiles()
+    const file = files[0] as UploadRawFile
+    file.uid = genFileId()
+    uploadRef.value!.handleStart(file)
+  }
+}
+
+const handleChange: UploadProps['onChange'] = (file: UploadUserFile, fileList: UploadUserFile[]) => {
+
+  console.log('file', file)
+  console.log('fileList', fileList)
+  if (file.status === 'ready') {
+    ElMessage.success('上傳成功')
+    // addFileReviewer.paperReviewerFileList.push(file)
+    formData.append('paperReviewerId', addFileReviewer.paperReviewerId)
+    if (file.raw) {
+      formData.append('file', file.raw)
+    }
+  } else if (file.status === 'fail') {
+    ElMessage.error('上傳失敗')
+  }
+}
+
+const handleRemove: UploadProps['onRemove'] = (file: UploadUserFile, fileList: UploadUserFile[]) => {
+  console.log('handleRemove', file, fileList)
+  if (uploadRef.value) {
+    uploadRef.value.clearFiles()
+  }
+}
+
+const handleUploadFile = async () => {
+  console.log(formData.get('file'))
+  const { res, error } = await tryCatch(uploadPaperReviewerFileApi(formData))
+  if (error) {
+    ElMessage.error('上傳失敗')
+    return
+  }
+  ElMessage.success('上傳成功')
+  await getReviewerList(currentPage.value, 10)
+  Object.assign(addFileReviewer, reviewerList.records.find((item: any) => item.paperReviewerId === addFileReviewer.paperReviewerId))
+  formData.delete('file')
+  if (uploadRef.value) {
+    uploadRef.value.clearFiles()
+  }
+}
+/**------------------------------------------------------- */
+const isUpdateFileVisible = ref(false);
+const toggleUpdateFile = (paperReviewerId: any, paperReviewerFileId: any) => {
+  formData.delete('paperReviewerId')
+  formData.delete('data')
+  formData.delete('file')
+  let updateData = {
+    paperReviewerId: paperReviewerId,
+    paperReviewerFileId: paperReviewerFileId
+  }
+  formData.append('data', JSON.stringify(updateData));
+  isUpdateFileVisible.value = true
+}
+
+const handleUpdateFile = async () => {
+  console.log('formData', formData.get('data'))
+  console.log('formData', formData.get('file'))
+  const { res, error } = await tryCatch(updatePaperReviewerFileApi(formData))
+  if (error) {
+    ElMessage.error('更新失敗')
+    return
+  }
+  ElMessage.success('更新成功')
+  await getReviewerList(currentPage.value, 10)
+  Object.assign(addFileReviewer, reviewerList.records.find((item: any) => item.paperReviewerId === addFileReviewer.paperReviewerId))
+  isUpdateFileVisible.value = false
+  if (uploadRef.value) {
+    uploadRef.value.clearFiles()
+  }
+}
+/**------------------------------------------------------- */
+const deleteReviewerFile = async (paperReviewerFileId: number) => {
+  ElMessageBox({
+    title: '提示',
+    message: `確定要刪除該檔案嗎？`,
+    type: 'warning',
+    showCancelButton: true,
+  }).then(async () => {
+    const { res, error } = await tryCatch(deletePaperReviewerFileApi(paperReviewerFileId))
+    // getReviewerList(currentPage.value, 10)
+    if (error) {
+      ElMessage.error('刪除失敗')
+      return
+    }
+    ElMessage.success('刪除成功')
+    await getReviewerList(currentPage.value, 10)
+    Object.assign(addFileReviewer, reviewerList.records.find((item: any) => item.paperReviewerId === addFileReviewer.paperReviewerId))
+    console.log(addFileReviewer)
+  }).catch(() => {
+    console.log('取消刪除')
+  })
+}
 
 
 
@@ -343,5 +501,9 @@ onMounted(() => {
   .el-input {
     width: 15rem;
   }
+}
+
+.upload {
+  width: 100%;
 }
 </style>

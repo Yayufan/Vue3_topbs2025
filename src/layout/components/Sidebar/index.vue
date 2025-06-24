@@ -26,7 +26,6 @@ const appStore = useAppStore();
 const settingsStore = useSettingsStore();
 const permissionStore = usePermissionStore();
 
-console.log('真正路由對象遍歷', permissionStore.routes)
 
 const sidebarLogo = computed(() => settingsStore.sidebarLogo);
 const layout = computed(() => settingsStore.layout);

@@ -31,7 +31,8 @@ setupElIcons(app);
 // 国际化
 setupI18n(app);
 // 注册动态路由,每次變更路由都會執行
-setupPermission();
+await setupPermission();
+console.log(router.getRoutes());
 
 //最後才進行掛載
 app.use(router).use(CKEditor).mount("#app");

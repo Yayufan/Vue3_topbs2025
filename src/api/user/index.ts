@@ -12,6 +12,13 @@ export function getUserInfoApi(): AxiosPromise {
   });
 }
 
+export function getReviewerInfoApi(): AxiosPromise {
+  return request({
+    url: "/paperReviewer/getPaperReviewerInfo",
+    method: "get",
+  });
+}
+
 /**
  * 获取用户分页列表
  *
