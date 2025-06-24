@@ -14,15 +14,30 @@
       </div>
 
       <div class="search-bar">
-        <el-input v-model="input" style="width: 240px" placeholder="輸入內容,Enter查詢" @input="getPaperList()" />
+        <div>
+          <el-input v-model="input" style="width: 240px" placeholder="輸入內容,Enter查詢" @input="getPaperList()" />
+          <el-select v-model="filterAbsType" style="width: 240px;" class="filter-abs-type" placeholder="請選擇投稿類型"
+            @change="getPaperList()">
+            <el-option value="Poster Presentation"></el-option>
+            <el-option value="Video Presentation"></el-option>
+            <el-option value="Young Investigator"></el-option>
+            <el-option value="" label="All"></el-option>
+          </el-select>
+        </div>
 
-        <el-select v-model="filterAbsType" style="width: 240px;" class="filter-abs-type" placeholder="請選擇投稿類型"
-          @change="getPaperList()">
-          <el-option value="Poster Presentation"></el-option>
-          <el-option value="Video Presentation"></el-option>
-          <el-option value="Young Investigator"></el-option>
-          <el-option value="" label="All"></el-option>
-        </el-select>
+        <div>
+          <el-button @click="openAutoAssignReviewerDialog">
+            自動分配審稿委員
+          </el-button>
+
+          <el-button type="success" @click="downloadExcel('first_review')">
+            下載一階評分Excel
+          </el-button>
+
+          <el-button type="success" @click="downloadExcel('second_review')">
+            下載二階評分Excel
+          </el-button>
+        </div>
         <!-- <el-select v-model="filterAbsProp" style="width: 240px;" class="filter-abs-prop"
           placeholder="請選擇文章屬性"></el-select> -->
 
@@ -80,10 +95,13 @@
             <span v-else-if="scope.row.status == 2" style="color: red;">駁回申請</span>
           </template>
         </el-table-column>
-        <el-table-column label="" width="150">
+        <el-table-column label="" width="250">
           <template #default="scope">
             <el-button link type="success" @click="toggleEdit(scope.row)">
               Edit
+            </el-button>
+            <el-button link type="primary" @click="openAssignReviewerDialog(scope.row)">
+              分配審稿委員
             </el-button>
             <el-button v-for="item in scope.row.paperFileUpload" type="primary" link @click="openFile(item.path)">下載{{
               item.type.split('_')[1] }}</el-button>
@@ -136,23 +154,6 @@
         <el-form-item label="報告時間" prop="reportTime">
           <el-input v-model="updateForm.reportTime"></el-input>
         </el-form-item>
-        <!-- <el-form-item label="審核狀態" prop="status">
-          <el-select v-model="updateForm.status" placeholder="請選擇審核狀態" style="width: 100%">
-            <el-option label="未審核" :value="0">
-              <span>未審核</span>
-            </el-option>
-            <el-option label="審核通過" :value="1">
-              <span style="color:green;">審核通過</span>
-            </el-option>
-            <el-option label="駁回申請" :value="2">
-              <span style="color:red;">駁回申請</span>
-            </el-option>
-
-            <template #label="{ label, value }">
-              <span :style="{ color: value == '1' ? 'green' : value == '-1' ? 'red' : 'black' }">{{ label }}</span>
-            </template>
-          </el-select>
-        </el-form-item> -->
         <el-form-item>
           <el-button type="primary" @click="updatePaper">更新</el-button>
           <el-button @click="isEdit = false">關閉</el-button>
@@ -161,12 +162,41 @@
 
 
     </el-drawer>
+
+
+    <el-dialog v-model="isAssignReviewerVisible" title="分配審稿委員" width="50%">
+      <div class="stage-btn-bar">
+        <el-button class="first-stage" :class="{ 'is-active': reviewStage === 'first_review' }"
+          @click="reviewStage = 'first_review'">一階</el-button>
+        <el-button class="second-stage" :class="{ 'is-active': reviewStage === 'second_review' }"
+          @click="reviewStage = 'second_review'">二階</el-button>
+      </div>
+      <el-transfer v-model="submitAssignData.targetPaperReviewerIdList" :data="assignPaperReviewData" filterable
+        :titles="['可選審稿人', '已選審稿人']" @change="console.log(assignPaperReviewTempList)" />
+      <el-button @click="submitAssignDataFn">
+        確定
+      </el-button>
+    </el-dialog>
+
+    <el-dialog v-model="isAutoAssignReviewerVisible" title="自動分配審稿委員" width="15%">
+      <el-radio-group v-model="reviewStage">
+        <el-radio value="first_review">一階審稿</el-radio>
+        <el-radio value="second_review">二階審稿</el-radio>
+      </el-radio-group>
+      <el-button @click="autoAssignPaperReviewers">
+        確定
+      </el-button>
+    </el-dialog>
+
+
+
   </section>
 
 
 </template>
 <script lang="ts" setup>
-import { getPaperPageApi, updatePaperApi } from '@/api/abstract';
+import { assignPaperReviewersApi, autoAssignPaperReviewersApi, downloadPaperScoreExcelApi, getPaperPageApi, updatePaperApi } from '@/api/abstract';
+import { tryCatch } from '@/utils/tryCatch';
 
 
 
@@ -179,7 +209,12 @@ const filterAbsProp = ref('')
 
 const paperList = reactive<any>([])
 const getPaperList = async () => {
-  let res = await getPaperPageApi(currentPage.value, 10, input.value, filterStatus.value, filterAbsType.value, filterAbsProp.value);
+  const { res, error } = await tryCatch(getPaperPageApi(currentPage.value, 10, input.value, filterStatus.value, filterAbsType.value, filterAbsProp.value));
+  if (error) {
+    console.error('Error fetching paper list:', error);
+    return;
+  }
+
   console.log(res)
   Object.assign(paperList, res.data)
 }
@@ -191,6 +226,114 @@ watch(filterStatus, (value, oldValue) => {
 watch(currentPage, (value, oldValue) => {
   getPaperList()
 })
+
+/**------------------------------------------------ */
+const isAssignReviewerVisible = ref(false);
+
+const assignPaper = reactive<any>({});
+
+const reviewStage = ref('first_review');
+
+const submitAssignData = reactive<any>({
+  reviewStage: '',
+  targetPaperReviewerIdList: [],
+  paperId: '',
+})
+
+const assignPaperReviewData = reactive<any>([])
+const assignPaperReviewTempList = ref<any>([]);
+
+
+const openAssignReviewerDialog = (paper: any) => {
+  submitAssignData.paperId = '';
+  submitAssignData.targetPaperReviewerIdList = [];
+  assignPaperReviewData.length = 0;
+  Object.assign(assignPaper, paper);
+  submitAssignData.paperId = paper.paperId;
+
+  assignPaper.assignedPaperReviewers.forEach((paperReviewer: any) => {
+    if (paperReviewer.reviewStage !== reviewStage.value) {
+      console.log('Skipping paper reviewer:', paperReviewer.paperReviewerId, 'for stage:', paperReviewer.reviewStage);
+      return;
+    }
+    submitAssignData.targetPaperReviewerIdList.push(paperReviewer.paperReviewerId)
+  })
+
+  assignPaper.availablePaperReviewers.forEach((paperReviewer: any) => {
+    assignPaperReviewData.push({
+      label: paperReviewer.name,
+      key: paperReviewer.paperReviewerId,
+    })
+  })
+
+
+
+  isAssignReviewerVisible.value = true;
+}
+
+watch(() => reviewStage.value, (value, oldValue) => {
+  console.log('submitAssignData changed:', value);
+  if (!isAssignReviewerVisible.value) {
+    return;
+  }
+  submitAssignData.targetPaperReviewerIdList.length = 0
+  assignPaper.assignedPaperReviewers.forEach((paperReviewer: any) => {
+    if (paperReviewer.reviewStage !== reviewStage.value) {
+      console.log('Skipping paper reviewer:', paperReviewer.paperReviewerId, 'for stage:', paperReviewer.reviewStage);
+      return;
+    }
+    submitAssignData.targetPaperReviewerIdList.push(paperReviewer.paperReviewerId)
+  });
+
+  // submitAssignData.targetPaperReviewerIdList.filter((item: any) => {
+  //   console.log(item)
+  //   return item.reviewStage === submitAssignData.reviewStage;
+  // })
+
+
+
+}, { deep: true });
+
+const submitAssignDataFn = async () => {
+  submitAssignData.reviewStage = reviewStage.value;
+  console.log(submitAssignData)
+  if (submitAssignData.targetPaperReviewerIdList.length === 0) {
+    isAssignReviewerVisible.value = false;
+    return;
+  }
+  const { res, error } = await tryCatch(assignPaperReviewersApi(submitAssignData));
+
+  if (error) {
+    console.error('Error assigning reviewers:', error);
+    return;
+  }
+  console.log(res)
+  isAssignReviewerVisible.value = false;
+  getPaperList();
+}
+
+
+const isAutoAssignReviewerVisible = ref(false);
+
+const openAutoAssignReviewerDialog = () => {
+  isAutoAssignReviewerVisible.value = true;
+}
+
+const autoAssignPaperReviewers = async () => {
+  let submitData = {
+    reviewStage: reviewStage.value,
+  }
+  const { res, error } = await tryCatch(autoAssignPaperReviewersApi(submitData));
+  if (error) {
+    console.error('Error auto assigning reviewers:', error);
+    return;
+  }
+  ElMessage.success('自動分配審稿委員成功');
+  isAutoAssignReviewerVisible.value = false;
+  console.log(res);
+}
+
+
 
 /**-------------------------------------------- */
 const isEdit = ref(false);
@@ -243,7 +386,18 @@ const findFirstVaildTag = (tagSet: any) => {
   }
   return '';
 }
-
+/**--------------------------------------------------- */
+const downloadExcel = async (reviewStage: string) => {
+  let fileName = reviewStage === 'first_review' ? '一階評分.xlsx' : '二階評分.xlsx';
+  let res = await downloadPaperScoreExcelApi(reviewStage)
+  console.log(res)
+  const url = window.URL.createObjectURL(new Blob([res.data]));
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', fileName);
+  document.body.appendChild(link);
+  link.click();
+}
 
 onMounted(() => {
   getPaperList()
@@ -279,7 +433,7 @@ onMounted(() => {
 .search-bar {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   margin-bottom: 20px;
 
 }
@@ -291,5 +445,36 @@ onMounted(() => {
 
 :deep(.el-tag__close) {
   color: red;
+}
+
+.stage-btn-bar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+
+  .el-button {
+    margin: 0;
+
+    &.is-active {
+      background-color: #409eff;
+      color: white;
+    }
+
+    &.first-stage {
+      border-radius: 4px 0 0 4px;
+    }
+
+    &.second-stage {
+      border-radius: 0 4px 4px 0;
+    }
+  }
+}
+
+.el-transfer {
+  margin-top: 4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  // flex-direction: column;
 }
 </style>

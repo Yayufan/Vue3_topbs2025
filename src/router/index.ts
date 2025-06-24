@@ -328,6 +328,18 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
           keepAlive: true,
         },
       },
+      {
+        path: "/review-status",
+        component: () => import("@/views/abstract/reviewStatus.vue"),
+        name: "abstract-reviewer-status",
+        meta: {
+          title: "審稿狀態",
+          icon: "el-icon-PriceTag",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      }
     ],
   },
   {
@@ -474,33 +486,31 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
 
 export const reviewerDynamicRoutes: RouteRecordRaw[] = [
   {
-    path: "/reviewer",
+    path: "/abstract",
     component: Layout,
-    name: "reviewer", // 用于 keep-alive, 必须与SFC自动推导或者显示声明的组件name一致
-    // https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
+    name: "abstract",
+
     meta: {
-      title: "審稿委員",
-      icon: "el-icon-Message",
-      //affix: true,
+      title: "稿件審核",
+      icon: "el-icon-Avatar",
       keepAlive: true,
       alwaysShow: false,
-      hidden: false,
     },
     children: [
       {
-        path: "",
-        component: () => import("@/views/test-upload/index.vue"),
-        name: "test1",
+        path: "/abstract-review",
+        component: () => import("@/views/abstract-review/index.vue"),
+        name: "abstractReview",
         meta: {
-          title: "",
-          icon: "el-icon-PriceTag",
-          hidden: true,
+          title: "摘要審稿",
+          icon: "el-icon-Avatar",
+          hidden: false,
           roles: ["ADMIN"],
           keepAlive: true,
         },
-      }
+      },
     ]
-  }
+  },
 ]
 
 

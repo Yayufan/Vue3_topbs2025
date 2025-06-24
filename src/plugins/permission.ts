@@ -39,6 +39,8 @@ export async function setupPermission() {
           next(`/login?redirect=${to.path}`);
         }
       }
+
+
       NProgress.done();
       return;
     }
@@ -62,6 +64,8 @@ export async function setupPermission() {
       next({ path: "/" });
       return;
     }
+
+
 
     // 如果正在添加路由，等待完成
     if (isAddingRoutes) {
@@ -103,6 +107,16 @@ export async function setupPermission() {
         //   return next({ path: "/404", replace: true });
         // }
         await initializeRoutes();
+        const resolvedRoute = router.resolve(to.fullPath);
+
+        if (resolvedRoute.matched.length === 0 && to.path !== '/404') {
+          // 如果仍然沒有匹配到路由，且目標不是 404 頁面本身，則跳轉到 404
+          console.warn(`[Permission] 动态路由添加后，路径 '${to.path}' 仍未匹配，重定向到 /404`);
+          next({ path: "/404", replace: true });
+        } else {
+          // 路由可能已經成功添加，重新導航以匹配新路由
+          next({ ...to, replace: true });
+        }
         return next({ ...to, replace: true });
       } catch (error) {
         // console.error("獲取用戶信息失敗", error);
