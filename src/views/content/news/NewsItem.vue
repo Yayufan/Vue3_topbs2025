@@ -47,8 +47,8 @@
       </el-form>
 
       <!-- 文章附件上傳組件 -->
-      <!-- <AttachmentComponent :articleId="id" :getApi="getAllArticleAttachmentApi" :addApi="addArticleAttachmentApi"
-        :deleteApi="deleteArticleAttachmentApi" /> -->
+      <AttachmentComponent :articleId="id" :getApi="getAllArticleAttachmentApi" :addApi="addArticleAttachmentApi"
+        :deleteApi="deleteArticleAttachmentApi" />
 
       <!-- CKEditor5 編輯器組件   -->
       <CustomCKEditor :scope="scope" :htmlContent="article.content" :updateContent="updateContent">
