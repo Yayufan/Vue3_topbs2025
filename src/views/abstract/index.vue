@@ -91,8 +91,10 @@
         <el-table-column prop="status" label="審核狀態" width="100">
           <template #default="scope">
             <span v-if="scope.row.status == 0" style="color: gray;">未審核</span>
-            <span v-else-if="scope.row.status == 1" style="color: green;">審核通過</span>
-            <span v-else-if="scope.row.status == 2" style="color: red;">駁回申請</span>
+            <span v-else-if="scope.row.status == 1" style="color: green;">入選</span>
+            <span v-else-if="scope.row.status == 2" style="color: red;">未入選</span>
+            <span v-else-if="scope.row.status == 3" style="color: red;">入選(二階段)</span>
+            <span v-else-if="scope.row.status == 4" style="color: red;">未入選(二階段)</span>
           </template>
         </el-table-column>
         <el-table-column label="" width="250">
@@ -173,7 +175,7 @@
       </div>
       <el-transfer v-model="submitAssignData.targetPaperReviewerIdList" :data="assignPaperReviewData" filterable
         :titles="['可選審稿人', '已選審稿人']" @change="console.log(assignPaperReviewTempList)" />
-      <el-button @click="submitAssignDataFn">
+      <el-button class="submit-btn" @click="submitAssignDataFn">
         確定
       </el-button>
     </el-dialog>
@@ -214,6 +216,12 @@ const getPaperList = async () => {
     console.error('Error fetching paper list:', error);
     return;
   }
+
+  res.data.records.forEach((item: any) => {
+    item.paperFileUpload = item.paperFileUpload.filter((file: any) =>
+      file.type !== 'supplementary_material'
+    )
+  })
 
   console.log(res)
   Object.assign(paperList, res.data)
@@ -297,10 +305,10 @@ watch(() => reviewStage.value, (value, oldValue) => {
 const submitAssignDataFn = async () => {
   submitAssignData.reviewStage = reviewStage.value;
   console.log(submitAssignData)
-  if (submitAssignData.targetPaperReviewerIdList.length === 0) {
-    isAssignReviewerVisible.value = false;
-    return;
-  }
+  // if (submitAssignData.targetPaperReviewerIdList.length === 0) {
+  //   isAssignReviewerVisible.value = false;
+  //   return;
+  // }
   const { res, error } = await tryCatch(assignPaperReviewersApi(submitAssignData));
 
   if (error) {
@@ -476,5 +484,11 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   // flex-direction: column;
+}
+
+.submit-btn {
+  display: block;
+  margin: 0 0 0 auto;
+
 }
 </style>
