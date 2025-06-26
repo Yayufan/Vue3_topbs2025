@@ -171,7 +171,7 @@
 import { addPaperReviewerApi, batchDeletePaperReviewerApi, deletePaperReviewerApi, deletePaperReviewerFileApi, editPaperReviewerApi, getPaperReviewerPageApi, updatePaperReviewerFileApi, uploadPaperReviewerFileApi } from '@/api/abstract-reviewer';
 import { tryCatch } from '@/utils/tryCatch';
 import { genFileId, type FormInstance, type FormRules, type UploadInstance, type UploadProps, type UploadRawFile, type UploadUserFile } from 'element-plus';
-import { update } from 'lodash';
+import { add, update } from 'lodash';
 
 
 const currentPage = ref(1)
@@ -243,6 +243,7 @@ const addPaperReviewer = async (formEl: FormInstance | undefined) => {
       isAdd.value = false
       getReviewerList(currentPage.value, 10)
       formEl.resetFields()
+      addReviewerForm.emailList = [{ email: '' }]
       console.log('submit!')
     } else {
       console.log('error submit!', fields)
