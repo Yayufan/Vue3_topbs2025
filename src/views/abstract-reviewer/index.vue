@@ -38,9 +38,9 @@
       <el-form class="add-form" :model="addReviewerForm" ref="addReviewerFormRef" label-position="top">
         <el-form-item label="稿件類別" prop="absTypeList" :rules="addReviewerFormRules.absTypeList">
           <el-select v-model="addReviewerForm.absTypeList" multiple placeholder="請選擇">
-            <el-option label="類別1" value="1"></el-option>
-            <el-option label="類別2" value="2"></el-option>
-            <el-option label="類別3" value="3"></el-option>
+            <el-option label="Poster Presentation" value="Poster Presentation"></el-option>
+            <el-option label="Video Presentation" value="Video Presentation"></el-option>
+            <el-option label="Young Investigator" value="Young Investigator"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="姓名" prop="name" :rules="addReviewerFormRules.name">
@@ -66,12 +66,12 @@
         <el-form-item label="連絡電話" prop="phone" :rules="addReviewerFormRules.phone">
           <el-input v-model="addReviewerForm.phone" placeholder="填寫連絡電話"></el-input>
         </el-form-item>
-        <el-form-item label="帳號" prop="account" :rules="addReviewerFormRules.account">
+        <!-- <el-form-item label="帳號" prop="account" :rules="addReviewerFormRules.account">
           <el-input v-model="addReviewerForm.account" placeholder="填寫帳號"></el-input>
         </el-form-item>
         <el-form-item label="密碼" prop="password" :rules="addReviewerFormRules.password">
           <el-input v-model="addReviewerForm.password" placeholder="填寫密碼"></el-input>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item>
           <el-button type="primary" @click="addPaperReviewer(addReviewerFormRef)">確定</el-button>
           <el-button @click="isAdd = false">取消</el-button>
@@ -83,9 +83,9 @@
       <el-form class="edit-form" :model="editReviewerForm" ref="editReviewerFormRef" label-position="top">
         <el-form-item label="稿件類別" prop="absTypeList" :rules="addReviewerFormRules.absTypeList">
           <el-select v-model="editReviewerForm.absTypeList" multiple placeholder="請選擇">
-            <el-option label="類別1" value="1"></el-option>
-            <el-option label="類別2" value="2"></el-option>
-            <el-option label="類別3" value="3"></el-option>
+            <el-option label="Poster Presentation" value="Poster Presentation"></el-option>
+            <el-option label="Video Presentation" value="Video Presentation"></el-option>
+            <el-option label="Young Investigator" value="Young Investigator"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="姓名" prop="name" :rules="addReviewerFormRules.name">
@@ -111,12 +111,12 @@
         <el-form-item label="連絡電話" prop="phone" :rules="addReviewerFormRules.phone">
           <el-input v-model="editReviewerForm.phone" placeholder="填寫連絡電話"></el-input>
         </el-form-item>
-        <el-form-item label="帳號" prop="account" :rules="addReviewerFormRules.account">
+        <!-- <el-form-item label="帳號" prop="account" :rules="addReviewerFormRules.account">
           <el-input v-model="editReviewerForm.account" placeholder="填寫帳號"></el-input>
         </el-form-item>
         <el-form-item label="密碼" prop="password" :rules="addReviewerFormRules.password">
           <el-input v-model="editReviewerForm.password" placeholder="填寫密碼"></el-input>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item>
           <el-button type="primary" @click="editReviewer(editReviewerFormRef)">確定</el-button>
           <el-button @click="isEdit = false">取消</el-button>
@@ -206,8 +206,8 @@ const addReviewerForm = reactive<any>({
   name: '',
   emailList: [{ email: '' }],
   phone: '',
-  account: '',
-  password: '',
+  // account: '',
+  // password: '',
 })
 
 const addReviewerFormRules = reactive<FormRules>({
