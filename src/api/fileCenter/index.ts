@@ -10,7 +10,7 @@ import { AxiosPromise } from "axios";
  */
 export function getFileByPaginationApi(page: number, size: number): AxiosPromise {
   return request({
-    url: "/file/pagination",
+    url: "/publish-file/pagination",
     method: "get",
     params: {
       page,
@@ -26,7 +26,7 @@ export function getFileByPaginationApi(page: number, size: number): AxiosPromise
  */
 export function getAllFileApi(): AxiosPromise {
   return request({
-    url: "/file",
+    url: "/publish-file",
     method: "get",
   });
 }
@@ -40,7 +40,7 @@ export function getAllFileApi(): AxiosPromise {
  */
 export function getAllFileByGroupApi(group: string): AxiosPromise {
   return request({
-    url: `/file/${group}`,
+    url: `/publish-file/${group}`,
     method: "get",
   });
 }
@@ -53,7 +53,7 @@ export function getAllFileByGroupApi(group: string): AxiosPromise {
  */
 export function getAllFileByGroupByPaginationApi(group: string, page: number, size: number): AxiosPromise {
   return request({
-    url: `/file/${group}/pagination`,
+    url: `/publish-file/${group}/pagination`,
     method: "get",
     params: {
       page,
@@ -69,7 +69,7 @@ export function getAllFileByGroupByPaginationApi(group: string, page: number, si
  */
 export function addFileApi(data: any): AxiosPromise {
   return request({
-    url: "/file",
+    url: "/publish-file",
     method: "post",
     data,
     // headers: {
@@ -85,7 +85,7 @@ export function addFileApi(data: any): AxiosPromise {
  */
 export function updateFileApi(data: any): AxiosPromise {
   return request({
-    url: "/file",
+    url: "/publish-file",
     method: "put",
     data
   });
@@ -98,7 +98,7 @@ export function updateFileApi(data: any): AxiosPromise {
  */
 export function deleteFileApi(id: number): AxiosPromise {
   return request({
-    url: `/file/${id}`,
+    url: `/publish-file/${id}`,
     method: "delete",
   });
 }
@@ -110,7 +110,7 @@ export function deleteFileApi(id: number): AxiosPromise {
  */
 export function batchDeleteFileApi(data: any): AxiosPromise {
   return request({
-    url: `/file`,
+    url: `/publish-file`,
     method: "delete",
     data
   });

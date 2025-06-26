@@ -450,7 +450,7 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
     meta: {
       title: "檔案管理",
       icon: "el-icon-EditPen",
-      hidden: true,
+      hidden: false,
       roles: ["ADMIN"],
     },
     children: [
@@ -462,7 +462,7 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
         meta: {
           title: "歷年成果(簽卡分析)",
           icon: "menu",
-          hidden: false,
+          hidden: true,
           roles: ["ADMIN"],
           keepAlive: true,
         },
@@ -474,6 +474,42 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
         name: "FileCenterJournal",
         meta: {
           title: "器捐會刊",
+          icon: "menu",
+          hidden: true,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+      {
+        path: "sponsor",
+        component: () => import("@/views/file-center/sponsor/index.vue"),
+        name: "FileCenterSponsor",
+        meta: {
+          title: "贊助廠商",
+          icon: "menu",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+      {
+        path: "agenda",
+        component: () => import("@/views/file-center/agenda/index.vue"),
+        name: "FileCenterAgendal",
+        meta: {
+          title: "Agenda",
+          icon: "menu",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+      {
+        path: "download-center",
+        component: () => import("@/views/file-center/download-center/index.vue"),
+        name: "FileCenterDownloadCenter",
+        meta: {
+          title: "下載中心",
           icon: "menu",
           hidden: false,
           roles: ["ADMIN"],

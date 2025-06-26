@@ -70,15 +70,28 @@
         <el-input-number :min="1" v-model="noImgArticleFormData.sort" size="small" />
       </el-form-item>
 
+      <el-form-item label="外部連結" :label-width="formLabelWidth">
+        <el-input type="textarea" v-model="noImgArticleFormData.link"></el-input>
+      </el-form-item>
+
       <el-form-item label="檔案上傳" :label-width="formLabelWidth">
-        <el-upload ref="fileComponent" class="thumbnail-uploader" :action="envAPI + '/upload/img'"
-          :show-file-list="true" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload" :limit="1"
-          :on-exceed="handleExceed">
+        <el-upload ref="fileComponent" class="thumbnail-uploader" :auto-upload="false" :show-file-list="true"
+          :before-upload="beforeAvatarUpload" :on-change="handleChange" :limit="1" :on-exceed="handleExceed">
 
           <template #trigger>
             <el-button type="primary">選擇檔案</el-button>
           </template>
 
+        </el-upload>
+      </el-form-item>
+
+      <el-form-item>
+        <el-upload class="avatar-uploader" :action="envAPI + '/upload/img'" :show-file-list="false"
+          :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+          <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+          <el-icon v-else class="avatar-uploader-icon">
+            <Plus />
+          </el-icon>
         </el-upload>
       </el-form-item>
 
@@ -103,6 +116,7 @@ import { ref, reactive, computed, watch } from 'vue'
 import { Delete, Plus } from '@element-plus/icons-vue'
 import { type FormInstance, type FormRules, type UploadRawFile, type UploadProps, ElMessageBox, ElMessage, UploadUserFile } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router';
+import { link } from 'fs';
 
 //獲取路由
 const route = useRoute()
@@ -120,6 +134,21 @@ const fileComponent = ref()
 const imageUrl = ref()
 //圖片實際數據
 let imgFile = <UploadRawFile>{}
+
+let realFile = <UploadRawFile>{}
+
+const handleChange: UploadProps['onChange'] = (
+  file: UploadUserFile,
+  fileList: UploadUserFile[],
+) => {
+  console.log("檔案變更", file, fileList)
+  //檔案變更的回調
+  console.log("檔案變更", file.raw)
+  realFile = file.raw!
+  // console.log(file, fileList, event)
+  //檔案上傳成功後的回調
+  // console.log("檔案上傳成功", file, fileList, event)
+}
 
 //檔案上傳成功的回調
 const handleAvatarSuccess: UploadProps['onSuccess'] = (
@@ -280,7 +309,8 @@ const noImgArticleFormData = reactive({
   type: '',
   name: '',
   description: null,
-  sort: 500
+  link: '',
+  sort: 500,
 })
 //獲取父組件給的group
 noImgArticleFormData.groupType = props.group
@@ -327,7 +357,7 @@ const toggleAddDialog = () => {
 const submitForm = (form: FormInstance | undefined) => {
 
   //如果沒上傳檔案,直接返回
-  if (Object.keys(imgFile).length === 0) {
+  if (Object.keys(realFile).length === 0) {
     ElMessage.error("請上傳檔案")
     return
   }
@@ -341,7 +371,8 @@ const submitForm = (form: FormInstance | undefined) => {
         // 將響應式對象轉換為普通對象，然後轉換為 JSON 字符串
         const jsonData = JSON.stringify(noImgArticleFormData)
         formData.append('data', jsonData)
-        formData.append('file', imgFile)
+        formData.append('file', realFile)
+        formData.append('imgFile', imgFile)
 
         //呼叫父組件給的新增function API
         await props.addApi(formData)
@@ -350,6 +381,9 @@ const submitForm = (form: FormInstance | undefined) => {
         form.resetFields()
         //重製上傳的檔案
         imgFile = <UploadRawFile>{}
+        realFile = <UploadRawFile>{}
+
+        imageUrl.value = ''
 
         //重置檔案列表
         console.log(fileComponent.value)
@@ -398,6 +432,32 @@ const editRow = (id: number): void => {
 
 .thumbnail-uploader {
   width: 100%;
+}
+
+.avatar-uploader {
+  position: relative;
+  width: 40%;
+  aspect-ratio: 1 / 1;
+  margin-inline: auto;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  overflow: hidden;
+
+  .avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 }
 
 

@@ -37,6 +37,13 @@
 
         <el-form-item :label="'檔案上傳(單個檔案不超過10MB)'" :label-width="formLabelWidth">
 
+          <!-- <el-upload :on-change="handleChange" v-model:file-list="fileList" class="thumbnail-uploader"
+            :action="envAPI + '/upload/img'" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+            <el-button type="primary">上傳檔案</el-button>
+            <template #tip>
+
+            </template>
+          </el-upload> -->
           <el-upload :on-change="handleChange" v-model:file-list="fileList" class="thumbnail-uploader"
             :action="envAPI + '/upload/img'" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
             <el-button type="primary">上傳檔案</el-button>
@@ -195,6 +202,8 @@ const handleChange: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
 
   //只保留最新的檔案
   fileList.value = [uploadFile]
+  imgFile = uploadFile.raw!
+  console.log("當前上傳的檔案: ", uploadFile)
 
 }
 
@@ -264,6 +273,8 @@ const addAttachment = (form: FormInstance | undefined) => {
         const jsonData = JSON.stringify(articleAttachmentFormData)
         formData.append('data', jsonData)
         formData.append('file', imgFile)
+
+        console.log("表單數據: ", formData.get('file'))
 
 
         // //呼叫父組件的新增API
