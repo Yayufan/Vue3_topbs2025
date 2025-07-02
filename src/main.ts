@@ -20,19 +20,23 @@ import "uno.css";
 import "animate.css";
 
 
+const bootstrap = async () => {
+  const app = createApp(App);
+  // 全局注册 自定义指令(directive)
+  setupDirective(app);
+  // 全局注册 状态管理(store)
+  setupStore(app);
+  // 全局注册Element-plus图标
+  setupElIcons(app);
+  // 国际化
+  setupI18n(app);
+  // 注册动态路由,每次變更路由都會執行
+  await setupPermission();
+  console.log(router.getRoutes());
 
-const app = createApp(App);
-// 全局注册 自定义指令(directive)
-setupDirective(app);
-// 全局注册 状态管理(store)
-setupStore(app);
-// 全局注册Element-plus图标
-setupElIcons(app);
-// 国际化
-setupI18n(app);
-// 注册动态路由,每次變更路由都會執行
-await setupPermission();
-console.log(router.getRoutes());
+  //最後才進行掛載
+  app.use(router).use(CKEditor).mount("#app");
+}
 
-//最後才進行掛載
-app.use(router).use(CKEditor).mount("#app");
+bootstrap();
+

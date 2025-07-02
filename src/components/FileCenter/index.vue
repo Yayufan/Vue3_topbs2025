@@ -29,7 +29,7 @@
         <!-- <el-button link type="primary" size="small" @click="editRow(scope.row.id)">
           Edit
         </el-button> -->
-        <el-button link type="danger" size="small" @click="deleteRow(scope.row.id, scope.row.title)">
+        <el-button link type="danger" size="small" @click="deleteRow(scope.row.publishFileId, scope.row.title)">
           Delete</el-button>
       </template>
     </el-table-column>
@@ -267,6 +267,7 @@ const deleteRow = (id: number, title: string): void => {
     type: 'warning'
   }).then(async () => {
     // 用户選擇確認，繼續操作
+    console.log("要刪除的id", id)
     await props.deleteApi(id)
     ElMessage.success('刪除成功');
   }).catch((err) => {
