@@ -53,6 +53,7 @@ const addFile = async (data: any) => {
 
 //刪除最新消息
 const deleteFile = async (id: number) => {
+  console.log('要刪除的id', id)
   await deleteFileApi(id)
   getFile(1, 10)
 }
