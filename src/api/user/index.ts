@@ -14,7 +14,7 @@ export function getUserInfoApi(): AxiosPromise {
 
 export function getReviewerInfoApi(): AxiosPromise {
   return request({
-    url: "/paperReviewer/getPaperReviewerInfo",
+    url: "/paper-reviewer/getPaperReviewerInfo",
     method: "get",
   });
 }

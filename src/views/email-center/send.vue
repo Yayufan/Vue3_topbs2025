@@ -224,8 +224,8 @@ const getDataAndEditorLoaded = async () => {
       }
       break;
     case 'reviewer':
-      tagType.value = 'paperReviewer'
-      sendUrl.value = '/paperReviewer/send-email'
+      tagType.value = 'paper-reviewer'
+      sendUrl.value = '/paper-reviewer/send-email'
 
       mergeTags = {
         absTypeList: {
@@ -500,7 +500,7 @@ const selectTags = ref<any>([])
 const tagCurrentPage = ref<number>(1)
 
 const getTagList = async () => {
-  console.log(tagType.value)
+  console.log("tagType為", tagType.value)
   let res = await getTagsByPaginationApi(tagCurrentPage.value, 10, tagType.value)
   console.log("獲取標籤列表", res.data)
   Object.assign(tagList, res.data.records)

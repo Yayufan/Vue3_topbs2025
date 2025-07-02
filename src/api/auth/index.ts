@@ -18,7 +18,7 @@ export function loginApi(loginData: any): AxiosPromise<LoginResult> {
 
 export function reviewerLoginApi(loginData: any): AxiosPromise<LoginResult> {
   return request({
-    url: "/paperReviewer/login",
+    url: "/paper-reviewer/login",
     method: "post",
     data: loginData,
   });
@@ -38,7 +38,7 @@ export function logoutApi() {
 
 export function reviewerLogoutApi() {
   return request({
-    url: "/paperReviewer/logout",
+    url: "/paper-reviewer/logout",
     method: "post",
   })
 }
@@ -55,7 +55,7 @@ export function reviewerLogoutApi() {
 
 export function getCaptchaApi() {
   return request({
-    url: "paperReviewer/captcha",
+    url: "paper-reviewer/captcha",
     method: "get",
   })
 }

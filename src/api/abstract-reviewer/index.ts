@@ -3,7 +3,7 @@ import { AxiosPromise } from "axios";
 
 export function getPaperReviewerPageApi(page: number, size: number) {
   return request({
-    url: "paperReviewer/pagination",
+    url: "paper-reviewer/pagination",
     method: "get",
     params: {
       page: page,
@@ -14,7 +14,7 @@ export function getPaperReviewerPageApi(page: number, size: number) {
 
 export function addPaperReviewerApi(data: any) {
   return request({
-    url: "/paperReviewer",
+    url: "/paper-reviewer",
     method: "post",
     data,
   });
@@ -22,7 +22,7 @@ export function addPaperReviewerApi(data: any) {
 
 export function editPaperReviewerApi(data: any) {
   return request({
-    url: "/paperReviewer",
+    url: "/paper-reviewer",
     method: "put",
     data,
   });
@@ -30,14 +30,14 @@ export function editPaperReviewerApi(data: any) {
 
 export function deletePaperReviewerApi(id: number) {
   return request({
-    url: `/paperReviewer/${id}`,
+    url: `/paper-reviewer/${id}`,
     method: "delete",
   });
 }
 
 export function batchDeletePaperReviewerApi(ids: any) {
   return request({
-    url: "/paperReviewer",
+    url: "/paper-reviewer",
     method: "delete",
     data: ids,
   });
@@ -68,7 +68,7 @@ export function deletePaperReviewerFileApi(id: any) {
 
 export function getPaperListByReviewerApi(page: number, size: number, reviewStage: string) {
   return request({
-    url: `/paperReviewer/review/pagination`,
+    url: `/paper-reviewer/review/pagination`,
     method: "get",
     params: {
       page: page,
@@ -80,7 +80,7 @@ export function getPaperListByReviewerApi(page: number, size: number, reviewStag
 
 export function paperReviewApi(data: any): AxiosPromise<any> {
   return request({
-    url: `/paperReviewer/review`,
+    url: `/paper-reviewer/review`,
     method: "put",
     data
   });
@@ -88,7 +88,7 @@ export function paperReviewApi(data: any): AxiosPromise<any> {
 
 export function getReviewerScoreStatusPageApi(page: number, size: number, reviewStage: string | null): AxiosPromise<any> {
   return request({
-    url: `/paperReviewer/score/pagination`,
+    url: `/paper-reviewer/score/pagination`,
     method: "get",
     params: {
       page: page,
