@@ -38,7 +38,7 @@ let typeOption = reactive(["無"])
 const getFile = async (page: number, size: number) => {
   let res = await getAllFileByGroupByPaginationApi(GROUP, page, size)
   console.log("這是響應值", res)
-  let transData = transFormPaginationByFileCenter(res.data, "fileId")
+  let transData = transFormPaginationByFileCenter(res.data, "publishFileId")
   Object.assign(fileList, transData)
   console.log('這是轉換後的數據', fileList)
 }

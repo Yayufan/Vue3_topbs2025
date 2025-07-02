@@ -29,7 +29,7 @@
         <!-- <el-button link type="primary" size="small" @click="editRow(scope.row.id)">
           Edit
         </el-button> -->
-        <el-button link type="danger" size="small" @click="deleteRow(scope.row.publishFileId, scope.row.title)">
+        <el-button link type="danger" size="small" @click="deleteRow(scope.row.id, scope.row.title)">
           Delete</el-button>
       </template>
     </el-table-column>
