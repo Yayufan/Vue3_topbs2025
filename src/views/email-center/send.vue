@@ -37,7 +37,7 @@
     <EmailEditor :tools="tools" locale='zh-TW' class="vue-email-editor" ref="emailEditor"
       v-on:load="getDataAndEditorLoaded" :options="emailOptions" />
 
-    <el-dialog v-model="isOpen" title="選擇標籤" width="70%">
+    <el-dialog v-model="isOpen" title="選擇標籤" width="70%" :before-close="cancelTransfer">
       <el-transfer v-if="optionList" ref="transferPanelRef" class="transfer" v-model="selectTags" :data="optionList"
         :titles="['可選標籤', '已選標籤']" :filterable="true">
         <template #default="{ option }">
@@ -490,6 +490,7 @@ const sendMail = async (sendMailFormRef: FormInstance | undefined) => {
         await sendEmailByCategoryAndTagApi(returnData, sendUrl.value);
         await loading()
         ElMessage.success('寄送成功');
+        tempSelectedTagList.value = []
         router.back()
       } catch (err: any) {
         console.log(err)
@@ -508,13 +509,20 @@ const selectTags = ref<any>([])
 
 const tagCurrentPage = ref<number>(1)
 
+const tempSelectedTagList = ref<any>([]);
+
 const getTagList = async () => {
   console.log("tagType為", tagType.value)
   let res = await getTagsByPaginationApi(tagCurrentPage.value, 10, tagType.value)
-  console.log("獲取標籤列表", res.data)
   tagList.length = 0
   selectTags.value.length = 0
   Object.assign(tagList, res.data.records)
+  tagList.forEach((item: any) => {
+    if (tempSelectedTagList.value.find((tag: any) => tag.tagId === item.tagId)) {
+      selectTags.value.push(item);
+
+    }
+  })
   optionList.length = 0
   tagList.forEach((item: any) => {
     optionList.push({
@@ -538,6 +546,7 @@ const openDialog = () => {
 }
 
 const closeDialog = () => {
+  tempSelectedTagList.value.push(...selectTags.value);
   isOpen.value = false
 }
 

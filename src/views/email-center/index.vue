@@ -277,7 +277,7 @@ const editRow = (row: any): void => {
 /**-------------------寄信-------------------- */
 
 const sendEmail = (row: any): void => {
-  router.push(`${route.fullPath}/${'email-send'}/${row.emailTemplateId}`)
+  router.push(`${route.fullPath}/email-send/${row.emailTemplateId}`)
 }
 
 /**-------------------掛載頁面時執行-------------------- */
