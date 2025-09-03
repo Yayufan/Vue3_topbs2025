@@ -107,7 +107,6 @@ export function sendEmailByCategoryAndTagApi(
   data: any,
   url: string
 ): AxiosPromise {
-  console.log(data);
   return request({
     url: url,
     method: "post",

@@ -37,11 +37,20 @@
     <EmailEditor :tools="tools" locale='zh-TW' class="vue-email-editor" ref="emailEditor"
       v-on:load="getDataAndEditorLoaded" :options="emailOptions" />
 
-    <el-dialog v-model="isOpen" title="選擇標籤" width="50%">
-      <el-transfer v-if="optionList" class="transfer" v-model="selectTags" :data="optionList" :titles="['可選標籤', '已選標籤']"
-        :filterable="true">
+    <el-dialog v-model="isOpen" title="選擇標籤" width="70%">
+      <el-transfer v-if="optionList" ref="transferPanelRef" class="transfer" v-model="selectTags" :data="optionList"
+        :titles="['可選標籤', '已選標籤']" :filterable="true">
         <template #default="{ option }">
-          <el-tag :color="option.color" round>{{ option.label }}</el-tag>
+          <el-popover v-if="option.isOverParentElementWidth" class="box-item" placement="top" :width="option.width">
+            <template #reference>
+              <el-tag :color="option.color" size="large" round>{{ option.label }}</el-tag>
+            </template>
+            <template #default>
+              <el-tag :color="option.color" size="large" round>{{ option.label }}</el-tag>
+            </template>
+          </el-popover>
+          <el-tag v-else :color="option.color" size="large" round>{{ option.label }}</el-tag>
+          <!-- <el-tag :color="option.color" round>{{ option.label }}</el-tag> -->
         </template>
         <template #left-footer>
           <div class="pagination-box">
@@ -51,7 +60,7 @@
       </el-transfer>
       <template #footer>
         <el-button type="primary" @click="closeDialog">確定</el-button>
-        <el-button @click="isOpen = false">取消</el-button>
+        <el-button @click="cancelTransfer">取消</el-button>
       </template>
     </el-dialog>
   </div>
@@ -503,8 +512,10 @@ const getTagList = async () => {
   console.log("tagType為", tagType.value)
   let res = await getTagsByPaginationApi(tagCurrentPage.value, 10, tagType.value)
   console.log("獲取標籤列表", res.data)
+  tagList.length = 0
+  selectTags.value.length = 0
   Object.assign(tagList, res.data.records)
-  // console.log("tagList", tagList)
+  optionList.length = 0
   tagList.forEach((item: any) => {
     optionList.push({
       key: item,
@@ -528,8 +539,37 @@ const openDialog = () => {
 
 const closeDialog = () => {
   isOpen.value = false
-  console.log(selectTags.value)
 }
+
+const cancelTransfer = () => {
+  isOpen.value = false
+  getTagList()
+}
+
+const transferPanelRef = ref();
+watch(() => transferPanelRef.value, (newVal) => {
+  if (newVal) {
+    // 獲取所有的 transfer body 元素
+    const transferPanelBodyList = transferPanelRef.value.$el.querySelectorAll('.el-transfer-panel__body');
+    // 遍歷 body 元素
+    transferPanelBodyList.forEach((transferPanelBody: any) => {
+      // 獲取 body 寬度
+      const transferPanelBodyWidth: number = Number(getComputedStyle(transferPanelBody).width.split('px')[0]);
+      //獲取裡面所有的 tag label
+      const transferPanelBodyItemTagContent = transferPanelBody.querySelectorAll('.el-tag__content');
+      // 遍歷所有的 tag 元素找出寬度超過父元素的
+      transferPanelBodyItemTagContent.forEach((item: any, index: number) => {
+        const width = Number(getComputedStyle(item).width.split('px')[0]);
+        if (width > transferPanelBodyWidth) {
+          let foundTag = optionList.find((tag: any) => tag.label === item.textContent);
+          foundTag.isOverParentElementWidth = true;
+          foundTag.width = width + 40;
+        }
+      });
+
+    });
+  }
+});
 
 
 onMounted(() => {
@@ -567,5 +607,22 @@ onMounted(() => {
   display: flex !important;
 
   justify-content: center !important;
+}
+
+// 設置 transfer 面板寬度
+:deep(.el-transfer-panel) {
+  width: 300px;
+
+  .el-transfer-panel__body {
+    overflow: hidden;
+  }
+
+}
+
+// 設置 transfer 面板內列表為 column 並設置間距
+:deep(.el-transfer-panel__list) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 </style>

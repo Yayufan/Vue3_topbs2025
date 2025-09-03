@@ -196,7 +196,7 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
     },
     children: [
       {
-        path: "mail-template",
+        path: "",
         component: () => import("@/views/email-center/index.vue"),
         name: "emailTemplate",
         meta: {
@@ -571,7 +571,6 @@ const router = createRouter({
   scrollBehavior: () => ({ left: 0, top: 0 }),
 });
 
-console.log(import.meta.env.BASE_URL);
 
 /**
  * 重置路由

@@ -270,16 +270,14 @@ const submitInsertForm = (form: FormInstance | undefined) => {
 
 //跳轉到編輯信件頁面
 const editRow = (row: any): void => {
-  console.log(row)
-  router.push(`/mail-center/${row.emailTemplateId}`)
+  router.push(`${route.fullPath}/${row.emailTemplateId}`)
 }
 
 
 /**-------------------寄信-------------------- */
 
 const sendEmail = (row: any): void => {
-  console.log(row)
-  router.push(`${'email-send'}/${row.emailTemplateId}`)
+  router.push(`${route.fullPath}/${'email-send'}/${row.emailTemplateId}`)
 }
 
 /**-------------------掛載頁面時執行-------------------- */

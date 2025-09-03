@@ -24,7 +24,6 @@ export function getPaperPageApi(
 }
 
 export function updatePaperApi(data: any) {
-  console.log("updatePaperApi", data);
   return request({
     url: "/paper",
     method: "put",
@@ -43,7 +42,6 @@ export async function downloadAllAbstractFileApi() {
 }
 
 export function assignPaperReviewersApi(data: any): AxiosPromise<any> {
-  console.log("assignPaperReviewersApi", data);
   return request({
     url: "/paper/assign-paper-reviewer",
     method: "put",

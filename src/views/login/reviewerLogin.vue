@@ -134,7 +134,6 @@ const loginRules = computed(() => {
 const route = useRoute();
 
 function handleLogin() {
-  console.log("loginData", loginData);
   loginFormRef.value.validate((valid: boolean) => {
     if (valid) {
       loading.value = true;
@@ -142,7 +141,6 @@ function handleLogin() {
         .reviewerLogin(loginData)
         .then(() => {
           const query: LocationQuery = route.query;
-          console.log("query", query);
           const redirect = (query.redirect as LocationQueryValue) ?? "/";
           const otherQueryParams = Object.keys(query).reduce(
             (acc: any, cur: string) => {
@@ -153,13 +151,10 @@ function handleLogin() {
             },
             {}
           );
-          console.log("redirect", redirect);
-          console.log("otherQueryParams", otherQueryParams);
           router.push('/dashboard');
           // router.push({ path: redirect, query: otherQueryParams });
         })
         .catch((err) => {
-          console.log("登录失败:", err);
         })
         .finally(() => {
           loading.value = false;
@@ -207,7 +202,6 @@ const getCaptcha = async () => {
     return;
   }
 
-  console.log("获取验证码成功:", res);
   captchaImage.value = res.data.image;
   loginData.verificationKey = res.data.key;
 }

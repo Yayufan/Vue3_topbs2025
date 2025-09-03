@@ -81,17 +81,21 @@
         <el-table-column prop="tagSet" label="標籤" min-width="40" align="center" width="150">
           <template #default="scope">
             <el-popover v-if="scope.row.tagSet.length > 0" placement="left-start" title="標籤" :width="200"
-              trigger="hover">
+              trigger="hover" class="tag-popover">
               <template #reference>
                 <el-tag v-if="findFirstVaildTag(scope.row.tagSet)" size="large" round
                   :color="findFirstVaildTag(scope.row.tagSet).color" effect="light">{{
                     findFirstVaildTag(scope.row.tagSet).name }}</el-tag>
+
               </template>
               <template #default>
-                <div v-for="tag in scope.row.tagSet" :key="tag.tagId" class="tag-item">
-                  <el-tag v-if="tag.status === 0" size="large" round :color="tag.color">{{
-                    tag.name }}</el-tag>
+                <div class="tag-popover-box">
+                  <div v-for="tag in scope.row.tagSet" :key="tag.tagId" class="tag-item">
+                    <el-tag v-if="tag.status === 0" size="large" round :color="tag.color">{{
+                      tag.name }}</el-tag>
+                  </div>
                 </div>
+
               </template>
             </el-popover>
 
@@ -125,12 +129,21 @@
           :default-page-size="Number(memberList.size)" v-model:current-page="currentPage" :hide-on-single-page="true" />
       </div>
 
-      <el-dialog v-model="tagsDialogIsOpen" title="編輯標籤">
+      <el-dialog v-model="tagsDialogIsOpen" title="編輯標籤" width="70%">
         <h1>{{ assignMember.name }}</h1>
         <div class="transfer-box">
-          <el-transfer v-model="assignMember.tagList" :data="transferDataList" :titles="['未擁有', '已擁有']">
+          <el-transfer ref="transferPanelRef" v-model="assignMember.tagList" :data="transferDataList"
+            :titles="['未擁有', '已擁有']">
             <template #default="{ option }">
-              <el-tag :color="option.color" size="large" round>{{ option.label }}</el-tag>
+              <el-popover v-if="option.isOverParentElementWidth" class="box-item" placement="top" :width="option.width">
+                <template #reference>
+                  <el-tag :color="option.color" size="large" round>{{ option.label }}</el-tag>
+                </template>
+                <template #default>
+                  <el-tag :color="option.color" size="large" round>{{ option.label }}</el-tag>
+                </template>
+              </el-popover>
+              <el-tag v-else :color="option.color" size="large" round>{{ option.label }}</el-tag>
             </template>
             <template #left-empty>
               <el-empty :image-size="60" description="No data" />
@@ -141,7 +154,7 @@
           </el-transfer>
         </div>
         <template #footer>
-          <el-button>取消</el-button>
+          <el-button @click="cancelTransfer">取消</el-button>
           <el-button type="primary" @click="submitTagsList">保存</el-button>
         </template>
       </el-dialog>
@@ -336,21 +349,6 @@
             <el-input v-model="insertMemberFormData.receipt" placeholder="抬頭" />
           </el-form-item>
           <el-form-item class="category required" label="類別" prop="category">
-            <!-- <el-radio-group v-model="insertMemberFormData.category">
-              <el-radio :value="1">Member</el-radio>
-              <el-form-item v-if="insertMemberFormData.category === 1 && insertMemberFormData.country !== 'Taiwan'"
-                prop="categoryExtra">
-                <el-select v-model="insertMemberFormData.categoryExtra" class="category-select">
-                  <el-option label="JBCS" value="JBCS"></el-option>
-                  <el-option label="JOPBS" value="JOPBS"></el-option>
-                  <el-option label="KBCS" value="KBCS"></el-option>
-                  <el-option label="HKSBS " value="HKSBS "></el-option>
-                </el-select>
-              </el-form-item>
-              <el-radio :value="2">Others(Trainee/Nurse/Reasearcher)</el-radio>
-              <el-radio :value="3">Non-member</el-radio>
-            </el-radio-group> -->
-
             <el-select v-model="insertMemberFormData.category">
               <el-option label="MVP" :value="4"></el-option>
               <el-option label="講者" :value="5"></el-option>
@@ -387,6 +385,7 @@ import countriesData from '@/assets/data/countries.json'
 import { title } from 'process'
 
 import { memberEnums } from '@/enums/memberEnum'
+import { H } from 'vite/dist/node/types.d-aGj9QkWt'
 
 const countries = ref(countriesData)
 
@@ -394,7 +393,6 @@ const countries = ref(countriesData)
 
 const downloadExcel = async () => {
   let res = await downloadMemberExcelApi()
-  console.log(res)
   const url = window.URL.createObjectURL(new Blob([res.data]));
   const link = document.createElement('a');
   link.href = url;
@@ -431,7 +429,6 @@ const getMemberCount = async () => {
 
 const setTagEffect = (status: number) => {
   if (status === 1) {
-    console.log('dark')
     return 'light'
   }
 }
@@ -464,7 +461,6 @@ let currentPage = ref(1)
 const getMemberByPagination = async (page: number, size: number) => {
   let res = await getMemberByPaginationByStatusApi(page, size, filterStatus.value, input.value)
   Object.assign(memberList, res.data)
-  console.log(res.data.records)
 }
 
 
@@ -503,7 +499,6 @@ const deleteRow = (id: number): void => {
 
     ElMessage.success('刪除成功');
   }).catch((err) => {
-    console.log(err)
   });
 }
 
@@ -517,13 +512,11 @@ const deleteList = () => {
     }).then(async () => {
       //確定刪除後使用父組件傳來的function
       //提取idList
-      console.log(deleteSelectList)
       let deleteIdList = deleteSelectList.map((item: { memberId: string }) => item.memberId)
       await batchDeleteMemberApi(deleteIdList)
       getMemberByPagination(currentPage.value, 10)
       ElMessage.success('刪除成功');
     }).catch((err) => {
-      console.log(err)
     })
 
   } else {
@@ -788,7 +781,6 @@ const submitInsertForm = (form: FormInstance | undefined) => {
         getMemberByPagination(currentPage.value, 10)
 
       } catch (err: any) {
-        console.log(err)
       }
       //最終都將這個dialog關掉
       dialogFormVisible.value = false
@@ -915,7 +907,6 @@ const confirmClick = async () => {
   //沒有抓到的這個Dom直接返回
   updateMemberFormRef.value.validate(async (valid: boolean) => {
     if (valid) {
-      console.log(updateMemberForm)
       await updateMemberApi(updateMemberForm)
       drawer.value = false
       ElMessage.success("修改完成")
@@ -932,7 +923,6 @@ const confirmClick = async () => {
 const editRow = (member: any): void => {
   Object.assign(updateMemberForm, member)
   drawer.value = true
-  console.log(updateMemberForm)
 }
 
 
@@ -945,6 +935,8 @@ let tagsList = reactive<any>([]);
 
 let transferDataList = reactive<any>([]);
 
+
+
 const getTagsList = async () => {
   let res = await getAllTagsApi()
   Object.assign(tagsList, res.data);
@@ -953,10 +945,11 @@ const getTagsList = async () => {
       label: item.name,
       key: item.tagId,
       disabled: item.status === 1,
-      color: item.color
+      color: item.color,
+      isOverParentElementWidth: false,
+      width: 0
     })
   })
-  console.log(transferDataList);
 }
 
 const findFirstVaildTag = (tagSet: any) => {
@@ -972,6 +965,10 @@ const toggleTagsDialog = async (member: any) => {
   assignMember = member;
   assignMember.tagList = Array.from(member.tagSet).map((item: any) => item.tagId);
   tagsDialogIsOpen.value = true;
+}
+
+const cancelTransfer = () => {
+  tagsDialogIsOpen.value = false;
 }
 
 const submitTagsList = async () => {
@@ -1001,6 +998,30 @@ const handleDialogWidthAndDrawerSize = () => {
 }
 
 
+const transferPanelRef = ref();
+watch(() => transferPanelRef.value, (newVal) => {
+  if (newVal) {
+    // 獲取所有的 transfer body 元素
+    const transferPanelBodyList = transferPanelRef.value.$el.querySelectorAll('.el-transfer-panel__body');
+    // 遍歷 body 元素
+    transferPanelBodyList.forEach((transferPanelBody: any) => {
+      // 獲取 body 寬度
+      const transferPanelBodyWidth: number = Number(getComputedStyle(transferPanelBody).width.split('px')[0]);
+      //獲取裡面所有的 tag label
+      const transferPanelBodyItemTagContent = transferPanelBody.querySelectorAll('.el-tag__content');
+      // 遍歷所有的 tag 元素找出寬度超過父元素的
+      transferPanelBodyItemTagContent.forEach((item: any, index: number) => {
+        const width = Number(getComputedStyle(item).width.split('px')[0]);
+        if (width > transferPanelBodyWidth) {
+          let foundTag = transferDataList.find((tag: any) => tag.label === item.textContent);
+          foundTag.isOverParentElementWidth = true;
+          foundTag.width = width + 40;
+        }
+      });
+
+    });
+  }
+});
 
 /**-------------------掛載頁面時執行-------------------- */
 
@@ -1179,5 +1200,28 @@ onMounted(() => {
   }
 
 
+}
+
+// 設置 transfer 面板寬度
+:deep(.el-transfer-panel) {
+  width: 300px;
+
+  .el-transfer-panel__body {
+    overflow: hidden;
+  }
+
+}
+
+// 設置 transfer 面板內列表為 column 並設置間距
+:deep(.el-transfer-panel__list) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+
+// 設置 table 內的標籤顯示為可滑動區塊
+.tag-popover-box {
+  overflow: scroll !important;
 }
 </style>

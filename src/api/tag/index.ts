@@ -13,7 +13,6 @@ export function getTagsByPaginationApi(
   size: number,
   tagType?: string
 ): AxiosPromise {
-  console.log("getTagsByPaginationApi", page, size, tagType);
   return request({
     url: "/tag/getTagsByPaginationApi",
     method: "get",
@@ -57,7 +56,6 @@ export function assignMemberToTagApi(data: any): AxiosPromise {
 }
 
 export function assignPaperToTagApi(data: any) {
-  console.log("assignPaperToTagApi", data);
   return request({
     url: "/tag/paper",
     method: "put",

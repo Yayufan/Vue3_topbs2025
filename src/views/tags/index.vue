@@ -33,7 +33,7 @@
       <el-table empty-text="No Data" class="tags-table" :data="tagsList.records"
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
-        <el-table-column fixed prop="name" label="名稱" width="200">
+        <el-table-column fixed prop="name" label="名稱" width="200" :show-overflow-tooltip="true">
           <template #default="{ row }">
             <el-tag :color="row.color" round size="large">{{ row.name }}</el-tag>
           </template>
@@ -66,6 +66,11 @@
         </el-table-column>
       </el-table>
 
+      <div class="example-pagination-block member-pagination">
+        <el-pagination layout="prev, pager, next" :page-count="Number(tagsTotalPages)"
+          v-model:current-page="currentPage" :hide-on-single-page="true" @current-change="handlePageChange" />
+      </div>
+
       <!-- 新增對話框 -->
       <ElDialog v-model="isInsertDialogVisible" title="新增標籤" width="400">
 
@@ -74,7 +79,7 @@
           <div class="tag-box">
             <el-tag v-if="insertTagFormData.color" :color="insertTagFormData.color" round size="large">{{
               insertTagFormData.name
-              }}</el-tag>
+            }}</el-tag>
           </div>
         </div>
 
@@ -120,7 +125,7 @@
           <div class="tag-box">
             <el-tag :color="updateTagForm.color" round size="large">{{
               updateTagForm.name
-              }}</el-tag>
+            }}</el-tag>
           </div>
         </div>
         <el-form label-position="top" label-width="auto" :model="updateTagForm" :rules="tagRules"
@@ -334,7 +339,6 @@ const submitInsertForm = (form: FormInstance | undefined) => {
         form.resetFields()
 
       } catch (err: any) {
-        console.log(err)
       }
     } else {
       ElMessage.error("請完整填入資訊")
@@ -363,13 +367,11 @@ const confirmClick = async () => {
   updateTagFormRef.value.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        console.log(updateTagForm)
         await updateTagApi(updateTagForm)
         ElMessage.success('更新成功');
         getTagsByPagination(1, 10)
         drawer.value = false
       } catch (err: any) {
-        console.log(err)
       }
     } else {
       ElMessage.error("請完整填入資訊")
@@ -387,12 +389,19 @@ const cancelClick = () => {
 
 
 let currentPage = ref(1)
+let tagsTotalPages = ref<number>(0)
 
 let tagsList = reactive<Record<string, any>>([])
 
 const getTagsByPagination = async (page: number, size: number) => {
   const res = await getTagsByPaginationApi(page, size)
   Object.assign(tagsList, res.data)
+  tagsTotalPages.value = res.data.pages
+}
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+  getTagsByPagination(page, 10)
 }
 
 /** --------- 刪除相關variable及function -------------- */
@@ -420,7 +429,6 @@ const deleteRow = (id: number): void => {
 
     ElMessage.success('刪除成功');
   }).catch((err) => {
-    console.log(err)
   });
 }
 
@@ -434,13 +442,11 @@ const deleteList = () => {
     }).then(async () => {
       //確定刪除後使用父組件傳來的function
       //提取idList
-      console.log(deleteSelectList)
       let deleteIdList = deleteSelectList.map((item: { emailTemplateId: string }) => item.emailTemplateId)
       // await batchDeleteEmailTemplateApi(deleteIdList)
       // getEmailTemplateByPagination(currentPage.value, 10)
       ElMessage.success('刪除成功');
     }).catch((err) => {
-      console.log(err)
     })
 
   } else {
@@ -568,7 +574,6 @@ const getAttendeeByPagination = async () => {
       }
     })
   } catch (err: any) {
-    console.log(err)
     ElMessage.error('查詢失敗', err.message)
   }
 }
@@ -579,7 +584,6 @@ const handleAttendeesSelect = (selection: any, row: any) => {
   } else {
     attendeeIdSet.delete(row.attendeesId)
   }
-  console.log("attendeeIdSet :", attendeeIdSet)
 }
 /**--------------------------------稿件--------------------------- */
 const paperList = reactive<any>([]);
@@ -597,7 +601,6 @@ const getPaperListByPagination = async (page: number, size: number) => {
     ElMessage.error('查詢失敗: ' + error.message)
     return
   }
-  console.log("res :", res)
   Object.assign(paperList, res.data)
 
   totalPage.value = res.data.pages
@@ -618,13 +621,12 @@ const handlePaperSelect = (selection: any, row: any) => {
   } else {
     paperIdSet.delete(row.paperId)
   }
-  console.log("paperIdSet :", paperIdSet)
 }
 
 /**--------------------------------審稿--------------------------- */
 const paperReviewerList = reactive<any>([]);
 const paperReviewerTableRef = ref<any>();
-const paperRevieweIdrSet = new Set(); // 儲存不重複的ID值
+const paperReviewerIdSet = new Set(); // 儲存不重複的ID值
 
 
 const getPaperReviewerList = async (page: number, size: number) => {
@@ -642,22 +644,21 @@ const getPaperReviewerList = async (page: number, size: number) => {
   res.data.records.forEach((item: any) => {
     item.emailList = item.emailList.map((email: any) => ({ email }));
 
-    if (paperRevieweIdrSet.has(item.paperReviewerId)) {
+    if (paperReviewerIdSet.has(item.paperReviewerId)) {
       paperReviewerTableRef.value.toggleRowSelection(item, true);
     }
   })
 
   Object.assign(paperReviewerList, res.data)
-  console.log("res :", res)
 }
 
 const handlePaperReviewerSelect = (selection: any, row: any) => {
 
   /** 判斷已勾選的資料內是否有該 member 有的話新增至 set內， 沒有的話從 set 移除 */
   if (selection.some((item: any) => item.paperReviewerId === row.paperReviewerId)) {
-    paperRevieweIdrSet.add(row.paperReviewerId) // 確認該 member 已經有這個 tag
+    paperReviewerIdSet.add(row.paperReviewerId) // 確認該 member 已經有這個 tag
   } else {
-    paperRevieweIdrSet.delete(row.paperReviewerId) // 確認該 member 已經沒有這個 tag
+    paperReviewerIdSet.delete(row.paperReviewerId) // 確認該 member 已經沒有這個 tag
   }
 }
 
@@ -687,7 +688,6 @@ const submitTagSet = async () => {
   let data;
   switch (assignTag.type) {
     case 'member':
-      console.log("最後返回 :", allMemberIdHasSet)
       data = {
         tagId: assignTag.tagId,
         targetMemberIdList: Array.from(allMemberIdHasSet)
@@ -726,19 +726,17 @@ const submitTagSet = async () => {
     case 'paperReviewer':
       data = {
         tagId: assignTag.tagId,
-        targetPaperReviewerIdList: Array.from(paperRevieweIdrSet)
+        targetPaperReviewerIdList: Array.from(paperReviewerIdSet)
       }
-      console.log("data :", data)
       const { res: paperReviewerRes, error: paperReviewerError } = await tryCatch(assignPaperReviewerToTagApi(data));
       if (paperReviewerError) {
         ElMessage.error('更新失敗: ' + paperReviewerError.message)
         return;
       }
-      paperRevieweIdrSet.clear()
+      paperReviewerIdSet.clear()
       break;
 
   }
-  console.log("data :", '保存成功')
   assignTagDialogVisible.value = false
   assignTagCurrentPage.value = 1
   resetQueryText()
@@ -810,7 +808,6 @@ const changedTag = async (tag: any) => {
       paperRes.data.forEach((id: string) => {
         paperIdSet.add(id)
       })
-      console.log("paperIdSet :", paperIdSet)
 
       break;
     case 'paperReviewer':
@@ -821,9 +818,8 @@ const changedTag = async (tag: any) => {
         return;
       }
       paperReviewerRes.data.forEach((id: string) => {
-        paperRevieweIdrSet.add(id)
+        paperReviewerIdSet.add(id)
       })
-      console.log("paperRevieweIdrSet :", paperRevieweIdrSet)
       break;
   }
 }

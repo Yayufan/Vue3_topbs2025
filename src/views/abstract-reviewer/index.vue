@@ -24,6 +24,29 @@
             </span>
           </template>
         </el-table-column>
+
+        <el-table-column prop="tagSet" label="標籤" min-width="40" align="center" width="150">
+          <template #default="scope">
+            <el-popover v-if="scope.row.tagList.length > 0" placement="left-start" title="標籤" :width="200"
+              trigger="hover">
+              <template #reference>
+                <el-tag v-if="findFirstVaildTag(scope.row.tagList)" size="large" round
+                  :color="findFirstVaildTag(scope.row.tagList).color" effect="light">{{
+                    findFirstVaildTag(scope.row.tagList).name }}</el-tag>
+              </template>
+              <template #default>
+                <div class="tag-popover-box">
+                  <div v-for="tag in scope.row.tagList" :key="tag.tagId" class="tag-item">
+                    <el-tag v-if="tag.status === 0" size="large" round :color="tag.color">{{
+                      tag.name }}</el-tag>
+                  </div>
+                </div>
+              </template>
+            </el-popover>
+
+          </template>
+        </el-table-column>
+
         <el-table-column label="" width="200">
           <template #default="scope">
             <el-button link type="success" @click="toggleEditReviewer(scope.row)">Edit</el-button>
@@ -449,6 +472,14 @@ const deleteReviewerFile = async (paperReviewerFileId: number) => {
   })
 }
 
+const findFirstVaildTag = (tagList: any) => {
+  for (let i = 0; i < tagList.length; i++) {
+    if (tagList[i].status === 0) {
+      return tagList[i];
+    }
+  }
+  return '';
+}
 
 
 onMounted(() => {
@@ -504,7 +535,22 @@ onMounted(() => {
   }
 }
 
+:deep(.el-tag__content) {
+  color: white;
+  font-size: 14px;
+}
+
+:deep(.el-tag__close) {
+  color: red;
+}
+
+
 .upload {
   width: 100%;
+}
+
+// 設置 table 內的標籤顯示為可滑動區塊
+.tag-popover-box {
+  overflow: scroll !important;
 }
 </style>

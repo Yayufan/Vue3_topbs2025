@@ -102,14 +102,12 @@ const props = defineProps({
   },
 })
 
-console.log("父組件傳來的articleId: ", props.articleId)
 
 /**-----------------------Table功能相關-------------------------------------- */
 const tableData = reactive<Record<string, any>[]>([])
 
 const getData = async () => {
   let res = await props.getApi(props.articleId);
-  console.log("獲得的響應 ", res)
 
   //如果列表不為空
   if (res.data.length > 0) {
@@ -149,7 +147,6 @@ const deleteAttachment = (row: any) => {
 
   }).catch((err) => {
     // 用户選擇取消，中止上傳操作
-    console.log(err)
   });
 
 
@@ -177,13 +174,10 @@ const handleAvatarSuccess: UploadProps['onSuccess'] = (
   response,
   uploadFile
 ) => {
-  // console.log(uploadFile)
   //將檔案傳給接收圖片的數據
   imgFile = uploadFile.raw!
   articleAttachmentFormData.type = imgFile.type
 
-  console.log("當前檔案: ", imgFile)
-  console.log("當前表單 ", articleAttachmentFormData)
 }
 
 //檔案上傳前的回調
@@ -203,7 +197,6 @@ const handleChange: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
   //只保留最新的檔案
   fileList.value = [uploadFile]
   imgFile = uploadFile.raw!
-  console.log("當前上傳的檔案: ", uploadFile)
 
 }
 
@@ -274,7 +267,6 @@ const addAttachment = (form: FormInstance | undefined) => {
         formData.append('data', jsonData)
         formData.append('file', imgFile)
 
-        console.log("表單數據: ", formData.get('file'))
 
 
         // //呼叫父組件的新增API
@@ -288,7 +280,6 @@ const addAttachment = (form: FormInstance | undefined) => {
         ElMessage.success("上傳成功")
 
       } catch (err: any) {
-        console.log(err)
       }
 
       //最終都將這個dialog關掉

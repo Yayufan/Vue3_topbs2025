@@ -140,7 +140,6 @@ const getMember = async (page: number, size: number) => {
   let res = await getUnpaidMemberApi(page, input.value);
   memberList
   Object.assign(memberList, res.data)
-  console.log("memberList", memberList)
 }
 
 const getMemberCount = async () => {
