@@ -60,22 +60,18 @@ const getAllSetting = async () => {
   try {
     settingData.length = 0
     let res = await getAllSettingApi()
-    console.log(res)
     Object.assign(settingData, res.data)
   } catch (err: any) {
-    console.log(err)
   }
 }
 
 
 //更新設定,更新完成重新載入設定
 const saveSetting = async () => {
-  console.log('當前資料', settingData)
   try {
     await updateSettingApi(settingData)
     ElMessage.success('保存成功')
   } catch (err: any) {
-    console.log(err)
   }
   getAllSetting()
 

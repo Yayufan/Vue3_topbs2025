@@ -58,7 +58,6 @@ export function getMemberByPaginationByStatusApi(
   queryText?: string
   // tags?: number[]
 ): AxiosPromise {
-  // console.log("tags", tags);
   return request({
     url: "/member/tag/pagination-by-query",
     method: "get",

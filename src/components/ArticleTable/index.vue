@@ -196,8 +196,6 @@ const handleAvatarSuccess: UploadProps['onSuccess'] = (
   response,
   uploadFile
 ) => {
-  // console.log(response)
-  // console.log(uploadFile)
   imageUrl.value = URL.createObjectURL(uploadFile.raw!)
   //將檔案傳給接收圖片的數據
   imgFile = uploadFile.raw!
@@ -226,7 +224,6 @@ const dialogFormVisible = ref(false)
 //顯示新增Dialog
 const toggleAddDialog = () => {
   dialogFormVisible.value = true
-  console.log(articleFormData)
 
 }
 
@@ -314,7 +311,6 @@ const submitForm = (form: FormInstance | undefined) => {
         ElMessage.success("創建成功")
 
       } catch (err: any) {
-        console.log(err)
       }
 
       //最終都將這個dialog關掉
@@ -354,7 +350,6 @@ const deleteRow = (id: number, title: string): void => {
 
   }).catch((err) => {
     // 用户選擇取消，中止上傳操作
-    console.log(err)
   });
 }
 
@@ -371,7 +366,6 @@ const deleteList = () => {
       await props.batchDeleteApi(deleteIdList)
       ElMessage.success("刪除成功")
     }).catch((err) => {
-      console.log(err)
     })
 
   } else {

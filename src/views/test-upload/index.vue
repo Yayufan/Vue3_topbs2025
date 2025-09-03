@@ -39,7 +39,6 @@ const percentage = ref<number>(0)
 
 
 const handleUpload: UploadProps['onChange'] = async (file: UploadUserFile, uploadFiles) => {
-  console.log('file', file);
   if (file.size == 0) {
     ElMessage.error('File is empty');
     return false;

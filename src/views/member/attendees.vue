@@ -71,9 +71,11 @@
                     findFirstVaildTag(scope.row.tagSet).name }}</el-tag>
               </template>
               <template #default>
-                <div v-for="tag in scope.row.tagSet" :key="tag.tagId" class="tag-item">
-                  <el-tag v-if="tag.status === 0" size="large" round :color="tag.color">{{
-                    tag.name }}</el-tag>
+                <div class="tag-popover-box">
+                  <div v-for="tag in scope.row.tagSet" :key="tag.tagId" class="tag-item">
+                    <el-tag v-if="tag.status === 0" size="large" round :color="tag.color">{{
+                      tag.name }}</el-tag>
+                  </div>
                 </div>
               </template>
             </el-popover>
@@ -170,13 +172,11 @@ const attendeeList = reactive<any>([])
 
 const getAttendeeList = async () => {
   let res = await getAttendeeListByTagAndPaginationApi(currentPage.value, input.value)
-  console.log("這是與會者列表: ", res)
 
   Object.assign(attendeeList, res.data)
 }
 
 const findFirstVaildTag = (tagSet: any) => {
-  console.log("這是標籤: ", tagSet)
   for (let i = 0; i < tagSet.length; i++) {
     if (tagSet[i].status === 0) {
       return tagSet[i];
@@ -342,5 +342,10 @@ onMounted(() => {
 :deep(.el-tag__content) {
   color: white;
   font-size: 14px;
+}
+
+// 設置 table 內的標籤顯示為可滑動區塊
+.tag-popover-box {
+  overflow: scroll !important;
 }
 </style>

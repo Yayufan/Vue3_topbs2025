@@ -35,6 +35,11 @@
         </el-table-column>
       </el-table>
 
+      <div class="page-box">
+        <el-pagination layout=" prev, pager, next" :page-count="Number(speakerList.pages)"
+          :current-page="speakerList.currentPage" @current-change="handlePageChange" :hide-on-single-page="true" />
+      </div>
+
       <el-dialog v-model="toggleAddDialog" title="新增講者">
         <el-form ref="addFormRef" class="form" :model="addFormData" label-position="top" :rules="formRules">
 
@@ -213,6 +218,7 @@ import { addNewInvitedSpeakerApi, batchDeleteInvitedSpeakerApi, deleteInvitedSpe
 import { FormInstance, FormRules, UploadProps, UploadRawFile } from 'element-plus';
 
 import countriesJson from '@/assets/data/countries.json'
+import { env } from 'process';
 const countries = reactive(countriesJson);
 
 
@@ -223,11 +229,14 @@ const currentPage = ref(1);
 const speakerList = ref<any>([]);
 const getInvitedSpeakerByPagination = async () => {
   const res = await getInvitedSpeakerListByPaginationApi(currentPage.value, 10);
-  // speakerList.value = res.data;
-  console.log(res)
   Object.assign(speakerList.value, res.data);
+  console.log('speakerList', speakerList.value);
 }
 
+const handlePageChange = (page: number) => {
+  currentPage.value = page;
+  getInvitedSpeakerByPagination();
+}
 
 onMounted(() => {
   getInvitedSpeakerByPagination();
@@ -271,10 +280,8 @@ const addNewSpeaker = async (formEl: FormInstance | undefined) => {
   formEl.validate(async (valid) => {
     if (valid) {
       let formData = new FormData();
-      console.log('addFormData', addFormData);
       formData.append('data', JSON.stringify(addFormData));
       formData.append('file', imgFile);
-      console.log('formData', formData.get('data'));
       let res: any = await addNewInvitedSpeakerApi(formData);
       if (res.code === 200) {
         ElMessage.success('新增成功');
@@ -291,7 +298,6 @@ const addNewSpeaker = async (formEl: FormInstance | undefined) => {
         ElMessage.error('新增失敗');
       }
     } else {
-      console.log('error submit!!');
       ElMessage.error('請完整填入資訊');
     }
   });
@@ -307,7 +313,6 @@ const imageUrl = ref();
 let imgFile = <UploadRawFile>{}
 
 const handleImageUpload: UploadProps['onSuccess'] = (response, uploadFile) => {
-  console.log('uploadFile', uploadFile);
 
   imageUrl.value = URL.createObjectURL(uploadFile.raw!);
   imgFile = uploadFile.raw!;
@@ -357,11 +362,9 @@ const handleEditSpeaker = async (formEl: FormInstance | undefined) => {
 
   formEl.validate(async (valid) => {
     if (valid) {
-      console.log('editForm', editForm);
       let formData = new FormData();
       formData.append('data', JSON.stringify(editForm));
       formData.append('file', imgFile);
-      console.log('formData', formData.get('data'));
       let res: any = await updateNewInvitedSpeakerApi(formData);
       if (res.code === 200) {
         ElMessage.success('編輯成功');
@@ -371,7 +374,6 @@ const handleEditSpeaker = async (formEl: FormInstance | undefined) => {
         ElMessage.error('編輯失敗');
       }
     } else {
-      console.log('error submit!!');
       ElMessage.error('請完整填入資訊');
     }
   });
@@ -379,7 +381,6 @@ const handleEditSpeaker = async (formEl: FormInstance | undefined) => {
 
 /**================================ */
 const deleteSpeaker = async (id: number) => {
-  console.log('刪除id', id);
   await deleteInvitedSpeakerApi(id);
   ElMessage.success('刪除成功');
   getInvitedSpeakerByPagination();
@@ -397,7 +398,6 @@ const handleSelectionChange = (val: any) => {
 
 //批量刪除醫學新知的function
 const deleteList = () => {
-  console.log('deleteSelectList', deleteSelectList);
   if (deleteSelectList.length >= 1) {
     ElMessageBox.confirm(`確定要刪除這${deleteSelectList.length}位講者嗎？`, '確認刪除', {
       confirmButtonText: '確定',
@@ -410,7 +410,6 @@ const deleteList = () => {
       ElMessage.success("刪除成功")
       getInvitedSpeakerByPagination()
     }).catch((err) => {
-      console.log(err)
     })
 
   } else {
@@ -545,5 +544,10 @@ const deleteList = () => {
       }
     }
   }
+}
+
+.page-box {
+  display: flex;
+  justify-content: center;
 }
 </style>

@@ -25,17 +25,13 @@ export async function setupPermission() {
 
     if (!hasToken) {
       if (whiteList.includes(to.path)) {
-        console.log("未登录，访问白名单页面", to.path);
-        console.log("白名单页面，直接访问", to.path);
         next();
       } else {
         // 不在白名單且沒有token
-        console.log("未登录，访问非白名单页面", to.path);
         if (localStorage.getItem("paper-reviewer-logout") === "true") {
           next(`/reviewer-login?redirect=${to.path}`);
           localStorage.removeItem("paper-reviewer-logout");
         } else {
-          console.log("未登录，访问非白名单页面，跳转到审稿人登录", to.path);
           next(`/login?redirect=${to.path}`);
         }
       }
@@ -111,7 +107,6 @@ export async function setupPermission() {
 
         if (resolvedRoute.matched.length === 0 && to.path !== '/404') {
           // 如果仍然沒有匹配到路由，且目標不是 404 頁面本身，則跳轉到 404
-          console.warn(`[Permission] 动态路由添加后，路径 '${to.path}' 仍未匹配，重定向到 /404`);
           next({ path: "/404", replace: true });
         } else {
           // 路由可能已經成功添加，重新導航以匹配新路由
@@ -430,14 +425,11 @@ async function initializeRoutes() {
       accessedRoutes.forEach((route: RouteRecordRaw) => {
         if (route.name && !router.hasRoute(route.name)) {
           router.addRoute(route);
-          console.log("添加路由:", route.path);
         } else {
-          console.warn("路由已存在，跳過添加:", route.path);
         }
       });
 
       hasAddDynamicRoutes = true;
-      console.log("动态路由添加完成，当前所有路由：", router.getRoutes().map(r => r.path));
     }
   } finally {
     isAddingRoutes = false;
