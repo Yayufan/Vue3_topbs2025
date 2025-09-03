@@ -37,7 +37,7 @@
     <EmailEditor :tools="tools" locale='zh-TW' class="vue-email-editor" ref="emailEditor"
       v-on:load="getDataAndEditorLoaded" :options="emailOptions" />
 
-    <el-dialog v-model="isOpen" title="選擇標籤" width="70%">
+    <el-dialog v-model="isOpen" title="選擇標籤" width="70%" :before-close="cancelTransfer">
       <el-transfer v-if="optionList" ref="transferPanelRef" class="transfer" v-model="selectTags" :data="optionList"
         :titles="['可選標籤', '已選標籤']" :filterable="true">
         <template #default="{ option }">
