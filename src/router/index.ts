@@ -208,6 +208,18 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        path: "/schedule-manage",
+        component: () => import("@/views/email-center/emailScheduleManage.vue"),
+        name: "emailTaskManage",
+        meta: {
+          title: "E-Mail任務管理",
+          icon: "el-icon-Grid",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+      {
         path: ":id",
         component: () => import("@/views/email-center/emailTemplateItem.vue"),
         name: "EmailTemplateItem",

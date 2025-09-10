@@ -1,42 +1,66 @@
 <!--  -->
 <template>
-  <!-- <h1>我是信件寄送</h1>  -->
+  <div>
+    <BasicComponent title="信件寄送">
+      <template #main-section>
+        <div class="top-btn-box">
+          <el-button type="info" @click="back">返回</el-button>
+          <el-button type="primary" @click="sendMail(sendMailFormRef)" :disabled="isDisabled"
+            v-loading.fullscreen.lock="fullscreenLoading">寄送</el-button>
+        </div>
+        <el-card class="top">
+          <div class="email-quota" type="warning">剩餘{{ emailQuota }}封信件</div>
+          <el-form label-position="top" :model="sendEmailDto" :rules="sendMailRules" ref="sendMailFormRef">
+            <el-form-item label="主旨" prop="subject">
+              <el-input v-model="sendEmailDto.subject" />
+            </el-form-item>
 
+            <el-form-item label="信件選項" prop="emailOptions">
+              <div class="checkbox-group">
+                <div class="checkbox-item">
+                  <el-checkbox v-model="sendEmailDto.isTest" label="是否為測試信件" name="emailOptions"
+                    @change="console.log(sendEmailDto)" />
 
+                  <el-input v-if="sendEmailDto.isTest" v-model="sendEmailDto.testEmail" placeholder="請輸入測試信箱" />
+                </div>
+                <div class="checkbox-item">
+                  <el-checkbox v-model="sendEmailDto.isSchedule" label="是否排程寄送" name="emailOptions"
+                    @change="console.log(sendEmailDto)" />
+                  <el-date-picker v-if="sendEmailDto.isSchedule" v-model="sendEmailDto.scheduleTime" type="datetime"
+                    placeholder="選擇日期時間" value-format="YYYY-MM-DD HH:mm:ss" format="YYYY-MM-DD HH:mm:ss" />
+                </div>
+                <div class="checkbox-item">
+                  <el-checkbox v-model="sendEmailDto.includeOfficialAttachment" label="是否附帶公文" name="emailOptions"
+                    @change="console.log(sendEmailDto)" />
+                </div>
+              </div>
+            </el-form-item>
 
-  <div class="mail-template-box">
-    <h1>信件寄送</h1>
-    <div class="mail-count">
-      <span>剩餘 email 數量: {{ emailTemplate.count }}</span>
-    </div>
-    <div class="function-bar">
-      <el-button type="info" @click="back">返回</el-button>
-      <el-button type="primary" @click="sendMail(sendMailFormRef)" :disabled="isDisabled"
-        v-loading.fullscreen.lock="fullscreenLoading">寄送</el-button>
-    </div>
+            <el-button class="add-tag-button" @click="openDialog">
+              <div class="btn-box">
+                <el-icon>
+                  <PriceTag />
+                </el-icon>選擇標籤
+              </div>
+            </el-button>
 
-    <el-form class="subject-form" ref="sendMailFormRef" :rules="sendMailRules" :model="sendEmailDto" label-width="80px"
-      label-position="top">
-      <el-form-item label="主旨" prop="subject">
-        <el-input v-model="sendEmailDto.subject" />
-      </el-form-item>
-      <el-form-item prop="testEmail">
-        <el-checkbox v-model="sendEmailDto.isTest" label="是否為測試信件" />
-        <el-input v-if="sendEmailDto.isTest" v-model="sendEmailDto.testEmail" placeholder="請輸入測試信箱" />
-      </el-form-item>
-      <el-form-item prop="attachment">
-        <el-checkbox v-model="sendEmailDto.includeOfficialAttachment" label="是否附帶公文" />
-      </el-form-item>
+            <el-form-item label="本次發送對象">
+              <div class="tag-box">
+                <div class="tag-item" v-for="(item, index) in selectTags">
+                  <el-tag :color="item.color">{{ item.name }}</el-tag>
+                  <span v-if="index !== selectTags.length - 1">,</span>
+                </div>
+              </div>
+            </el-form-item>
+          </el-form>
 
+        </el-card>
 
-      <el-button type="primary" @click="openDialog">選擇標籤</el-button>
-    </el-form>
-    <el-tag color="black">本次發送對象 :</el-tag>
-    <el-tag v-for="item in selectTags" :color="item.color">{{ item.name }}</el-tag>
+        <EmailEditor :tools="tools" locale='zh-TW' class="vue-email-editor" ref="emailEditor"
+          v-on:load="getDataAndEditorLoaded" :options="emailOptions" />
+      </template>
 
-    <EmailEditor :tools="tools" locale='zh-TW' class="vue-email-editor" ref="emailEditor"
-      v-on:load="getDataAndEditorLoaded" :options="emailOptions" />
-
+    </BasicComponent>
     <el-dialog v-model="isOpen" title="選擇標籤" width="70%" :before-close="cancelTransfer">
       <el-transfer v-if="optionList" ref="transferPanelRef" class="transfer" v-model="selectTags" :data="optionList"
         :titles="['可選標籤', '已選標籤']" :filterable="true">
@@ -50,7 +74,6 @@
             </template>
           </el-popover>
           <el-tag v-else :color="option.color" size="large" round>{{ option.label }}</el-tag>
-          <!-- <el-tag :color="option.color" round>{{ option.label }}</el-tag> -->
         </template>
         <template #left-footer>
           <div class="pagination-box">
@@ -64,15 +87,20 @@
       </template>
     </el-dialog>
   </div>
+
+
 </template>
 
 <script setup lang='ts'>
 import { EmailEditor, } from 'vue-email-editor'
-import { getEmailTemplateApi, sendEmailApi, sendEmailByCategoryAndTagApi, updateEmailTemplateApi } from '@/api/emailTemplate'
+import { fetchEmailQuotaApi, getEmailTemplateApi, sendEmailApi, sendEmailByCategoryAndTagApi, updateEmailTemplateApi } from '@/api/emailTemplate'
 import { ref, reactive } from 'vue'
 import { FormInstance, FormRules } from 'element-plus'
 import { getAllTagsApi, getTagsByPaginationApi } from '@/api/tag'
 import { stubObject } from 'lodash'
+import { tryCatch } from '@/utils/tryCatch'
+
+import BasicComponent from '@/layout/components/Basic/index.vue'
 
 const router = useRouter()
 
@@ -96,8 +124,28 @@ const sendMailRules = reactive<FormRules>({
 })
 
 
-/**------------------------------ */
+/**------------------------------
+ * 獲取本日寄信餘額
+ * 
+ */
 
+const emailQuota = ref<number>(0)
+const fetchEmailQuota = async () => {
+  const { res, error }: any = await tryCatch(fetchEmailQuotaApi())
+  console.log(res)
+  if (error || res.code !== 200) {
+    ElMessage.error(res.msg || error || '獲取寄信餘額失敗');
+    return;
+  }
+
+  console.log("本日寄信餘額: ", res.data);
+  emailQuota.value = res.data;
+}
+
+
+
+
+/**------------------------------ */
 let emailTemplate = reactive<Record<string, any>>({})
 let isDisabled = ref(true)
 
@@ -336,6 +384,8 @@ const sendEmailDto = reactive<any>({
   "plainText": "",
   "isTest": false,
   "testEmail": "",
+  "isSchedule": false,
+  "scheduleTime": "",
   "includeOfficialAttachment": false
 })
 
@@ -582,6 +632,7 @@ watch(() => transferPanelRef.value, (newVal) => {
 
 
 onMounted(() => {
+  fetchEmailQuota();
   // getTagList()
 })
 
@@ -599,12 +650,13 @@ onMounted(() => {
   }
 
 
-  .vue-email-editor {
-    // min-height: 500px;
-    height: 800px;
-    margin: 3% auto;
-  }
 
+}
+
+.vue-email-editor {
+  // min-height: 500px;
+  height: 800px;
+  margin: 3% auto;
 }
 
 :deep(.el-tag__content) {
@@ -633,5 +685,63 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.email-quota {
+  padding: 1rem;
+  margin: 1rem 0;
+  color: #a14508;
+  background-color: #fffbeb;
+  border-radius: 8px;
+}
+
+.top-btn-box {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.top {
+  margin-bottom: 1rem;
+
+  .add-tag-button {
+    margin-bottom: 1rem;
+
+    .btn-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      i {
+        rotate: -45deg;
+      }
+    }
+  }
+
+  .checkbox-group {
+    display: flex;
+    width: 70%;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+    .checkbox-item {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 1rem;
+
+      .el-input {
+        width: 200px;
+      }
+    }
+  }
+
+  .tag-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
 }
 </style>

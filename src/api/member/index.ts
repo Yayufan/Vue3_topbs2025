@@ -51,7 +51,7 @@ export function getMemberByPaginationApi(
  * @param status
  * @returns
  */
-export function getMemberByPaginationByStatusApi(
+export function fetchMembersWithPaginationAndStatusApi(
   page: number,
   size: number,
   status: string,
@@ -169,7 +169,7 @@ export function batchUpdateMemberApi(data: any): AxiosPromise {
  * @param id
  * @returns
  */
-export function deleteMemberApi(id: number): AxiosPromise {
+export function deleteMemberApi(id: string): AxiosPromise {
   return request({
     url: `/member/${id}`,
     method: "delete",

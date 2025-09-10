@@ -1,90 +1,63 @@
 <!--  -->
 <template>
-  <section class="member-section">
-    <el-card class="member-card">
-      <h1>繳費確認審核</h1>
-
-      <!-- 如果要用兩種註冊方式再考慮使用這個 -->
-      <div class="function-bar">
-        <div class="display-count">
-          未審核人數為： {{ memberList.total }} 人
+  <div class="content">
+    <BasicComponent title="繳費確認管理" :totalCount="memberList.total + '人'">
+      <template #search-box>
+        <div class="search-bar">
+          <el-input v-model="input" style="width: 240px" placeholder="輸入內容,Enter查詢"
+            @input="getMember(currentPage, 10)" />
         </div>
-        <div class="btn-box">
-          <!-- <el-button type="primary" @click="approvalList" :disabled="selectList.length > 0 ? false : true">
-            批量通過<el-icon class="el-icon--right">
-              <Plus />
-            </el-icon>
-          </el-button>
+      </template>
 
-          <el-button type="danger" @click="failedList" :disabled="selectList.length > 0 ? false : true">
-            批量駁回<el-icon class="el-icon--right">
-              <Delete />
-            </el-icon>
-          </el-button> -->
-        </div>
-      </div>
+      <template #data-table>
+        <el-table class="news-table" :data="memberList.records">
+          <el-table-column type="selection" width="55" />
+          <el-table-column prop="chineseName" label="中文姓名" width="100"></el-table-column>
+          <el-table-column prop="country" label="國家" width="100" />
+          <el-table-column prop="remitAccountLast5" label="戶頭末五碼" width="100" />
+          <el-table-column label="繳費金額" width="150">
+            <template #default="scope">
+              <el-text v-if="isEarlyBird && scope.row.category === 1">700</el-text>
+              <el-text v-if="!isEarlyBird && scope.row.category === 1">1000</el-text>
+              <el-text v-if="isEarlyBird && scope.row.category === 2">600</el-text>
+              <el-text v-if="!isEarlyBird && scope.row.category === 2">1200</el-text>
+              <el-text v-if="isEarlyBird && scope.row.category === 3">1000</el-text>
+              <el-text v-if="!isEarlyBird && scope.row.category === 3">1500</el-text>
+            </template>
+          </el-table-column>
+          <el-table-column prop="idCard" label="身分證字號" width="200" />
+          <el-table-column prop="category" label="會員類別" width="200">
+            <template #default="scope">
+              {{ memberEnums[scope.row.category] }}
 
-      <div class="search-bar">
-        <el-input v-model="input" style="width: 240px" placeholder="輸入內容,Enter查詢" @input="getMember(currentPage, 10)" />
-      </div>
+            </template>
+          </el-table-column>
 
-      <el-table class="news-table" :data="memberList.records">
-        <el-table-column type="selection" width="55" />
-        <!-- <el-table-column fixed prop="lastName" label="姓氏" width="90" />
-        <el-table-column fixed prop="firstName" label="名字" width="90" /> -->
-        <el-table-column prop="chineseName" label="中文姓名" width="100"></el-table-column>
-        <el-table-column prop="country" label="國家" width="100" />
-        <el-table-column prop="remitAccountLast5" label="戶頭末五碼" width="100" />
-        <el-table-column label="繳費金額" width="150">
-          <template #default="scope">
-            <el-text v-if="isEarlyBird && scope.row.category === 1">700</el-text>
-            <el-text v-if="!isEarlyBird && scope.row.category === 1">1000</el-text>
-            <el-text v-if="isEarlyBird && scope.row.category === 2">600</el-text>
-            <el-text v-if="!isEarlyBird && scope.row.category === 2">1200</el-text>
-            <el-text v-if="isEarlyBird && scope.row.category === 3">1000</el-text>
-            <el-text v-if="!isEarlyBird && scope.row.category === 3">1500</el-text>
-          </template>
-        </el-table-column>
-        <el-table-column prop="idCard" label="身分證字號" width="200" />
-        <el-table-column prop="category" label="會員類別" width="200">
-          <template #default="scope">
-            {{ memberEnums[scope.row.category] }}
+          <el-table-column prop="email" label="信箱" />
+          <el-table-column prop="phone" label="手機" width="140" />
 
-          </template>
-        </el-table-column>
+          <el-table-column fixed="right" label="操作" width="150">
+            <!-- 透過#default="scope" , 獲取到當前的對象值 , scope.row則是拿到當前那個row的數據  -->
+            <template #default="scope">
+              <el-button type="primary" size="small" @click="updateUnpaidMember(scope.row.memberId)">
+                通過
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </template>
 
-        <el-table-column prop="email" label="信箱" />
-        <el-table-column prop="phone" label="手機" width="140" />
-
-        <el-table-column fixed="right" label="操作" width="150">
-          <!-- 透過#default="scope" , 獲取到當前的對象值 , scope.row則是拿到當前那個row的數據  -->
-          <template #default="scope">
-            <el-button type="primary" size="small" @click="updateUnpaidMember(scope.row.memberId)">
-              通過
-            </el-button>
-            <!-- <el-button type="danger" size="small" @click="failedRow(scope.row)">
-              不通過
-            </el-button> -->
-          </template>
-        </el-table-column>
-      </el-table>
-
-
-      <!-- 
-      分頁插件 total為總資料數(這邊設置20筆),  default-page-size代表每頁顯示資料(預設為10筆,這邊設置為5筆) 
-      current-page當前頁數,官方建議使用v-model與current-page去與自己設定的變量做綁定,
-    -->
-      <div class="example-pagination-block news-pagination">
+      <template #pagination-box>
         <el-pagination layout="prev, pager, next" :page-count="Number(memberList.pages)"
-          :default-page-size="Number(memberList.size)" v-model:current-page="currentPage" :hide-on-single-page="true" />
-      </div>
-
-
-    </el-card>
-  </section>
+          :default-page-size="Number(memberList.size)" v-model:current-page="currentPage"
+          :hide-on-single-page="false" />
+      </template>
+    </BasicComponent>
+  </div>
 </template>
 
 <script setup lang='ts'>
+import BasicComponent from '@/layout/components/Basic/index.vue'
 
 import { ref, reactive } from 'vue'
 import { Delete, Plus } from '@element-plus/icons-vue'
