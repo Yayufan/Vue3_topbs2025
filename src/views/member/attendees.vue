@@ -1,17 +1,10 @@
 <!--  -->
 <template>
-  <section class="member-section">
-    <el-card class="member-card">
-      <h1>與會者列表</h1>
+  <div class="content">
+    <BasicComponent title="與會者管理" :totalCount="attendeeList.total + ' 人'">
 
-      <!-- 如果要用兩種註冊方式再考慮使用這個 -->
-      <div class="function-bar">
-        <div class="display-count">
-          與會人數為： {{ attendeeList.total }} 人
-        </div>
+      <template #option-box>
         <div class="btn-box">
-
-
           <el-button type="danger" @click="deleteAttendeeList" :disabled="selectList.length > 0 ? false : true">
             批量刪除<el-icon class="el-icon--right">
               <Delete />
@@ -21,94 +14,89 @@
             下載Excel
           </el-button>
         </div>
-      </div>
+      </template>
 
-      <div class="search-bar">
+      <template #search-box>
         <el-input v-model="input" style="width: 240px" placeholder="輸入內容,Enter查詢" @input="getAttendeeList()" />
-      </div>
+      </template>
 
-      <el-table class="news-table" :data="attendeeList.records" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" />
-        <el-table-column fixed prop="firstName" label="名字" width="90">
-          <template #default="scope">
-            {{ scope.row.member.firstName }}
-          </template>
-        </el-table-column>
-        <el-table-column fixed prop="lastName" label="姓氏" width="90">
-          <template #default="scope">
-            {{ scope.row.member.lastName }}
-          </template>
-        </el-table-column>
+      <template #data-table>
+        <el-table class="news-table" :data="attendeeList.records" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="55" />
+          <el-table-column fixed prop="firstName" label="名字" width="90">
+            <template #default="scope">
+              {{ scope.row.member.firstName }}
+            </template>
+          </el-table-column>
+          <el-table-column fixed prop="lastName" label="姓氏" width="90">
+            <template #default="scope">
+              {{ scope.row.member.lastName }}
+            </template>
+          </el-table-column>
 
-        <el-table-column fixed prop="idCard" label="身分證" width="190">
-          <template #default="scope">
-            {{ scope.row.member.idCard }}
-          </template>
-        </el-table-column>
-        <el-table-column fixed prop="lastName" label="飲食偏好" width="100">
-          <template #default="scope">
-            {{ scope.row.member.food }}
-          </template>
-        </el-table-column>
+          <el-table-column fixed prop="idCard" label="身分證" width="190">
+            <template #default="scope">
+              {{ scope.row.member.idCard }}
+            </template>
+          </el-table-column>
+          <el-table-column fixed prop="lastName" label="飲食偏好" width="100">
+            <template #default="scope">
+              {{ scope.row.member.food }}
+            </template>
+          </el-table-column>
 
-        <el-table-column prop="email" label="信箱">
-          <template #default="scope">
-            {{ scope.row.member.email }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="phone" label="手機" width="140">
-          <template #default="scope">
-            {{ scope.row.member.phone }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="tagSet" label="標籤" min-width="40" align="center">
-          <template #default="scope">
-            <el-popover v-if="scope.row.tagSet.length > 0" placement="left-start" title="標籤" :width="200"
-              trigger="hover">
-              <template #reference>
-                <el-tag v-if="findFirstVaildTag(scope.row.tagSet)" size="large" round
-                  :color="findFirstVaildTag(scope.row.tagSet).color" effect="light">{{
-                    findFirstVaildTag(scope.row.tagSet).name }}</el-tag>
-              </template>
-              <template #default>
-                <div class="tag-popover-box">
-                  <div v-for="tag in scope.row.tagSet" :key="tag.tagId" class="tag-item">
-                    <el-tag v-if="tag.status === 0" size="large" round :color="tag.color">{{
-                      tag.name }}</el-tag>
+          <el-table-column prop="email" label="信箱">
+            <template #default="scope">
+              {{ scope.row.member.email }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="phone" label="手機" width="140">
+            <template #default="scope">
+              {{ scope.row.member.phone }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="tagSet" label="標籤" min-width="40" align="center">
+            <template #default="scope">
+              <el-popover v-if="scope.row.tagSet.length > 0" placement="left-start" title="標籤" :width="200"
+                trigger="hover">
+                <template #reference>
+                  <el-tag v-if="findFirstVaildTag(scope.row.tagSet)" size="large" round
+                    :color="findFirstVaildTag(scope.row.tagSet).color" effect="light">{{
+                      findFirstVaildTag(scope.row.tagSet).name }}</el-tag>
+                </template>
+                <template #default>
+                  <div class="tag-popover-box">
+                    <div v-for="tag in scope.row.tagSet" :key="tag.tagId" class="tag-item">
+                      <el-tag v-if="tag.status === 0" size="large" round :color="tag.color">{{
+                        tag.name }}</el-tag>
+                    </div>
                   </div>
-                </div>
-              </template>
-            </el-popover>
+                </template>
+              </el-popover>
 
-          </template>
-        </el-table-column>
+            </template>
+          </el-table-column>
 
-        <el-table-column label="操作" width="150" align="center">
-          <template #default="scope">
-            <el-button link type="danger" @click="deleteAttendee(scope.row.attendeesId)">Delete</el-button>
-          </template>
+          <el-table-column label="操作" width="150" align="center">
+            <template #default="scope">
+              <el-button link type="danger" @click="deleteAttendee(scope.row.attendeesId)">Delete</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </template>
 
-        </el-table-column>
-
-      </el-table>
-
-
-      <!-- 
-      分頁插件 total為總資料數(這邊設置20筆),  default-page-size代表每頁顯示資料(預設為10筆,這邊設置為5筆) 
-      current-page當前頁數,官方建議使用v-model與current-page去與自己設定的變量做綁定,
-    -->
-      <div class="example-pagination-block news-pagination">
+      <template #pagination-box>
         <el-pagination layout="prev, pager, next" :page-count="Number(attendeeList.pages)"
           :default-page-size="Number(attendeeList.size)" v-model:current-page="currentPage"
           :hide-on-single-page="true" />
-      </div>
-
-
-    </el-card>
-  </section>
+      </template>
+    </BasicComponent>
+  </div>
 </template>
 
 <script setup lang='ts'>
+
+import BasicComponent from '@/layout/components/Basic/index.vue'
 
 import { ref, reactive } from 'vue'
 import { Delete, Plus } from '@element-plus/icons-vue'

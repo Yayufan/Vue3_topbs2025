@@ -113,3 +113,10 @@ export function sendEmailByCategoryAndTagApi(
     data,
   });
 }
+
+export function fetchEmailQuotaApi(): AxiosPromise<any> {
+  return request({
+    url: `/email-template/email-quota`,
+    method: "get",
+  });
+}

@@ -1,16 +1,8 @@
 <!--  -->
 <template>
-
-  <section class="emailTemplate-section">
-    <el-card class="emailTemplate-card">
-      <h1>信件模板管理</h1>
-
-      <!-- 如果要用兩種註冊方式再考慮使用這個 -->
-      <div class="function-bar">
-        <div class="search-bar">
-          <el-input v-model="input" style="width: 240px" placeholder="輸入內容,Enter查詢" @keydown.enter="" />
-        </div>
-
+  <div class="content">
+    <BasicComponent title="信件模板管理">
+      <template #option-box>
         <div class="btn-box">
 
           <el-button type="danger" @click="deleteList" :disabled="deleteSelectList.length > 0 ? false : true">
@@ -27,100 +19,92 @@
             </el-icon>
           </el-button>
         </div>
+      </template>
 
+      <template #search-box>
+        <el-input v-model="input" style="width: 240px" placeholder="輸入內容,Enter查詢" @keydown.enter="" />
+      </template>
 
-      </div>
+      <template #data-table>
+        <el-table empty-text="No Data" class="emailTemplate-table" :data="emailTemplateList.records"
+          @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="55" />
+          <el-table-column fixed prop="name" label="名稱" width="200" />
+          <el-table-column fixed prop="name" label="類型" width="150">
+            <template #default="scope">
+              <el-tag v-if="scope.row.category === 'poster'" type="primary">投稿者</el-tag>
+              <el-tag v-if="scope.row.category === 'reviewer'" type="warning">審稿委員</el-tag>
+              <el-tag v-if="scope.row.category === 'all'">會員</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column fit prop="description" label="描述" />
+          <el-table-column prop="createTime" label="創建時間" width="200" />
+          <el-table-column prop="updateTime" label="修改時間" width="200" />
 
+          <el-table-column fixed="right" label="操作" width="150">
+            <!-- 透過#default="scope" , 獲取到當前的對象值 , scope.row則是拿到當前那個row的數據  -->
+            <template #default="scope">
+              <el-button link type="success" size="small" @click="sendEmail(scope.row)">
+                Send
+              </el-button>
+              <el-button link type="primary" size="small" @click="editRow(scope.row)">
+                Edit
+              </el-button>
+              <el-button link type="danger" size="small" @click="deleteRow(scope.row.emailTemplateId)">
+                Delete</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </template>
 
-
-      <el-table empty-text="No Data" class="emailTemplate-table" :data="emailTemplateList.records"
-        @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" />
-        <el-table-column fixed prop="name" label="名稱" width="200" />
-        <el-table-column fixed prop="name" label="類型" width="150">
-          <template #default="scope">
-            <el-tag v-if="scope.row.category === 'poster'" type="primary">投稿者</el-tag>
-            <el-tag v-if="scope.row.category === 'reviewer'" type="warning">審稿委員</el-tag>
-            <el-tag v-if="scope.row.category === 'all'">會員</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column fit prop="description" label="描述" />
-        <el-table-column prop="createTime" label="創建時間" width="200" />
-        <el-table-column prop="updateTime" label="修改時間" width="200" />
-
-        <el-table-column fixed="right" label="操作" width="150">
-          <!-- 透過#default="scope" , 獲取到當前的對象值 , scope.row則是拿到當前那個row的數據  -->
-          <template #default="scope">
-            <el-button link type="success" size="small" @click="sendEmail(scope.row)">
-              Send
-            </el-button>
-            <el-button link type="primary" size="small" @click="editRow(scope.row)">
-              Edit
-            </el-button>
-            <el-button link type="danger" size="small" @click="deleteRow(scope.row.emailTemplateId)">
-              Delete</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-
-
-      <!-- 
-      分頁插件 total為總資料數(這邊設置20筆),  default-page-size代表每頁顯示資料(預設為10筆,這邊設置為5筆) 
-      current-page當前頁數,官方建議使用v-model與current-page去與自己設定的變量做綁定,
-    -->
-      <div class="example-pagination-block emailTemplate-pagination">
+      <template #pagination-box>
         <el-pagination layout="prev, pager, next" :page-count="Number(emailTemplateList.pages)"
           :default-page-size="Number(emailTemplateList.size)" v-model:current-page="currentPage"
-          :hide-on-single-page="true" />
-      </div>
+          :hide-on-single-page="false" />
+      </template>
+    </BasicComponent>
+
+    <ElDialog v-model="dialogFormVisible" title="新增信件模板" width="400">
+
+      <el-form :model="insertEmailTemplateFormData" ref="form" :rules="insertEmailTemplateRules">
+
+        <el-form-item label="名稱" :label-width="formLabelWidth" prop="name">
+          <el-input v-model="insertEmailTemplateFormData.name" />
+        </el-form-item>
+
+        <el-form-item label="分類" :label-width="formLabelWidth" prop="category">
+          <el-select v-model="insertEmailTemplateFormData.category">
+            <el-option label="會員" value="all" />
+            <!-- <el-option label="與會者" value="attendees" /> -->
+            <el-option label="投稿者" value="poster" />
+            <el-option label="審稿委員" value="reviewer" />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="描述" :label-width="formLabelWidth" prop="description">
+          <el-input type="textarea" v-model="insertEmailTemplateFormData.description" />
+        </el-form-item>
 
 
+      </el-form>
 
-      <!-- 新增對話框 -->
-      <ElDialog v-model="dialogFormVisible" title="新增信件模板" width="400">
+      <template #footer>
+        <div class="dialog-footer">
+          <ElButton @click="dialogFormVisible = false">取消</ElButton>
+          <ElButton type="primary" @click="submitInsertForm(form)">
+            建立
+          </ElButton>
+        </div>
+      </template>
 
-        <el-form :model="insertEmailTemplateFormData" ref="form" :rules="insertEmailTemplateRules">
+    </ElDialog>
+  </div>
 
-          <el-form-item label="名稱" :label-width="formLabelWidth" prop="name">
-            <el-input v-model="insertEmailTemplateFormData.name" />
-          </el-form-item>
-
-          <el-form-item label="分類" :label-width="formLabelWidth" prop="name">
-            <el-select v-model="insertEmailTemplateFormData.category">
-              <el-option label="會員" value="all" />
-              <el-option label="投稿者" value="poster" />
-              <el-option label="審稿委員" value="reviewer" />
-            </el-select>
-          </el-form-item>
-
-          <el-form-item label="描述" :label-width="formLabelWidth" prop="description">
-            <el-input type="textarea" v-model="insertEmailTemplateFormData.description" />
-          </el-form-item>
-
-
-        </el-form>
-
-        <template #footer>
-          <div class="dialog-footer">
-            <ElButton @click="dialogFormVisible = false">取消</ElButton>
-            <ElButton type="primary" @click="submitInsertForm(form)">
-              建立
-            </ElButton>
-          </div>
-        </template>
-
-      </ElDialog>
-
-
-
-
-    </el-card>
-
-  </section>
 
 </template>
 
 <script setup lang='ts'>
+import BasicComponent from '@/layout/components/Basic/index.vue'
 
 import { ref, reactive } from 'vue'
 import { Delete, Plus } from '@element-plus/icons-vue'
