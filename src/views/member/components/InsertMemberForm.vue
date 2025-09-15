@@ -106,7 +106,7 @@ const data = ref<Member>({
   affiliation: '',
   jobTitle: '',
   idCard: '',
-  countryCode: '+886',
+  countryCode: '',
   phone: '',
   food: '葷',
   foodTaboo: '',
@@ -211,5 +211,15 @@ const submitInsertForm = (form: FormInstance | undefined) => {
   }
 
 
+}
+
+.btn-box {
+  text-align: center;
+  display: flex;
+  justify-content: flex-end;
+
+  .el-button {
+    margin: 0 1rem;
+  }
 }
 </style>

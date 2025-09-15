@@ -1,15 +1,15 @@
 import request from '@/utils/request';
 import { AxiosPromise } from 'axios';
 
-export function fetchScheduleEmailTaskPageApi(page: number, size: number, recipientCategory: string | null, status: number | null): AxiosPromise<any> {
+
+export function fetchScheduleEmailTaskPageApi(page: number, size: number, options?: { recipientCategory: string | undefined, status: number | undefined }): AxiosPromise<any> {
   return request({
     url: '/schedule-email-task/pagination',
     method: 'get',
     params: {
       page,
       size,
-      recipientCategory,
-      status
+      ...options
     }
   })
 }

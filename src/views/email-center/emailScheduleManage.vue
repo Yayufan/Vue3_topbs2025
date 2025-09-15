@@ -52,7 +52,7 @@
       </template>
 
       <template #pagination-box>
-        <el-pagination layout="prev, pager, next" :page-size="fetchRes.size"
+        <el-pagination layout="prev, pager, next" :page-size="Number(fetchRes.size)"
           :current-page="fetchDataCondition.currentPage" :total="Number(fetchRes.total)"
           @current-change="handlePageChange" />
       </template>
@@ -82,13 +82,14 @@ const useFetchDataManagement = () => {
   })
 
   const fetchScheduleEmailTaskList = async () => {
-    let recipientCategory = fetchDataCondition.value.recipientCategory === '' ? null : fetchDataCondition.value.recipientCategory;
-    let status = fetchDataCondition.value.status === '' ? null : Number(fetchDataCondition.value.status);
-    const { res, error }: any = await tryCatch(fetchScheduleEmailTaskPageApi(fetchDataCondition.value.currentPage, fetchDataCondition.value.pageSize, recipientCategory, status));
+    let recipientCategory = fetchDataCondition.value.recipientCategory || undefined;
+    let status = fetchDataCondition.value.status ? Number(fetchDataCondition.value.status) : undefined;
+    const { res, error }: any = await tryCatch(fetchScheduleEmailTaskPageApi(fetchDataCondition.value.currentPage, fetchDataCondition.value.pageSize, { recipientCategory, status }));
     if (error || res.code !== 200) {
-      console.error('獲取E-Mail任務列表失敗', error || res.message);
+      ElMessage.error('獲取E-Mail任務列表失敗', error || res.message);
       return;
     }
+    console.log(res.data);
     fetchRes.value = res.data
   }
 
