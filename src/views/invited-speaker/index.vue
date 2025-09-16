@@ -453,8 +453,6 @@ const deleteList = () => {
       padding-right: 4rem;
       gap: 2rem;
 
-      .top-left {}
-
       .top-right {
         height: 15rem;
         width: 15rem;
