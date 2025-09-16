@@ -218,7 +218,6 @@ import { addNewInvitedSpeakerApi, batchDeleteInvitedSpeakerApi, deleteInvitedSpe
 import { FormInstance, FormRules, UploadProps, UploadRawFile } from 'element-plus';
 
 import countriesJson from '@/assets/data/countries.json'
-import { env } from 'process';
 const countries = reactive(countriesJson);
 
 
@@ -230,7 +229,6 @@ const speakerList = ref<any>([]);
 const getInvitedSpeakerByPagination = async () => {
   const res = await getInvitedSpeakerListByPaginationApi(currentPage.value, 10);
   Object.assign(speakerList.value, res.data);
-  console.log('speakerList', speakerList.value);
 }
 
 const handlePageChange = (page: number) => {
