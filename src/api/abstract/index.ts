@@ -67,3 +67,46 @@ export function downloadPaperScoreExcelApi(reviewStage: string): AxiosPromise<an
     responseType: "arraybuffer",
   });
 }
+
+export function getDownloadPaperFileUrlApi(): AxiosPromise<any> {
+  return request({
+    url: "/paper/download/get-download-folder-url",
+    method: "post",
+  });
+}
+
+export function downloadPaperFolderApi(url: string) {
+  request({
+    url: url,
+    method: "get",
+    responseType: "arraybuffer",
+  }).then(async (res: any) => {
+    console.log(res);
+    console.log(res.data)
+    const blob = new Blob([res.data], { type: 'application/zip' });
+
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = '稿件.zip';
+    document.body.appendChild(link); // Append the link to the body
+    link.click();
+    document.body.removeChild(link); // Clean up by removing the link
+    window.URL.revokeObjectURL(link.href);
+
+
+    // const a = document.createElement('a');
+    // a.href = url;
+    // a.download = 'download.zip'; //
+    // document.body.appendChild(a);
+    // a.click();
+    // a.remove();
+    // URL.revokeObjectURL(url);
+
+    // const blob = new Blob([res as any], { type: "application/zip" });
+    // const link = document.createElement("a");
+    // link.href = window.URL.createObjectURL(blob);
+    // link.download = "稿件.zip";
+    // link.click();
+    // window.URL.revokeObjectURL(link.href);
+  })
+};
