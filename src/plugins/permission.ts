@@ -40,20 +40,6 @@ export async function setupPermission() {
       NProgress.done();
       return;
     }
-    // else {
-    //   // 未登录可以访问白名单页面
-    //   if (whiteList.indexOf(to.path) !== -1) {
-    //     next();
-    //   } else {
-    //     console.log("已登录，访问非白名单页面", to.path);
-    //     if (isReviewerLogin) {
-    //       next(`/reviewer-login?redirect=${to.path}`);
-    //     } else {
-    //       next(`/login?redirect=${to.path}`);
-    //     }
-    //     NProgress.done();
-    //   }
-    // }
 
     if (to.path === "/login" || to.path === "/reviewer-login") {
       NProgress.done();
@@ -76,32 +62,7 @@ export async function setupPermission() {
 
     if (needInit) {
       try {
-        // if (!userStore.user.roleList || userStore.user.roleList.length === 0) {
-        //   if (isReviewerLogin) {
-        //     await userStore.getReviewerInfo();
-        //   } else if (isAdminLogin) {
-        //     await userStore.getUserInfo();
-        //   }
-        // }
 
-        // if (!hasAddDynamicRoutes && userStore.user.roleList.length > 0) {
-        //   const accessedRoutes = await permissionStore.generateRoutes(userStore.user.roleList);
-        //   accessedRoutes.forEach((route: RouteRecordRaw) => {
-        //     if (route.name && !router.hasRoute(route.name)) { // 使用 name 或 path 作為識別
-        //       router.addRoute(route); // 將路由添加到 Vue Router 實例
-        //     } else {
-        //       console.warn("路由已存在，跳過添加:", route.path);
-        //     }
-        //   })
-        //   console.log("目前所有路由：", router.getRoutes().map(r => r.path));
-        //   console.log("目前導航目標：", to.path);
-        //   hasAddDynamicRoutes = true;
-        // }
-        // const resolved = router.resolve(to.fullPath);
-        // if (resolved.matched.length === 0) {
-        //   console.warn("導航路徑不存在於已註冊路由中，跳轉到 404");
-        //   return next({ path: "/404", replace: true });
-        // }
         await initializeRoutes();
         const resolvedRoute = router.resolve(to.fullPath);
 
@@ -112,96 +73,15 @@ export async function setupPermission() {
           // 路由可能已經成功添加，重新導航以匹配新路由
           next({ ...to, replace: true });
         }
-        return next({ ...to, replace: true });
+        // return next({ ...to, replace: true });
       } catch (error) {
-        // console.error("獲取用戶信息失敗", error);
-        // if (isReviewerLogin) {
-        //   next(`/reviewer-login?redirect=${to.path}`);
-        // } else {
-        //   next(`/login?redirect=${to.path}`);
-        // }
-        // NProgress.done();
-        // return;
+
       }
       NProgress.done();
       return;
     }
 
 
-    // if (!userStore.user.roleList || userStore.user.roleList.length === 0 || !hasAddDynamicRoutes) {
-    //   let userRoles: string[] = [];
-
-    //   if (!userStore.user.roleList || userStore.user.roleList.length === 0) {
-    //     if (isReviewerLogin) {
-    //       const { res: reviewerRes, error: reviewerError } = await tryCatch(userStore.getReviewerInfo());
-    //       if (reviewerError) {
-    //         console.error("獲取審稿人信息失敗", reviewerError);
-    //         next(`/reviewer-login?redirect=${to.path}`);
-    //         NProgress.done();
-    //         return;
-    //       }
-    //       userRoles = userStore.user.roleList || [];
-    //     } else if (isAdminLogin) {
-    //       const { res, error } = await tryCatch(userStore.getUserInfo());
-    //       if (error) {
-    //         console.error("獲取用戶信息失敗", error);
-    //         next(`/login?redirect=${to.path}`);
-    //         NProgress.done();
-    //         return;
-    //       }
-    //       userRoles = userStore.user.roleList || [];
-    //     }
-    //   } else {
-    //     userRoles = userStore.user.roleList || [];
-    //   }
-
-    //   if (!hasAddDynamicRoutes && userRoles.length > 0) {
-    //     // 獲取菜單權限路由
-    //     const accessRoutes = await permissionStore.generateRoutes(userStore.user.roleList);
-    //     // console.log('在permission裡生成的動態路由', accessRoutes)
-    //     // console.log('路由器', router)
-
-    //     // 遍歷動態路由,真正由路由器進行添加
-    //     accessRoutes.forEach((route: RouteRecordRaw) => {
-    //       if (!router.hasRoute(route.name || route.path)) { // 使用 name 或 path 作為識別
-    //         router.addRoute(route); // 將路由添加到 Vue Router 實例
-    //       } else {
-    //         console.warn("路由已存在，跳過添加:", route.path);
-    //       }
-    //     });
-    //     hasAddDynamicRoutes = true;
-    //     console.log(router.getRoutes());
-
-    //     // 未匹配到任何路由，跳转404
-    //     // console.log(to)
-    //     // const resolvedRoute = router.resolve(to.fullPath);
-    //     // console.log(resolvedRoute);
-    //     // if (to.matched.length === 0) {
-    //     //   console.log("動態路由還沒添加,所以沒有匹配到路由,跳轉404");
-    //     //   NProgress.done();
-    //     //   return next({ path: to.fullPath, replace: true });
-    //     // }
-
-    //     console.log("動態路由添加完成", router.getRoutes());
-
-    //     // 重新導航到目標路由，讓路由重新解析
-    //     const targetRoute = router.resolve(to.fullPath);
-    //     if (targetRoute.matched.length === 0) {
-    //       // 路由不存在，跳轉到 404 或首頁
-    //       console.error("未匹配到任何路由，跳转到 404 页面");
-    //       next({ path: "/404", replace: true });
-    //     } else {
-    //       console.log(to)
-    //       // 重新導航到目標路由
-    //       next({ ...to, replace: true });
-    //     }
-    //   }
-    //   isAddingRoutes = false; // 重置添加路由狀態
-    //   console.log("to", to);
-    //   NProgress.done();
-    //   return;
-
-    // }
     next();
     NProgress.done();
 

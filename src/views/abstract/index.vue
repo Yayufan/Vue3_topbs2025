@@ -37,6 +37,10 @@
           <el-button type="success" @click="downloadExcel('second_review')">
             下載二階評分Excel
           </el-button>
+
+          <el-button type="primary" @click="batchDownloadPaperFile">
+            下載稿件
+          </el-button>
         </div>
         <!-- <el-select v-model="filterAbsProp" style="width: 240px;" class="filter-abs-prop"
           placeholder="請選擇文章屬性"></el-select> -->
@@ -197,7 +201,7 @@
 
 </template>
 <script lang="ts" setup>
-import { assignPaperReviewersApi, autoAssignPaperReviewersApi, downloadPaperScoreExcelApi, getPaperPageApi, updatePaperApi } from '@/api/abstract';
+import { assignPaperReviewersApi, autoAssignPaperReviewersApi, downloadPaperScoreExcelApi, getDownloadPaperFileUrlApi, getPaperPageApi, updatePaperApi } from '@/api/abstract';
 import { tryCatch } from '@/utils/tryCatch';
 
 
@@ -405,6 +409,15 @@ const downloadExcel = async (reviewStage: string) => {
   link.setAttribute('download', fileName);
   document.body.appendChild(link);
   link.click();
+}
+
+const batchDownloadPaperFile = async () => {
+  const { res, error }: any = await tryCatch(getDownloadPaperFileUrlApi());
+  if (error || res.code !== 200) {
+    console.error('Error fetching download URL:', error || res.message);
+    return;
+  }
+  window.open(import.meta.env.VITE_APP_BASE_API + res.data, '_blank');
 }
 
 onMounted(() => {

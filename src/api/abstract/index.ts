@@ -67,3 +67,10 @@ export function downloadPaperScoreExcelApi(reviewStage: string): AxiosPromise<an
     responseType: "arraybuffer",
   });
 }
+
+export function getDownloadPaperFileUrlApi(): AxiosPromise<any> {
+  return request({
+    url: "/paper/download/get-download-folder-url",
+    method: "post",
+  });
+}
