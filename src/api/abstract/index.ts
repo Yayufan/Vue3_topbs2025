@@ -88,25 +88,9 @@ export function downloadPaperFolderApi(url: string) {
     const link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
     link.download = '稿件.zip';
-    document.body.appendChild(link); // Append the link to the body
+    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link); // Clean up by removing the link
+    document.body.removeChild(link);
     window.URL.revokeObjectURL(link.href);
-
-
-    // const a = document.createElement('a');
-    // a.href = url;
-    // a.download = 'download.zip'; //
-    // document.body.appendChild(a);
-    // a.click();
-    // a.remove();
-    // URL.revokeObjectURL(url);
-
-    // const blob = new Blob([res as any], { type: "application/zip" });
-    // const link = document.createElement("a");
-    // link.href = window.URL.createObjectURL(blob);
-    // link.download = "稿件.zip";
-    // link.click();
-    // window.URL.revokeObjectURL(link.href);
   })
 };
