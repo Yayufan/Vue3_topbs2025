@@ -201,7 +201,7 @@
 
 </template>
 <script lang="ts" setup>
-import { assignPaperReviewersApi, autoAssignPaperReviewersApi, downloadPaperFolderApi, downloadPaperScoreExcelApi, getDownloadPaperFileUrlApi, getPaperPageApi, updatePaperApi } from '@/api/abstract';
+import { assignPaperReviewersApi, autoAssignPaperReviewersApi, downloadPaperScoreExcelApi, getDownloadPaperFileUrlApi, getPaperPageApi, updatePaperApi } from '@/api/abstract';
 import { tryCatch } from '@/utils/tryCatch';
 
 
