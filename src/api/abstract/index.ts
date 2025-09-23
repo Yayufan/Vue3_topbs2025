@@ -74,23 +74,3 @@ export function getDownloadPaperFileUrlApi(): AxiosPromise<any> {
     method: "post",
   });
 }
-
-export function downloadPaperFolderApi(url: string) {
-  request({
-    url: url,
-    method: "get",
-    responseType: "arraybuffer",
-  }).then(async (res: any) => {
-    console.log(res);
-    console.log(res.data)
-    const blob = new Blob([res.data], { type: 'application/zip' });
-
-    const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.download = '稿件.zip';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(link.href);
-  })
-};
