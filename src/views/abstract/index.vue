@@ -417,8 +417,7 @@ const batchDownloadPaperFile = async () => {
     console.error('Error fetching download URL:', error || res.message);
     return;
   }
-  console.log(res.data)
-  downloadPaperFolderApi(res.data);
+  window.open(import.meta.env.VITE_APP_BASE_API + res.data, '_blank');
 }
 
 onMounted(() => {
