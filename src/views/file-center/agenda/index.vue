@@ -32,7 +32,7 @@ const GROUP = "agenda"
 //後端獲取Page資料後要傳給子組件的數據
 let fileList = reactive({})
 //子類別選項
-let typeOption = reactive(["Day1-101", "Day1-102", "Day2-101", "Day2-102", "Day1", "Day2"])
+let typeOption = reactive(["Day1-101", "Day1-102", "Day1-103", "Day2-101", "Day2-102", "Day2-103", "Day1", "Day2"])
 
 //獲取最新消息
 const getFile = async (page: number, size: number) => {
