@@ -69,20 +69,6 @@ const router = useRouter()
 //formLabel 寬度
 const formLabelWidth = '140px'
 
-const earlyBirdDate = ref(new Date('2025/9/31'))
-
-const isEarlyBird = ref(false)
-
-const checkEarlyBird = (date: Date) => {
-  const now = new Date()
-  const earlyBird = new Date(date)
-  if (now <= earlyBird) {
-    isEarlyBird.value = true
-  } else {
-    isEarlyBird.value = false
-  }
-}
-
 
 /**--------------顯示數據相關---------------------------- */
 
@@ -140,7 +126,6 @@ const updateUnpaidMember = async (memberId: string) => {
 onMounted(() => {
   getMemberCount()
   getMember(1, 10)
-  checkEarlyBird(earlyBirdDate.value)
 })
 
 
