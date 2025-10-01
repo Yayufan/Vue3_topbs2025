@@ -186,7 +186,12 @@
       <el-table v-if="assignTag.type === 'member'" :data="allMemberList.records" ref="memberTableRef"
         :row-key="getRowKey" @select="handleMemberSelect" empty-text="查無資料">
         <el-table-column type="selection" width="55" :reserve-selection="true" />
-        <el-table-column prop="chineseName" label="名稱" />
+        <el-table-column prop="chineseName" label="名稱">
+          <template #default="{ row }">
+            <span v-if="row.chineseName && row.chineseName !== ''">{{ row.chineseName }}</span>
+            <span v-else>{{ row.firstName + ' ' + row.lastName }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="email" label="Email" />
         <el-table-column prop="phone" label="電話" />
       </el-table>
