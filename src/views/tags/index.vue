@@ -188,7 +188,8 @@
         <el-table-column type="selection" width="55" :reserve-selection="true" />
         <el-table-column prop="chineseName" label="名稱">
           <template #default="{ row }">
-            {{ row.firstName + ' ' + row.lastName }}
+            <span v-if="row.chineseName && row.chineseName !== ''">{{ row.chineseName }}</span>
+            <span v-else>{{ row.firstName + ' ' + row.lastName }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="email" label="Email" />
