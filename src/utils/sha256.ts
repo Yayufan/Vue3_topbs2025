@@ -51,12 +51,9 @@ export async function hashFile(file: File) {
   const hashArray = new Uint8Array(finalHash);
   const hash = arrayBufferToHex(hashArray);
 
-  console.log("hash", hash);
-  console.log(chunks.length, "chunks");
 
   // 帶著 hash 去後端查詢是否存在該文件, 回傳 true 或 false
   // let res = await slideCheck(hash);
-  // console.log("res", res);
 
   let res = {
     hash: hash,
@@ -67,7 +64,6 @@ export async function hashFile(file: File) {
   return res;
 
   // if (!res.data.exist) {
-  //   console.log("文件不存在, 開始上傳");
 
   //   const MAX_CONCURRENT = 5; // 設置最大併發數量
   //   const uploadChunk = async (chunk: Blob, index: number) => {
@@ -92,9 +88,7 @@ export async function hashFile(file: File) {
   //   );
   //   await limitConcurrency(uploadTasks, MAX_CONCURRENT);
   // } else {
-  //   console.log("文件已存在");
   //   let baseUrl = import.meta.env.VITE_MINIO_API_URL;
-  //   console.log("baseUrl", baseUrl);
   //   let url = `${baseUrl}/topbs2025/${res.data.path}`;
   //   window.open(url, "_blank");
   // }
@@ -149,7 +143,6 @@ function arrayBufferToHex(buffer: Uint8Array): string {
 }
 
 export async function slideCheck(data: string) {
-  console.log("slideUpload", data);
   let res = await request({
     url: "/paper/slide-check",
     method: "get",
@@ -168,7 +161,6 @@ export async function slideUpload(
   percentage: Ref<number>
 ) {
   if (!checkResult.data.exist) {
-    console.log("文件不存在, 開始上傳");
 
     const MAX_CONCURRENT = 5; // 設置最大併發數量
     const uploadChunk = async (chunk: Blob, index: number) => {
@@ -185,8 +177,6 @@ export async function slideUpload(
       formData.append("file", chunk);
       formData.append("data", JSON.stringify(data));
       if (data == null) {
-        console.log(console.log(index));
-        console.log("data is null");
       }
       await slideUploadApi(formData);
     };
@@ -196,21 +186,16 @@ export async function slideUpload(
       (chunk, index) => () => uploadChunk(chunk, index)
     );
     await limitConcurrency(uploadTasks, MAX_CONCURRENT, percentage);
-    console.log("上傳完成");
     percentage.value = 100; // 上傳完成後設置為 100%
-    console.log(percentage.value);
   } else {
-    console.log("文件已存在");
     percentage.value = 100;
     let baseUrl = import.meta.env.VITE_MINIO_API_URL;
-    console.log("baseUrl", baseUrl);
     let url = `${baseUrl}/topbs2025/${checkResult.data.path}`;
     window.open(url, "_blank");
   }
 }
 
 function slideUploadApi(data: any) {
-  console.log("slideUpload", data);
   return fileRequest({
     url: "/paper/slide-upload",
     method: "post",

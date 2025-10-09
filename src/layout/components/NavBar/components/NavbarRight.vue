@@ -94,7 +94,6 @@ function logout() {
 }
 
 function reviewerLogout() {
-  console.log(123)
   ElMessageBox.confirm("确定登出系統嗎？", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",

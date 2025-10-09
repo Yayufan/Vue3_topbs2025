@@ -18,20 +18,17 @@
             <el-form-item label="信件選項" prop="emailOptions">
               <div class="checkbox-group">
                 <div class="checkbox-item">
-                  <el-checkbox v-model="sendEmailDto.isTest" label="是否為測試信件" name="emailOptions"
-                    @change="console.log(sendEmailDto)" />
+                  <el-checkbox v-model="sendEmailDto.isTest" label="是否為測試信件" name="emailOptions" />
 
                   <el-input v-if="sendEmailDto.isTest" v-model="sendEmailDto.testEmail" placeholder="請輸入測試信箱" />
                 </div>
                 <div class="checkbox-item">
-                  <el-checkbox v-model="sendEmailDto.isSchedule" label="是否排程寄送" name="emailOptions"
-                    @change="console.log(sendEmailDto)" />
+                  <el-checkbox v-model="sendEmailDto.isSchedule" label="是否排程寄送" name="emailOptions" />
                   <el-date-picker v-if="sendEmailDto.isSchedule" v-model="sendEmailDto.scheduleTime" type="datetime"
                     placeholder="選擇日期時間" value-format="YYYY-MM-DD HH:mm:ss" format="YYYY-MM-DD HH:mm:ss" />
                 </div>
                 <div class="checkbox-item">
-                  <el-checkbox v-model="sendEmailDto.includeOfficialAttachment" label="是否附帶公文" name="emailOptions"
-                    @change="console.log(sendEmailDto)" />
+                  <el-checkbox v-model="sendEmailDto.includeOfficialAttachment" label="是否附帶公文" name="emailOptions" />
                 </div>
               </div>
             </el-form-item>
@@ -132,13 +129,11 @@ const sendMailRules = reactive<FormRules>({
 const emailQuota = ref<number>(0)
 const fetchEmailQuota = async () => {
   const { res, error }: any = await tryCatch(fetchEmailQuotaApi())
-  console.log(res)
   if (error || res.code !== 200) {
     ElMessage.error(res.msg || error || '獲取寄信餘額失敗');
     return;
   }
 
-  console.log("本日寄信餘額: ", res.data);
   emailQuota.value = res.data;
 }
 
@@ -163,18 +158,13 @@ const getDataAndEditorLoaded = async () => {
   let objDesign = null;
   if (res.data.design != null) {
     objDesign = JSON.parse(res.data.design)
-    console.log(res.data)
     res.data.design = objDesign
   }
 
   Object.assign(emailTemplate, res.data)
-  console.log("獲取模板數據 ", emailTemplate)
-  console.log("這是emailEditor", emailEditor.value)
 
   if (objDesign == null) {
-    console.log("沒有design數據")
   } else {
-    console.log("有design數據,進行載入")
     emailEditor.value.editor.loadDesign(objDesign)
   }
 
@@ -188,8 +178,6 @@ const getDataAndEditorLoaded = async () => {
 
 
   // emailEditor.value.editor.registerCallback('image', function (file: any, done: any) {
-  //   console.log('file為', file)
-  //   console.log('done', done)
   //   done({ progress: 100, url: "https://png.pngtree.com/png-clipart/20230108/original/pngtree-super-cute-cartoon-vector-bear-png-image_8887896.png" })
   //   // Handle file upload here
   // })
@@ -315,8 +303,6 @@ const getDataAndEditorLoaded = async () => {
   }
   //當編輯器載入完成,解鎖save按鈕
   emailEditor.value.editor.addEventListener('editor:ready', function () {
-    console.log("合併標籤", mergeTags)
-    console.log('editor:ready')
 
     emailEditor.value.editor.setMergeTags(mergeTags);
     isDisabled.value = false;
@@ -344,7 +330,6 @@ const tools = {
 const saveDesign = () => {
   emailEditor.value.editor.saveDesign(
     (design: any) => {
-      console.log('saveDesign', design);
     }
   )
 }
@@ -352,7 +337,6 @@ const saveDesign = () => {
 const exportHtml = () => {
   emailEditor.value.editor.exportHtml(
     (data: any) => {
-      console.log('exportHtml', data);
     }, {
     //壓縮html大小
     minify: true
@@ -361,7 +345,6 @@ const exportHtml = () => {
 
 const exportPlainText = () => {
   emailEditor.value.editor.exportPlainText((data: any) => {
-    console.log('exportHtml', data);
   }, {
     //忽略各種連結和圖片
     ignoreLinks: true,
@@ -465,7 +448,6 @@ const sendMail = async (sendMailFormRef: FormInstance | undefined) => {
     return new Promise<void>((resolve, reject) => {
       emailEditor.value.editor.exportHtml(
         (data: any) => {
-          console.log('exportHtml', data);
           jsonDesign = JSON.stringify(data.design);
           htmlContent = data.html;
           resolve(); // 解析 Promise
@@ -488,7 +470,6 @@ const sendMail = async (sendMailFormRef: FormInstance | undefined) => {
     return new Promise<void>((resolve, reject) => {
       emailEditor.value.editor.exportPlainText(
         (data: any) => {
-          console.log('exporPlainText', data);
           plainText = data.text
           resolve(); // 解析 Promise
         }, {
@@ -516,7 +497,7 @@ const sendMail = async (sendMailFormRef: FormInstance | undefined) => {
 
   //資料賦值
   if (jsonDesign) {
-    console.log(getImageSizeFromDesign(JSON.parse(jsonDesign)))
+    getImageSizeFromDesign(JSON.parse(jsonDesign))
   }
   // sendMailFormData.htmlContent = optimizeForOutlook(htmlContent);
   // sendMailFormData.plainText = plainText
@@ -526,12 +507,9 @@ const sendMail = async (sendMailFormRef: FormInstance | undefined) => {
   returnData.tagIdList = selectTags.value.map((item: any) => {
     return item.tagId
   })
-  // console.log("emailTemplate資料: ", sendMailFormData)
-  console.log("emailTemplate資料: ", sendEmailDto)
 
   if (!sendMailFormRef) return;
   returnData.sendEmailDTO = sendEmailDto
-  console.log("returnData", returnData)
 
   sendMailFormRef.validate(async (valid) => {
     if (valid) {
@@ -543,7 +521,6 @@ const sendMail = async (sendMailFormRef: FormInstance | undefined) => {
         tempSelectedTagList.value = []
         router.back()
       } catch (err: any) {
-        console.log(err)
       }
     } else {
       ElMessage.error("請完整填入資訊")
@@ -562,7 +539,6 @@ const tagCurrentPage = ref<number>(1)
 const tempSelectedTagList = ref<any>([]);
 
 const getTagList = async () => {
-  console.log("tagType為", tagType.value)
   let res = await getTagsByPaginationApi(tagCurrentPage.value, 10, tagType.value)
   tagList.length = 0
   selectTags.value.length = 0
@@ -584,7 +560,6 @@ const getTagList = async () => {
 }
 
 watch(tagType, (newVal) => {
-  console.log("tagType", newVal)
   getTagList()
 })
 

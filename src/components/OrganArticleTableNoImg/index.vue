@@ -178,7 +178,6 @@ const deleteRow = (id: number, title: string): void => {
     await props.deleteApi(id)
     ElMessage.success('刪除成功');
   }).catch((err) => {
-    console.log(err)
   });
 }
 
@@ -196,7 +195,6 @@ const deleteList = () => {
       await props.batchDeleteApi(deleteIdList)
       ElMessage.success('刪除成功');
     }).catch((err) => {
-      console.log(err)
     })
 
   } else {
@@ -285,7 +283,6 @@ const submitForm = (form: FormInstance | undefined) => {
         await props.addApi(formData)
         ElMessage.success('新增成功');
       } catch (err: any) {
-        console.log(err)
       }
       //最終都將這個dialog關掉
       dialogFormVisible.value = false

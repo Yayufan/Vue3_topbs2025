@@ -6,7 +6,6 @@ import { listRoutes } from "@/api/menu";
 const modules = import.meta.glob("../../views/**/**.vue");
 const Layout = () => import("@/layout/index.vue");
 
-// console.log('原本路由列表', constantRoutes)
 
 /**
  * Use meta.role to determine if the current user has permission
@@ -46,7 +45,6 @@ const filterAsyncRoutes = (routes: RouteRecordRaw[], roles: string[]) => {
 
   routes.forEach((route) => {
 
-    // console.log('過濾路由-單個動態路由', route)
 
     // ES6扩展运算符复制新对象,這邊要進行重新組裝
     const tmpRoute = { ...route };
@@ -57,9 +55,7 @@ const filterAsyncRoutes = (routes: RouteRecordRaw[], roles: string[]) => {
     // 判断用户(角色)是否有该路由的访问权限,有這個權限才要組裝這個動態路由
     if (hasPermission(roles, tmpRoute)) {
       if (tmpRoute.component?.toString() == "Layout") {
-        console.log('暫存路由佈局', tmpRoute.component)
         tmpRoute.component = Layout;
-        console.log('暫存路由佈局', tmpRoute.component)
       } else {
         //創建路由的配置組件,但有可能引入modules不匹配
         const component = modules[`../../views/${tmpRoute.component}.vue`];
@@ -121,7 +117,6 @@ export const usePermissionStore = defineStore("permission", () => {
       listRoutes()
         .then(({ data: asyncRoutes }) => {
 
-          console.log('api獲取的,動態的路由列表', asyncRoutes)
           // 根据角色获取有访问权限的路由
           const accessedRoutes = filterAsyncRoutes(asyncRoutes, roles);
 

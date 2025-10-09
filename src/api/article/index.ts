@@ -75,7 +75,7 @@ export function getAllArticleByGroupApi(group: string): AxiosPromise {
  */
 export function getAllArticleByGroupByPaginationApi(group: string, page: number, size: number): AxiosPromise {
   return request({
-    url: `/article/${group}/pagination`,
+    url: `/article/admin/${group}/pagination`,
     method: "get",
     params: {
       page,

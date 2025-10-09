@@ -93,11 +93,9 @@ const reviewStage = ref('first_review');
 const getPaperListByReviewer = async () => {
   const { res, error } = await tryCatch(getPaperListByReviewerApi(currentPage.value, 10, reviewStage.value))
   if (error) {
-    console.error('Error fetching paper list:', error);
     return;
   }
 
-  console.log(res);
 
   Object.assign(paperList, res.data);
 }

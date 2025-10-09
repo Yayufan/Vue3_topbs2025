@@ -18,8 +18,6 @@ export default class MyUploadAdapter {
     const protocol = window.location.protocol; // 获取当前协议 (例如 "http:" 或 "https:")
     const hostname = window.location.hostname; // 获取当前域名 (例如 "www.example.com")
 
-    console.log('當前協議', protocol)
-    console.log('當前域名', hostname)
 
     const data = new FormData();
     //   data.append('typeOption', 'upload_image');
@@ -43,7 +41,6 @@ export default class MyUploadAdapter {
 
         if (res.data.code === 500) {
           ElMessage.error("檔案大小請勿超過10MB")
-          console.log(res.data.msg)
           return resolve(resData)
 
         }
@@ -51,7 +48,6 @@ export default class MyUploadAdapter {
 
         //重新組裝URL
         let reassembleUrl = protocol + '//' + hostname + '/minio' + res.data.url
-        console.log(reassembleUrl)
 
         resData.default = reassembleUrl
         let originalStr = localStorage.getItem(this.scope)
@@ -64,7 +60,6 @@ export default class MyUploadAdapter {
 
 
         let imgList = newStr.split(",");
-        console.log('添加前的List', imgList)
 
         localStorage.setItem(this.scope, newStr)
 
@@ -86,7 +81,6 @@ export default class MyUploadAdapter {
   constructor(loader) {
     // Save Loader instance to update upload progress.
     this.loader = loader
-    console.log('我是loader:', loader)
   }
 
 
@@ -94,32 +88,23 @@ export default class MyUploadAdapter {
   async upload() {
     let formData = new FormData();
 
-    console.log('loaderFile', await this.loader.file)
 
     formData.append('uploadfile', await this.loader.file);
 
 
-    console.log(formData)
-    console.log(formData.entries())
 
     // 遍歷FormData對象,查看是否有存進去
     for (let pair of formData.entries()) {
       // 如果值是一個File對象，則打印文件的詳細信息
       if (pair[1] instanceof File) {
-        console.log(pair[0] + ', File:');
-        console.log('    Name:', pair[1].name);
-        console.log('    Size:', pair[1].size);
-        console.log('    Type:', pair[1].type);
       } else {
         // 如果不是文件，則直接打印鍵值對
-        console.log(pair[0] + ', ' + pair[1]);
       }
     }
     const res = request('/api/upload', {
       method: 'POST',
       body: formData,
     });
-    console.log(res)
 
     return { default: "https://miro.medium.com/v2/resize:fit:582/1*4j2A9niz0eq-mRaCPUffpg.png" };
 

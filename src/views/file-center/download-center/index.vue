@@ -37,23 +37,18 @@ let typeOption = reactive(["無"])
 //獲取最新消息
 const getFile = async (page: number, size: number) => {
   let res = await getAllFileByGroupByPaginationApi(GROUP, page, size)
-  console.log("這是響應值", res)
   let transData = transFormPaginationByFileCenter(res.data, "publishFileId")
   Object.assign(fileList, transData)
-  console.log('這是轉換後的數據', fileList)
 }
 
 //新增最新消息
 const addFile = async (data: any) => {
-  console.log('子組件傳來的data', data)
   let res = await addFileApi(data)
-  console.log(res)
   getFile(1, 10)
 }
 
 //刪除最新消息
 const deleteFile = async (id: number) => {
-  console.log('要刪除的id', id)
   await deleteFileApi(id)
   getFile(1, 10)
 }

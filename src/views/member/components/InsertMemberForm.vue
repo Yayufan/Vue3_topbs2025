@@ -129,7 +129,6 @@ const submitInsertForm = (form: FormInstance | undefined) => {
     if (valid) {
       try {
         data.value.phone = data.value.countryCode + data.value.phone
-        console.log('新增會員資料', data.value)
         //呼叫父組件給的新增function API
         await addVipMemberApi(data.value)
         ElMessage.success('新增成功');

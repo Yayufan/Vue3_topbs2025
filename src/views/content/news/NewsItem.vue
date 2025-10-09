@@ -154,8 +154,6 @@ const handleAvatarSuccess: UploadProps['onSuccess'] = (
   response,
   uploadFile
 ) => {
-  console.log(response)
-  console.log(uploadFile)
 
   imageUrl.value = URL.createObjectURL(uploadFile.raw!)
 
@@ -176,7 +174,6 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
 //獲取文章
 const getArticle = async () => {
   let res = await getArticleApi(id)
-  console.log(res.data.announcementDate)
   Object.assign(article, res.data)
 }
 
@@ -198,7 +195,6 @@ const back = () => {
     // 組合回去並加上 '/'
     const parentPath = '/' + pathSegments.join('/');
 
-    console.log('上層路徑', parentPath)
 
     // 導航回上層路徑，並保留查詢參數
     router.push({ path: parentPath, query });
@@ -247,7 +243,6 @@ const submitArticleForm = (form: FormInstance) => {
 
         ElMessage.success("儲存成功")
       } catch (err) {
-        console.log(err)
       }
 
     } else {
@@ -262,7 +257,6 @@ onMounted(async () => {
   // imageUrl.value = protocol + '//' + hostname + '/minio' + article.coverThumbnailUrl
 
   imageUrl.value = import.meta.env.VITE_MINIO_API_URL + article.coverThumbnailUrl;
-  console.log(imageUrl.value)
 })
 
 </script>

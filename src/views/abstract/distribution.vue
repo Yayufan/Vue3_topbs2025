@@ -46,7 +46,7 @@
       </el-transfer>
       <template #footer>
         <el-button type="danger" @click="closeTranfer()">取消</el-button>
-        <el-button @click="console.log(editPaper.reviewerList)">確定</el-button>
+        <!-- <el-button>確定</el-button> -->
       </template>
     </el-dialog>
   </section>
@@ -109,7 +109,6 @@ const getReviewerList = async () => {
   reviewerList.length = 0
   transferDataList.length = 0
   res.data.records.forEach((item: any) => {
-    console.log(item)
     transferDataList.push({
       id: item.id,
       name: item.name,
@@ -117,7 +116,6 @@ const getReviewerList = async () => {
     })
   })
   Object.assign(reviewerList, res.data)
-  console.log(res.data.total)
 }
 
 /**------------------------------------------- */

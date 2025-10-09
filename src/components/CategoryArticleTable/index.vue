@@ -196,8 +196,6 @@ const handleAvatarSuccess: UploadProps['onSuccess'] = (
   response,
   uploadFile
 ) => {
-  console.log(response)
-  console.log(uploadFile)
   imageUrl.value = URL.createObjectURL(uploadFile.raw!)
   //將檔案傳給接收圖片的數據
   imgFile = uploadFile.raw!
@@ -271,7 +269,6 @@ const submitForm = (form: FormInstance | undefined) => {
 
       try {
 
-        console.log('當前data', categoryArticleFormData)
 
         let formData = new FormData()
         // 將響應式對象轉換為普通對象，然後轉換為 JSON 字符串
@@ -292,7 +289,6 @@ const submitForm = (form: FormInstance | undefined) => {
         ElMessage.success("創建成功")
 
       } catch (err: any) {
-        console.log(err)
       }
 
       //最終都將這個dialog關掉
@@ -333,7 +329,6 @@ const deleteRow = (id: number, title: string): void => {
 
   }).catch((err) => {
     // 用户選擇取消，中止上傳操作
-    console.log(err)
     //ElMessage.error('不執行操作');
   });
 }
@@ -352,7 +347,6 @@ const deleteList = () => {
       ElMessage.success("刪除成功")
       props.getApi(1, 10)
     }).catch((err) => {
-      console.log(err)
     })
 
   } else {

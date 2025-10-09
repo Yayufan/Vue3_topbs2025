@@ -174,7 +174,6 @@ const confirmClick = () => {
   //沒有抓到的這個Dom直接返回
   categoryFormRef.value.validate(async (valid: boolean) => {
     if (valid) {
-      console.log("送出前的表單", categoryForm)
       await props.saveOrUpdateCategory(categoryForm)
       drawer.value = false
     } else {
@@ -203,7 +202,6 @@ const editCategory = (row: any) => {
   drawerTitle.value = "修改類別"
   drawer.value = true
   ElMessage.success("正在編輯")
-  console.log("展開單個數據", row)
 
   categoryForm.id = row.id
   categoryForm.parentId = row.parentId
@@ -228,7 +226,6 @@ const deleteCategory = async (row: any, title: string) => {
     await props.deleteCategory(row.id)
   }).catch((err) => {
     // 用户選擇取消，中止上傳操作
-    console.log(err)
   });
 
 }
@@ -245,7 +242,6 @@ const batchDeleteCategory = () => {
     await props.batchDeleteCategory(idList)
   }).catch((err) => {
     // 用户選擇取消，中止上傳操作
-    console.log(err)
   });
 
 }

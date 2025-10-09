@@ -40,7 +40,6 @@ const mixTopMenus = ref<RouteRecordRaw[]>([]);
 const handleMenuSelect = (routePath: string) => {
   appStore.activeTopMenu(routePath);
   permissionStore.setMixLeftMenus(routePath);
-  console.log('我在菜單選擇事件', permissionStore.mixLeftMenus)
   // 获取左侧菜单集合，默認跳转到第一个菜单
   const mixLeftMenus = permissionStore.mixLeftMenus;
   goToFirstMenu(mixLeftMenus);

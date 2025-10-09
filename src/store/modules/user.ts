@@ -22,7 +22,6 @@ export const useUserStore = defineStore("user", () => {
       loginApi(loginData)
         .then((response) => {
           const { tokenName, tokenValue } = response.data as { tokenName: string; tokenValue: string };;
-          // console.log(tokenName, tokenValue)
           localStorage.setItem(tokenName, "Bearer" + " " + tokenValue)
           resolve();
         })
@@ -37,7 +36,6 @@ export const useUserStore = defineStore("user", () => {
       reviewerLoginApi(loginData)
         .then((response) => {
           const { tokenName, tokenValue } = response.data as { tokenName: string; tokenValue: string };;
-          console.log(tokenName, tokenValue)
           localStorage.setItem(tokenName, "Bearer" + " " + tokenValue)
           resolve();
         })
@@ -54,7 +52,6 @@ export const useUserStore = defineStore("user", () => {
     return new Promise((resolve, reject) => {
       getUserInfoApi()
         .then((res) => {
-          // console.log(res)
           Object.assign(user, res.data);
           user.roleList = ["ROOT"];
           resolve(res);
@@ -69,7 +66,6 @@ export const useUserStore = defineStore("user", () => {
     return new Promise((resolve, reject) => {
       getReviewerInfoApi()
         .then((res: any) => {
-          // console.log(res)
           Object.assign(user, res.data);
           user.roleList = ["paperReviewer"];
           resolve(res);
@@ -112,7 +108,6 @@ export const useUserStore = defineStore("user", () => {
 
   // remove token
   function resetToken() {
-    console.log("resetToken");
     return new Promise<void>((resolve) => {
       localStorage.setItem("Authorization", "");
       resetRouter();
@@ -121,7 +116,6 @@ export const useUserStore = defineStore("user", () => {
   }
 
   function resetReviewerToken() {
-    console.log("resetReviewerToken");
     return new Promise<void>((resolve) => {
       localStorage.setItem("Authorization-paper-reviewer", "");
       resetReviewerRouter();

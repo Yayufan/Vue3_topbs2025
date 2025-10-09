@@ -37,17 +37,13 @@ let typeOption = reactive(["工作報告", "簽卡分析"])
 //獲取最新消息
 const getFile = async (page: number, size: number) => {
   let res = await getAllFileByGroupByPaginationApi(GROUP, page, size)
-  console.log("這是響應值", res)
   let transData = transFormPaginationByFileCenter(res.data, "fileId")
   Object.assign(fileList, transData)
-  console.log('這是轉換後的數據', fileList)
 }
 
 //新增最新消息
 const addFile = async (data: any) => {
-  console.log('子組件傳來的data', data)
   let res = await addFileApi(data)
-  console.log(res)
   getFile(1, 10)
 }
 

@@ -141,13 +141,9 @@ const handleChange: UploadProps['onChange'] = (
   file: UploadUserFile,
   fileList: UploadUserFile[],
 ) => {
-  console.log("檔案變更", file, fileList)
   //檔案變更的回調
-  console.log("檔案變更", file.raw)
   realFile = file.raw!
-  // console.log(file, fileList, event)
   //檔案上傳成功後的回調
-  // console.log("檔案上傳成功", file, fileList, event)
 }
 
 //檔案上傳成功的回調
@@ -156,8 +152,6 @@ const handleAvatarSuccess: UploadProps['onSuccess'] = (
   uploadFile,
   uploadFiles
 ) => {
-  // console.log(response)
-  console.log(uploadFile)
   imageUrl.value = URL.createObjectURL(uploadFile.raw!)
   //將檔案傳給接收圖片的數據
   imgFile = uploadFile.raw!
@@ -227,7 +221,6 @@ watch(() => { return props.table }, (newValue, oldValue) => {
 /**--------------顯示數據相關---------------------------- */
 
 //分頁組件， 從查詢參數中獲取初始值从查询参数中獲取初始值
-// console.log(route)
 let currentPage = ref<number>(parseInt(route.query.page as string) || 1);
 
 //獲取的最新檔案List
@@ -241,7 +234,6 @@ const updateURL = (page: number, size: number) => {
 
 //監聽當前頁數的變化,如果有更動就call API 獲取數組數據
 watch(currentPage, (value, oldValue) => {
-  // console.log("當前頁為 ", value)
   let pageSize = ref<number>(parseInt(route.query.size as string) || 10);
   updateURL(value, pageSize.value)
 })
@@ -267,11 +259,9 @@ const deleteRow = (id: number, title: string): void => {
     type: 'warning'
   }).then(async () => {
     // 用户選擇確認，繼續操作
-    console.log("要刪除的id", id)
     await props.deleteApi(id)
     ElMessage.success('刪除成功');
   }).catch((err) => {
-    console.log(err)
   });
 }
 
@@ -289,7 +279,6 @@ const deleteList = () => {
       await props.batchDeleteApi(deleteIdList)
       ElMessage.success('刪除成功');
     }).catch((err) => {
-      console.log(err)
     })
 
   } else {
@@ -387,12 +376,10 @@ const submitForm = (form: FormInstance | undefined) => {
         imageUrl.value = ''
 
         //重置檔案列表
-        console.log(fileComponent.value)
         fileComponent.value.clearFiles()
 
         ElMessage.success('新增成功');
       } catch (err: any) {
-        console.log(err)
       }
       //最終都將這個dialog關掉
       dialogFormVisible.value = false

@@ -39,12 +39,10 @@ const getArticle = async () => {
   //固定轉換數據給前端組件使用
   let transData = transFormPaginationByArticle(res.data, "articleId")
   Object.assign(articleList, transData)
-  // console.log('這是轉換後的數據', articleList)
 }
 
 //新增文章
 const addArticle = async (data: any) => {
-  // console.log('子組件傳來的data', data)
   let res = await addArticleApi(data)
   const currentPath = route.path
   const query = route.query
