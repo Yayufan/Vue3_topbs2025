@@ -3,7 +3,7 @@
 
   <section class="file-section">
     <el-card class="file-card">
-      <h1>下載中心-檔案管理</h1>
+      <h1>下載中心-電子議程</h1>
       <FileCenter :table="fileList" :getApi="getFile" :addApi="addFile" :deleteApi="deleteFile"
         :batchDeleteApi="batchDeleteFile" :group="GROUP" :typeOption="typeOption">
       </FileCenter>
@@ -26,13 +26,13 @@ const route = useRoute()
 const router = useRouter()
 
 //設定file_group 
-const GROUP = "downloadCenter"
+const GROUP = "programBook"
 
 
 //後端獲取Page資料後要傳給子組件的數據
 let fileList = reactive({})
 //子類別選項
-let typeOption = reactive(["無"])
+let typeOption = reactive(["Program book"])
 
 //獲取最新消息
 const getFile = async (page: number, size: number) => {

@@ -39,7 +39,6 @@ service.interceptors.response.use(
     }
 
     if (code == "401") {
-      console.log("token 过期,重新登录");
       if (localStorage.getItem("Authorization-paper-reviewer")) {
         localStorage.removeItem("Authorization-paper-reviewer");
         localStorage.setItem("paper-reviewer-logout", "true");

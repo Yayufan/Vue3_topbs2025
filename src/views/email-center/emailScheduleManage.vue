@@ -89,7 +89,6 @@ const useFetchDataManagement = () => {
       ElMessage.error('獲取E-Mail任務列表失敗', error || res.message);
       return;
     }
-    console.log(res.data);
     fetchRes.value = res.data
   }
 

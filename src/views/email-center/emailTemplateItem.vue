@@ -58,18 +58,13 @@ const getDataAndEditorLoaded = async () => {
   let objDesign = null;
   if (res.data.design != null) {
     objDesign = JSON.parse(res.data.design)
-    console.log(res.data)
     res.data.design = objDesign
   }
 
   Object.assign(emailTemplate, res.data)
-  console.log("獲取模板數據 ", emailTemplate)
-  console.log("這是emailEditor", emailEditor.value)
 
   if (objDesign == null) {
-    console.log("沒有design數據")
   } else {
-    console.log("有design數據,進行載入")
     emailEditor.value.editor.loadDesign(objDesign)
   }
 
@@ -83,8 +78,6 @@ const getDataAndEditorLoaded = async () => {
 
 
   // emailEditor.value.editor.registerCallback('image', function (file: any, done: any) {
-  //   console.log('file為', file)
-  //   console.log('done', done)
   //   done({ progress: 100, url: "https://png.pngtree.com/png-clipart/20230108/original/pngtree-super-cute-cartoon-vector-bear-png-image_8887896.png" })
   //   // Handle file upload here
   // })
@@ -204,7 +197,6 @@ const getDataAndEditorLoaded = async () => {
 
   //當編輯器載入完成,解鎖save按鈕
   emailEditor.value.editor.addEventListener('editor:ready', function () {
-    console.log('editor:ready')
 
     emailEditor.value.editor.setMergeTags(mergeTags);
 
@@ -250,7 +242,6 @@ const tools = {
 const saveDesign = () => {
   emailEditor.value.editor.saveDesign(
     (design: any) => {
-      console.log('saveDesign', design);
     }
   )
 }
@@ -258,7 +249,6 @@ const saveDesign = () => {
 const exportHtml = () => {
   emailEditor.value.editor.exportHtml(
     (data: any) => {
-      console.log('exportHtml', data);
     }, {
     //壓縮html大小
     minify: true
@@ -267,7 +257,6 @@ const exportHtml = () => {
 
 const exportPlainText = () => {
   emailEditor.value.editor.exportPlainText((data: any) => {
-    console.log('exportHtml', data);
   }, {
     //忽略各種連結和圖片
     ignoreLinks: true,
@@ -307,7 +296,6 @@ const save = async () => {
     return new Promise<void>((resolve, reject) => {
       emailEditor.value.editor.exportHtml(
         (data: any) => {
-          console.log('exportHtml', data);
           jsonDesign = JSON.stringify(data.design);
           htmlContent = data.html;
           resolve(); // 解析 Promise
@@ -327,7 +315,6 @@ const save = async () => {
     return new Promise<void>((resolve, reject) => {
       emailEditor.value.editor.exportPlainText(
         (data: any) => {
-          console.log('exporPlainText', data);
           plainText = data.text
           resolve(); // 解析 Promise
         }, {
@@ -356,7 +343,6 @@ const save = async () => {
   emailTemplate.design = jsonDesign
   emailTemplate.htmlContent = htmlContent
   emailTemplate.plainText = plainText
-  console.log("emailTemplate資料: ", emailTemplate)
 
   await updateEmailTemplateApi(emailTemplate)
 

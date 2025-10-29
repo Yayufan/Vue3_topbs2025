@@ -137,7 +137,6 @@ let emailTemplateList = reactive<Record<string, any>>({
 const getEmailTemplateByPagination = async (page: number, size: number) => {
   let res = await getEmailTemplateByPaginationApi(page, size)
   Object.assign(emailTemplateList, res.data)
-  console.log(emailTemplateList)
 }
 
 
@@ -167,7 +166,6 @@ const deleteRow = (id: number): void => {
 
     ElMessage.success('刪除成功');
   }).catch((err) => {
-    console.log(err)
   });
 }
 
@@ -181,13 +179,11 @@ const deleteList = () => {
     }).then(async () => {
       //確定刪除後使用父組件傳來的function
       //提取idList
-      console.log(deleteSelectList)
       let deleteIdList = deleteSelectList.map((item: { emailTemplateId: string }) => item.emailTemplateId)
       // await batchDeleteEmailTemplateApi(deleteIdList)
       // getEmailTemplateByPagination(currentPage.value, 10)
       ElMessage.success('刪除成功');
     }).catch((err) => {
-      console.log(err)
     })
 
   } else {
@@ -226,7 +222,6 @@ const insertEmailTemplateRules = reactive<FormRules>({
 //顯示新增Dialog
 const toggleAddDialog = () => {
   dialogFormVisible.value = true
-  console.log('觸發', dialogFormVisible.value)
 }
 
 //送出表單方法
@@ -242,7 +237,6 @@ const submitInsertForm = (form: FormInstance | undefined) => {
         router.push(`${route.fullPath}/${res.data}`)
 
       } catch (err: any) {
-        console.log(err)
       }
     } else {
       ElMessage.error("請完整填入資訊")

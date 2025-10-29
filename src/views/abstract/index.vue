@@ -160,6 +160,15 @@
         <el-form-item label="報告時間" prop="reportTime">
           <el-input v-model="updateForm.reportTime"></el-input>
         </el-form-item>
+        <el-form-item label="審稿通過" prop="status">
+          <el-select v-model="updateForm.status" placeholder="請選擇">
+            <el-option label="未審核" :value="0"></el-option>
+            <el-option label="已入選" :value="1"></el-option>
+            <el-option label="未入選" :value="2"></el-option>
+          </el-select>
+
+        </el-form-item>
+
         <el-form-item>
           <el-button type="primary" @click="updatePaper">更新</el-button>
           <el-button @click="isEdit = false">關閉</el-button>
@@ -178,7 +187,7 @@
           @click="reviewStage = 'second_review'">二階</el-button>
       </div>
       <el-transfer v-model="submitAssignData.targetPaperReviewerIdList" :data="assignPaperReviewData" filterable
-        :titles="['可選審稿人', '已選審稿人']" @change="console.log(assignPaperReviewTempList)" />
+        :titles="['可選審稿人', '已選審稿人']" />
       <el-button class="submit-btn" @click="submitAssignDataFn">
         確定
       </el-button>
@@ -217,7 +226,6 @@ const paperList = reactive<any>([])
 const getPaperList = async () => {
   const { res, error } = await tryCatch(getPaperPageApi(currentPage.value, 10, input.value, filterStatus.value, filterAbsType.value, filterAbsProp.value));
   if (error) {
-    console.error('Error fetching paper list:', error);
     return;
   }
 
@@ -227,7 +235,6 @@ const getPaperList = async () => {
     )
   })
 
-  console.log(res)
   Object.assign(paperList, res.data)
 }
 
@@ -265,7 +272,6 @@ const openAssignReviewerDialog = (paper: any) => {
 
   assignPaper.assignedPaperReviewers.forEach((paperReviewer: any) => {
     if (paperReviewer.reviewStage !== reviewStage.value) {
-      console.log('Skipping paper reviewer:', paperReviewer.paperReviewerId, 'for stage:', paperReviewer.reviewStage);
       return;
     }
     submitAssignData.targetPaperReviewerIdList.push(paperReviewer.paperReviewerId)
@@ -284,21 +290,18 @@ const openAssignReviewerDialog = (paper: any) => {
 }
 
 watch(() => reviewStage.value, (value, oldValue) => {
-  console.log('submitAssignData changed:', value);
   if (!isAssignReviewerVisible.value) {
     return;
   }
   submitAssignData.targetPaperReviewerIdList.length = 0
   assignPaper.assignedPaperReviewers.forEach((paperReviewer: any) => {
     if (paperReviewer.reviewStage !== reviewStage.value) {
-      console.log('Skipping paper reviewer:', paperReviewer.paperReviewerId, 'for stage:', paperReviewer.reviewStage);
       return;
     }
     submitAssignData.targetPaperReviewerIdList.push(paperReviewer.paperReviewerId)
   });
 
   // submitAssignData.targetPaperReviewerIdList.filter((item: any) => {
-  //   console.log(item)
   //   return item.reviewStage === submitAssignData.reviewStage;
   // })
 
@@ -308,7 +311,6 @@ watch(() => reviewStage.value, (value, oldValue) => {
 
 const submitAssignDataFn = async () => {
   submitAssignData.reviewStage = reviewStage.value;
-  console.log(submitAssignData)
   // if (submitAssignData.targetPaperReviewerIdList.length === 0) {
   //   isAssignReviewerVisible.value = false;
   //   return;
@@ -316,10 +318,8 @@ const submitAssignDataFn = async () => {
   const { res, error } = await tryCatch(assignPaperReviewersApi(submitAssignData));
 
   if (error) {
-    console.error('Error assigning reviewers:', error);
     return;
   }
-  console.log(res)
   isAssignReviewerVisible.value = false;
   getPaperList();
 }
@@ -337,12 +337,10 @@ const autoAssignPaperReviewers = async () => {
   }
   const { res, error } = await tryCatch(autoAssignPaperReviewersApi(submitData));
   if (error) {
-    console.error('Error auto assigning reviewers:', error);
     return;
   }
   ElMessage.success('自動分配審稿委員成功');
   isAutoAssignReviewerVisible.value = false;
-  console.log(res);
 }
 
 
@@ -361,7 +359,6 @@ const toggleEdit = (paper: any) => {
   updateForm.publicationGroup = paper.publicationGroup;
   updateForm.reportLocation = paper.reportLocation;
   updateForm.reportTime = paper.reportTime;
-  console.log(updateForm)
 }
 
 const openFile = async (filePath: string) => {
@@ -402,7 +399,6 @@ const findFirstVaildTag = (tagSet: any) => {
 const downloadExcel = async (reviewStage: string) => {
   let fileName = reviewStage === 'first_review' ? '一階評分.xlsx' : '二階評分.xlsx';
   let res = await downloadPaperScoreExcelApi(reviewStage)
-  console.log(res)
   const url = window.URL.createObjectURL(new Blob([res.data]));
   const link = document.createElement('a');
   link.href = url;

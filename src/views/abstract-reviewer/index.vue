@@ -209,7 +209,6 @@ const getReviewerList = async (page: number, size: number) => {
 
   Object.assign(reviewerList, res.data)
 
-  console.log('審稿委員列表', reviewerList)
 
 
 
@@ -261,15 +260,12 @@ const addPaperReviewer = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       addReviewerForm.emailList = addReviewerForm.emailList.map((item: any) => item.email),
-        console.log('submit!', addReviewerForm)
-      await addPaperReviewerApi(addReviewerForm)
+        await addPaperReviewerApi(addReviewerForm)
       isAdd.value = false
       getReviewerList(currentPage.value, 10)
       formEl.resetFields()
       addReviewerForm.emailList = [{ email: '' }]
-      console.log('submit!')
     } else {
-      console.log('error submit!', fields)
     }
   })
 }
@@ -297,14 +293,11 @@ const editReviewer = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       editReviewerForm.emailList = editReviewerForm.emailList.map((item: any) => item.email),
-        console.log('submit!', editReviewerForm)
-      await editPaperReviewerApi(editReviewerForm)
+        await editPaperReviewerApi(editReviewerForm)
       isEdit.value = false
       getReviewerList(currentPage.value, 10)
       formEl.resetFields()
-      console.log('submit!')
     } else {
-      console.log('error submit!', fields)
     }
   })
 }
@@ -320,7 +313,6 @@ const deleteReviewer = async (paperReviewer: any) => {
     await deletePaperReviewerApi(paperReviewer.paperReviewerId)
     getReviewerList(currentPage.value, 10)
   }).catch(() => {
-    console.log('取消刪除')
   })
 }
 
@@ -343,13 +335,11 @@ const deleteList = () => {
     }).then(async () => {
       //確定刪除後使用父組件傳來的function
       //提取idList
-      console.log(deleteSelectList)
       let deleteIdList = deleteSelectList.map((item: { paperReviewerId: number }) => item.paperReviewerId)
       await batchDeletePaperReviewerApi(deleteIdList)
       getReviewerList(currentPage.value, 10)
       ElMessage.success('刪除成功');
     }).catch((err) => {
-      console.log(err)
     })
 
   } else {
@@ -363,15 +353,12 @@ const addFileReviewer = reactive<any>({});
 const uploadRef = ref<UploadInstance>()
 const isAddFileVisible = ref(false)
 const toggleAddFile = (row: any) => {
-  console.log('row', row)
   Object.assign(addFileReviewer, row)
   isAddFileVisible.value = !isAddFileVisible.value
 }
 let formData = new FormData()
 
 const handleExceed: UploadProps['onExceed'] = (files: File[], fileList: UploadUserFile[]) => {
-  console.log('handleExceed', files)
-  console.log('fileList', fileList)
 
   if (uploadRef.value) {
     uploadRef.value.clearFiles()
@@ -383,8 +370,6 @@ const handleExceed: UploadProps['onExceed'] = (files: File[], fileList: UploadUs
 
 const handleChange: UploadProps['onChange'] = (file: UploadUserFile, fileList: UploadUserFile[]) => {
 
-  console.log('file', file)
-  console.log('fileList', fileList)
   if (file.status === 'ready') {
     ElMessage.success('上傳成功')
     // addFileReviewer.paperReviewerFileList.push(file)
@@ -398,14 +383,12 @@ const handleChange: UploadProps['onChange'] = (file: UploadUserFile, fileList: U
 }
 
 const handleRemove: UploadProps['onRemove'] = (file: UploadUserFile, fileList: UploadUserFile[]) => {
-  console.log('handleRemove', file, fileList)
   if (uploadRef.value) {
     uploadRef.value.clearFiles()
   }
 }
 
 const handleUploadFile = async () => {
-  console.log(formData.get('file'))
   const { res, error } = await tryCatch(uploadPaperReviewerFileApi(formData))
   if (error) {
     ElMessage.error('上傳失敗')
@@ -434,8 +417,6 @@ const toggleUpdateFile = (paperReviewerId: any, paperReviewerFileId: any) => {
 }
 
 const handleUpdateFile = async () => {
-  console.log('formData', formData.get('data'))
-  console.log('formData', formData.get('file'))
   const { res, error } = await tryCatch(updatePaperReviewerFileApi(formData))
   if (error) {
     ElMessage.error('更新失敗')
@@ -466,9 +447,7 @@ const deleteReviewerFile = async (paperReviewerFileId: number) => {
     ElMessage.success('刪除成功')
     await getReviewerList(currentPage.value, 10)
     Object.assign(addFileReviewer, reviewerList.records.find((item: any) => item.paperReviewerId === addFileReviewer.paperReviewerId))
-    console.log(addFileReviewer)
   }).catch(() => {
-    console.log('取消刪除')
   })
 }
 

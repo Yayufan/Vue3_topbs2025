@@ -49,10 +49,8 @@ const getReviewerScoreStatus = async () => {
   const { res, error }: any = await tryCatch(getReviewerScoreStatusPageApi(currentPage.value, 10, reviewStage.value));
 
   if (error || res.code !== 200) {
-    console.error('獲取失敗', error | res.message);
     return;
   }
-  console.log('獲取成功', res.data);
   Object.assign(reviewScoreStatusList, res.data);
 }
 

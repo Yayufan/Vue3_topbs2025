@@ -393,9 +393,6 @@ const onReady = (editor: any) => {
   //将编辑器保存起来，用来随时获取编辑器中的内容等，执行一些操作
   Object.assign(editorObj, editor)
 
-  // console.log('這是editor', editor)
-  // console.log('toolbar', editorToolbarElement)
-
   Array.from((editorToolbarElement.value as HTMLElement).children).forEach(child => child.remove());
   Array.from((editorMenuBarElement.value as HTMLElement).children).forEach(child => child.remove());
 

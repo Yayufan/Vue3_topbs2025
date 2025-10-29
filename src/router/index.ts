@@ -528,6 +528,18 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
           keepAlive: true,
         },
       },
+      {
+        path: "program-book",
+        component: () => import("@/views/file-center/program-book/index.vue"),
+        name: "FileCenterProgramBook",
+        meta: {
+          title: "電子議程",
+          icon: "menu",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
     ],
   },
 ]
