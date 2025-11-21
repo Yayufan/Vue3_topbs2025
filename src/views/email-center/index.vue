@@ -35,6 +35,7 @@
               <el-tag v-if="scope.row.category === 'poster'" type="primary">投稿者</el-tag>
               <el-tag v-if="scope.row.category === 'reviewer'" type="warning">審稿委員</el-tag>
               <el-tag v-if="scope.row.category === 'all'">會員</el-tag>
+              <el-tag v-if="scope.row.category === 'attendee'" type="success">與會者</el-tag>
             </template>
           </el-table-column>
           <el-table-column fit prop="description" label="描述" />
@@ -78,6 +79,7 @@
             <!-- <el-option label="與會者" value="attendees" /> -->
             <el-option label="投稿者" value="poster" />
             <el-option label="審稿委員" value="reviewer" />
+            <el-option label="與會者" value="attendee" />
           </el-select>
         </el-form-item>
 

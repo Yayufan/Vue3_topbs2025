@@ -298,6 +298,11 @@ const getDataAndEditorLoaded = async () => {
           value: '{{password}}',
         }
       }
+      break;
+    case 'attendee':
+      tagType.value = 'attendees'
+      sendUrl.value = '/attendees/send-email'
+      break;
 
 
   }
