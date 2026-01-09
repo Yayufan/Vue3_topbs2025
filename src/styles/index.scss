@@ -45,3 +45,13 @@ html {
     font-size: 12px;
   }
 }
+
+.btn-box {
+  display: flex;
+  justify-content: flex-end;
+  margin: 1rem 0;
+
+  @media screen and (max-width: 760px) {
+    justify-content: center;
+  }
+}

@@ -70,7 +70,7 @@ export function downloadPaperScoreExcelApi(reviewStage: string): AxiosPromise<an
 
 export function getDownloadPaperFileUrlApi(): AxiosPromise<any> {
   return request({
-    url: "/paper/download/get-download-folder-url",
+    url: "/paper/download/get-download-abstracts-url",
     method: "post",
   });
 }

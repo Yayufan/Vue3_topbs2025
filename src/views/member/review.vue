@@ -10,33 +10,8 @@
       </template>
 
       <template #data-table>
-        <el-table class="news-table" :data="memberList.records">
-          <el-table-column type="selection" width="55" />
-          <el-table-column prop="chineseName" label="中文姓名" width="100"></el-table-column>
-          <el-table-column prop="country" label="國家" width="100" />
-          <el-table-column prop="remitAccountLast5" label="戶頭末五碼" width="100" />
-          <el-table-column label="繳費金額" width="150" prop="amount">
-          </el-table-column>
-          <el-table-column prop="idCard" label="身分證字號" width="200" />
-          <el-table-column prop="category" label="會員類別" width="200">
-            <template #default="scope">
-              {{ memberEnums[scope.row.category] }}
-
-            </template>
-          </el-table-column>
-
-          <el-table-column prop="email" label="信箱" />
-          <el-table-column prop="phone" label="手機" width="140" />
-
-          <el-table-column fixed="right" label="操作" width="150">
-            <!-- 透過#default="scope" , 獲取到當前的對象值 , scope.row則是拿到當前那個row的數據  -->
-            <template #default="scope">
-              <el-button type="primary" size="small" @click="updateUnpaidMember(scope.row.memberId)">
-                通過
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+        <MemberTable :member-data="memberList.records" view-page="review" @update-unpaid-member="updateUnpaidMember">
+        </MemberTable>
       </template>
 
       <template #pagination-box>
@@ -52,23 +27,8 @@
 import BasicComponent from '@/layout/components/Basic/index.vue'
 
 import { ref, reactive } from 'vue'
-import { Delete, Plus } from '@element-plus/icons-vue'
-import type { FormInstance, FormRules } from 'element-plus'
-
-import { memberEnums } from '@/enums/memberEnum'
-
-import { getMemberOrder, getMemberCountByOrderStatusApi, updateMemberApi, batchUpdateMemberApi, getUnpaidMemberApi, updateUnpaidMemberApi } from '@/api/member'
-
-import { updateOrdersApi } from '@/api/order'
-
-
-//獲取路由
-const route = useRoute()
-//獲取路由器
-const router = useRouter()
-//formLabel 寬度
-const formLabelWidth = '140px'
-
+import { getMemberCountByOrderStatusApi, getUnpaidMemberApi, updateUnpaidMemberApi } from '@/api/member'
+import MemberTable from './components/MemberTable.vue'
 
 /**--------------顯示數據相關---------------------------- */
 
@@ -115,11 +75,6 @@ const updateUnpaidMember = async (memberId: string) => {
     ElMessage.error(res.msg)
   }
 }
-
-/**------------編輯內容相關操作---------------------- */
-
-
-
 
 /**-------------------掛載頁面時執行-------------------- */
 

@@ -20,8 +20,28 @@ export interface Member {
   categoryExtra?: string | null;
   status: number;
   amount?: number;
-  tagSet?: Set<any>;
+  tagList?: Iterable<any> | ArrayLike<any>;
   password?: string;
   confirmPassword?: string;
   countryCode: string;
+  remark?: string | null;
+}
+
+export interface PutMemberForAdminInterface {
+  memberId: string;
+  idCard?: string;
+  title: string;
+  chineseName: string | null;
+  firstName: string;
+  lastName: string;
+  country: string;
+  remitAccountLast5: string | null;
+  categoryExtra: string | null;
+  affiliation: string | null;
+  jobTitle: string | null;
+  phone: string | null;
+  remark: string | null;
+  receipt: string | null;
+  food: string;
+  foodTaboo: string;
 }

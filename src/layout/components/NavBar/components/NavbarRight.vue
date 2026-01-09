@@ -18,7 +18,7 @@
     <!-- 用户头像 -->
     <el-dropdown class="setting-item" trigger="click">
       <div class="flex-center h100% p10px">
-        <img src="/public/bunny.gif" class="rounded-full mr-10px w24px w24px" />
+        <img src="/bunny.gif" class="rounded-full mr-10px w24px w24px" />
         <span>{{ userStore.user.nickName }}</span>
       </div>
       <template #dropdown>

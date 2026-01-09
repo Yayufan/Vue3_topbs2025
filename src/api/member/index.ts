@@ -59,7 +59,7 @@ export function fetchMembersWithPaginationAndStatusApi(
   // tags?: number[]
 ): AxiosPromise {
   return request({
-    url: "/member/tag/pagination-by-query",
+    url: "/member/tag/pagination",
     method: "get",
     params: {
       page,

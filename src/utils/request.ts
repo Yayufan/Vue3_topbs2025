@@ -46,8 +46,10 @@ service.interceptors.response.use(
         userStore.resetReviewerToken().then(() => {
           location.reload();
         });
+
       }
       localStorage.removeItem("Authorization");
+      window.location.reload();
     }
     if (response.status == 200 && response.data instanceof Blob) {
       return response;

@@ -84,42 +84,6 @@ export async function setupPermission() {
 
     next();
     NProgress.done();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   });
 
   router.afterEach(() => {
