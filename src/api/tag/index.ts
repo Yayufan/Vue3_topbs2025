@@ -14,7 +14,7 @@ export function getTagsByPaginationApi(
   tagType?: string
 ): AxiosPromise {
   return request({
-    url: "/tag/getTagsByPaginationApi",
+    url: "/tag/pagination",
     method: "get",
     params: {
       page,
@@ -44,6 +44,13 @@ export function deleteTagApi(id: number): AxiosPromise {
   return request({
     url: `/tag/${id}`,
     method: "delete",
+  });
+}
+
+export function getAssociationIdListByTagIdApi(tagId: string): AxiosPromise {
+  return request({
+    url: `/tag/associated/${tagId}`,
+    method: "get",
   });
 }
 

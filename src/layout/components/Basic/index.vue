@@ -8,7 +8,6 @@
       <article class="top-section">
         <div class="data-count">
           <p v-if="totalCount" class="total-count">總數量 :{{ totalCount }}</p>
-          <!-- <p v-if="currentCount" class="current-count">當前查詢數量 :{{ currentCount }}</p> -->
           <slot name="search-box" />
         </div>
         <slot name="option-box" />
@@ -59,6 +58,28 @@ const { title, totalCount, currentCount } = toRefs(props);
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  .data-count {
+    display: flex;
+    align-items: center;
+
+    .total-count {
+      font-size: 1rem;
+      margin-right: 16px;
+    }
+
+    @media screen and (max-width: 760px) {
+      flex-direction: column;
+      align-items: flex-start;
+
+    }
+
+  }
+
+  @media screen and (max-width: 760px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .data-section {

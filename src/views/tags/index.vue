@@ -35,9 +35,12 @@
           <el-table-column fixed="right" label="操作" width="150">
             <!-- 透過#default="scope" , 獲取到當前的對象值 , scope.row則是拿到當前那個row的數據  -->
             <template #default="scope">
-              <el-button link type="success" size="small" @click="toggleAssignTagDialog(scope.row)">
+              <el-button link type="success" size="small" @click="getAssociationIdListByTagId(scope.row)">
                 Add
               </el-button>
+              <!-- <el-button link type="success" size="small" @click="toggleAssignTagDialog(scope.row)">
+                Add
+              </el-button> -->
               <el-button link type="primary" size="small" @click="editRow(scope.row)">
                 Edit
               </el-button>
@@ -280,7 +283,7 @@
 <script lang="ts" setup>
 import BasicComponent from '@/layout/components/Basic/index.vue'
 
-import { addTagApi, assignMemberToTagApi, assignPaperReviewerToTagApi, assignPaperToTagApi, deleteTagApi, findAttendeesIdListByTagIdApi, findMemberIdListByTagIdApi, findPaperIdListByTagIdApi, findPaperReviewerIdListByTagIdApi, getAllTagsApi, getTagsByPaginationApi, updateTagApi } from '@/api/tag'
+import { addTagApi, assignMemberToTagApi, assignPaperReviewerToTagApi, assignPaperToTagApi, deleteTagApi, findAttendeesIdListByTagIdApi, findMemberIdListByTagIdApi, findPaperIdListByTagIdApi, findPaperReviewerIdListByTagIdApi, getAllTagsApi, getAssociationIdListByTagIdApi, getTagsByPaginationApi, updateTagApi } from '@/api/tag'
 import { getMemberByPaginationApi, fetchMembersWithPaginationAndStatusApi } from '@/api/member'
 import type { FormInstance, FormRules } from 'element-plus'
 import { typeEnums } from '@/enums/TypeEnum'
@@ -392,9 +395,30 @@ let tagsTotalPages = ref<number>(0)
 
 let tagsList = reactive<Record<string, any>>([])
 
+
+const asscoitedIdList = ref<Array<string>>([])
+const getAssociationIdListByTagId = async (tag: any) => {
+
+  const { res, error }: any = await tryCatch(getAssociationIdListByTagIdApi(tag.tagId));
+  console.log('tag association ids', res)
+  if (error || res.code !== 200) {
+    ElMessage.error('查詢失敗: ' + error || res.msg)
+    return [];
+  }
+  asscoitedIdList.value = res.data
+
+  Object.assign(assignTag, tag)
+  // getListByTagType(tag)
+  changedTag(tag) // 根據 tag 類型獲取資料
+  getData(tag.type, assignTagCurrentPage.value)
+  assignTagDialogVisible.value = true
+
+}
+
 const getTagsByPagination = async (page: number, size: number) => {
   const res = await getTagsByPaginationApi(page, size)
   Object.assign(tagsList, res.data)
+  console.log('tagsList', tagsList)
   tagsTotalPages.value = res.data.pages
 }
 
@@ -777,46 +801,46 @@ const changedTag = async (tag: any) => {
   switch (tag.type) {
     case 'member':
       assignTagTitle.value = '新增會員'
-      const { res: memberRes, error: memberError } = await tryCatch(findMemberIdListByTagIdApi(tag.tagId));
-      if (memberError) {
-        ElMessage.error('查詢失敗: ' + memberError.message)
-        return;
-      }
-      memberRes.data.forEach((id: string) => {
+      // const { res: memberRes, error: memberError } = await tryCatch(findMemberIdListByTagIdApi(tag.tagId));
+      // if (memberError) {
+      //   ElMessage.error('查詢失敗: ' + memberError.message)
+      //   return;
+      // }
+      asscoitedIdList.value.forEach((id: string) => {
         allMemberIdHasSet.add(id)
       })
       break;
     case 'attendees':
       assignTagTitle.value = '新增與會者'
-      const { res: attendeeRes, error: attendeeError } = await tryCatch(findAttendeesIdListByTagIdApi(tag.tagId));
-      if (attendeeError) {
-        ElMessage.error('查詢失敗: ' + attendeeError.message)
-        return;
-      }
-      attendeeRes.data.forEach((id: string) => {
+      // const { res: attendeeRes, error: attendeeError } = await tryCatch(findAttendeesIdListByTagIdApi(tag.tagId));
+      // if (attendeeError) {
+      //   ElMessage.error('查詢失敗: ' + attendeeError.message)
+      //   return;
+      // }
+      asscoitedIdList.value.forEach((id: string) => {
         attendeeIdSet.add(id)
       })
       break;
     case 'paper':
       assignTagTitle.value = '新增稿件'
-      const { res: paperRes, error: paperError } = await tryCatch(findPaperIdListByTagIdApi(tag.tagId));
-      if (paperError) {
-        ElMessage.error('查詢失敗: ' + paperError.message)
-        return;
-      }
-      paperRes.data.forEach((id: string) => {
+      // const { res: paperRes, error: paperError } = await tryCatch(findPaperIdListByTagIdApi(tag.tagId));
+      // if (paperError) {
+      //   ElMessage.error('查詢失敗: ' + paperError.message)
+      //   return;
+      // }
+      asscoitedIdList.value.forEach((id: string) => {
         paperIdSet.add(id)
       })
 
       break;
     case 'paperReviewer':
       assignTagTitle.value = '新增審稿人'
-      const { res: paperReviewerRes, error: paperReviewerError } = await tryCatch(findPaperReviewerIdListByTagIdApi(tag.tagId));
-      if (paperReviewerError) {
-        ElMessage.error('查詢失敗: ' + paperReviewerError.message)
-        return;
-      }
-      paperReviewerRes.data.forEach((id: string) => {
+      // const { res: paperReviewerRes, error: paperReviewerError } = await tryCatch(findPaperReviewerIdListByTagIdApi(tag.tagId));
+      // if (paperReviewerError) {
+      //   ElMessage.error('查詢失敗: ' + paperReviewerError.message)
+      //   return;
+      // }
+      asscoitedIdList.value.forEach((id: string) => {
         paperReviewerIdSet.add(id)
       })
       break;

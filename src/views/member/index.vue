@@ -3,17 +3,26 @@
   <div class="content">
 
     <BasicComponent title="會員管理" :totalCount="memberRes.total + '人'">
+      <template v-slot:search-box>
+        <div class="search-box">
+          <el-input v-model="fetchConditions.input" placeholder="輸入內容,Enter查詢"
+            @input="fetchMemberListWithPaginationAndStatus" />
+
+          <el-select v-model="fetchConditions.filterStatus" class="filter-status" placeholder="請選擇">
+            <el-option v-for="status in statusList" :label="status.label" :value="status.value" />
+          </el-select>
+        </div>
+      </template>
+
       <template v-slot:option-box>
         <div class="btn-box">
-
-          <el-button type="primary" @click="toggleAddDialog">
-            新增<el-icon class="el-icon--right">
+          <el-button class="btn-insert" type="primary" @click="insertMemberDialogState.openDialog">
+            新增<el-icon>
               <Plus />
             </el-icon>
           </el-button>
 
-          <el-button type="danger" @click="batchDeleteMember"
-            :disabled="selectedDeleteMemberList.length > 0 ? false : true">
+          <el-button type="danger" @click="batchDeleteMember" :disabled="deleteButtonIsDisabled">
             刪除<el-icon class="el-icon--right">
               <Delete />
             </el-icon>
@@ -23,99 +32,10 @@
         </div>
       </template>
 
-      <template v-slot:search-box>
-        <div class="search-bar">
-          <el-input v-model="fetchConditions.input" style="width: 240px" placeholder="輸入內容,Enter查詢"
-            @input="fetchMemberListWithPaginationAndStatus" />
-
-          <el-select v-model="fetchConditions.filterStatus" style="width: 240px;" class="filter-status"
-            placeholder="請選擇">
-            <el-option label="全選" value="">
-              <span>全選</span>
-            </el-option>
-            <el-option label="未繳費" :value="0">
-              <span>未繳費</span>
-            </el-option>
-            <el-option label="待審核" :value="1">
-              <span style="color:gray;">已繳費-待確認</span>
-            </el-option>
-            <el-option label="繳費成功" :value="2">
-              <span style="color:green;">繳費成功</span>
-            </el-option>
-            <el-option label="繳費失敗" :value="3">
-              <span style="color:red;">繳費失敗</span>
-            </el-option>
-
-            <template #label="{ label, value }">
-              <span
-                :style="{ color: value == '1' ? 'gray' : value == '2' ? 'green' : value == '3' ? 'red' : 'black' }">{{
-                  label }}</span>
-            </template>
-          </el-select>
-
-        </div>
-      </template>
-
       <template v-slot:data-table>
-        <el-table class="member-table" :data="memberRes.records" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="55" />
-
-          <el-table-column fixed prop="firstName" label="名字" width="90" />
-          <el-table-column fixed prop="lastName" label="姓氏" width="90" />
-          <el-table-column prop="email" label="信箱" width="250" />
-          <el-table-column prop="country" label="國家" width="100" />
-          <el-table-column prop="remitAccountLast5" label="帳戶後五碼" width="100" />
-
-
-          <el-table-column prop="status" label="繳費狀態" width="120">
-            <template #default="scope">
-              <span v-if="scope.row.status == 1" style="color: gray;">已繳費-待確認</span>
-              <span v-else-if="scope.row.status == 2" style="color: green;">繳費成功</span>
-              <span v-else-if="scope.row.status == 3" style="color: red;">繳費失敗</span>
-              <span v-else>未繳費</span>
-            </template>
-          </el-table-column>
-
-          <el-table-column prop="tagSet" label="標籤" min-width="40" align="center" width="150">
-            <template #default="scope">
-              <el-popover v-if="scope.row.tagSet.length > 0" placement="left-start" title="標籤" :width="200"
-                trigger="hover" class="tag-popover">
-                <template #reference>
-                  <el-tag v-if="findFirstVaildTag(scope.row.tagSet)" size="large" round
-                    :color="findFirstVaildTag(scope.row.tagSet).color" effect="light">{{
-                      findFirstVaildTag(scope.row.tagSet).name }}</el-tag>
-
-                </template>
-                <template #default>
-                  <div class="tag-popover-box">
-                    <div v-for="tag in scope.row.tagSet" :key="tag.tagId" class="tag-item">
-                      <el-tag v-if="tag.status === 0" size="large" round :color="tag.color">{{
-                        tag.name }}</el-tag>
-                    </div>
-                  </div>
-
-                </template>
-              </el-popover>
-
-            </template>
-          </el-table-column>
-
-
-          <el-table-column label="操作" width="200">
-            <!-- 透過#default="scope" , 獲取到當前的對象值 , scope.row則是拿到當前那個row的數據  -->
-            <template #default="scope">
-              <el-button link type="success" size="small" @click="toggleTagsDialog(scope.row)">
-                Tags
-              </el-button>
-              <el-button link type="primary" size="small" @click="editRow(scope.row)">
-                View
-              </el-button>
-              <el-button link type="danger" size="small" @click="deleteMember(scope.row.memberId)">
-                Delete</el-button>
-
-            </template>
-          </el-table-column>
-        </el-table>
+        <MemberTable :member-data="memberRes.records" view-page="index" @open-tag-dialog="tagDialogState.openDialog"
+          @open-edit-dialog="updateMemberDrawerState.openDrawer" @delete-member="deleteMember"
+          @mutli-delete-members="handleSelectionChange" />
       </template>
 
       <template v-slot:pagination-box>
@@ -124,7 +44,9 @@
           :hide-on-single-page="false" />
       </template>
     </BasicComponent>
-    <el-dialog v-model="tagsDialogIsOpen" title="編輯標籤" width="70%">
+
+    <el-dialog v-model="tagDialogState.isOpen" title="編輯標籤" :width="tagDialogState.width"
+      :before-close="tagDialogState.closeDialog">
       <h1>{{ assignMember.name }}</h1>
       <div class="transfer-box">
         <el-transfer ref="transferPanelRef" v-model="assignMember.tagList" :data="transferDataList"
@@ -149,7 +71,7 @@
         </el-transfer>
       </div>
       <template #footer>
-        <el-button @click="cancelTransfer">取消</el-button>
+        <el-button @click="tagDialogState.closeDialog">取消</el-button>
         <el-button type="primary" @click="submitTagsList">保存</el-button>
       </template>
     </el-dialog>
@@ -157,150 +79,34 @@
 
 
     <!-- 修改時的Drawer -->
-    <el-drawer v-model="drawer" title="I am the title" :size="drawerSize">
-
-      <template #header>
-        <h4>檢視資料</h4>
-      </template>
-
-      <template #default>
-        <el-form label-position="top" label-width="auto" :model="updateMemberForm" ref="updateMemberFormRef">
-
-          <el-form-item label="E-Mail" prop="email">
-            <el-input disabled v-model="updateMemberForm.email" />
-          </el-form-item>
-
-          <el-form-item label="名字" prop="firstName">
-            <el-input disabled v-model="updateMemberForm.firstName" />
-          </el-form-item>
-
-          <el-form-item label="姓氏" prop="lastName">
-            <el-input disabled v-model="updateMemberForm.lastName" />
-          </el-form-item>
-
-          <el-form-item label="中文姓名" prop="chineseName">
-            <el-input disabled v-model="updateMemberForm.chineseName" placeholder="中文名" style="width: 240px;" />
-          </el-form-item>
-
-          <el-form-item label="國家" prop="country">
-            <el-input disabled v-model="updateMemberForm.country" />
-          </el-form-item>
-
-          <el-form-item label="身份證字號/護照號碼" prop="idCard">
-            <el-input disabled v-model="updateMemberForm.idCard" />
-          </el-form-item>
-
-          <el-form-item label="飲食偏好" prop="email">
-            <el-radio-group disabled v-model="updateMemberForm.food" style="margin-left: 1rem;">
-              <el-radio value="葷">葷</el-radio>
-              <el-radio value="素">素</el-radio>
-            </el-radio-group>
-          </el-form-item>
-
-          <el-form-item label="食物禁忌" prop="foodTaboo">
-            <el-input disabled v-model="updateMemberForm.foodTaboo" placeholder="食物禁忌" style="width: 240px;" />
-          </el-form-item>
-
-          <el-form-item label="帳號末五碼" prop="remitAccountLast5">
-            <el-input disabled v-model="updateMemberForm.remitAccountLast5" />
-          </el-form-item>
-
-          <el-form-item label="抬頭" prop="receipt">
-            <el-input disabled v-model="updateMemberForm.receipt" />
-          </el-form-item>
-
-
-          <el-form-item label="註冊費" prop="amount">
-            <el-input disabled v-model="updateMemberForm.amount" />
-          </el-form-item>
-
-          <el-form-item label="會員類別">
-            <el-select disabled v-model="updateMemberForm.category">
-              <el-option v-for="item in 7" :label="memberEnums[item]" :value="item"></el-option>
-            </el-select>
-          </el-form-item>
-
-
-          <el-form-item label="單位" prop="affiliation">
-            <el-input disabled v-model="updateMemberForm.affiliation">
-            </el-input>
-          </el-form-item>
-
-          <el-form-item label="職稱" prop="jobTitle">
-            <el-input disabled v-model="updateMemberForm.jobTitle" />
-          </el-form-item>
-
-          <el-form-item label="連絡電話" prop="phone">
-            <el-input disabled v-model="updateMemberForm.phone" />
-          </el-form-item>
-
-          <el-form-item label="繳費狀態" prop="status">
-            <el-select v-model="updateMemberForm.status" disabled placeholder="Select" style="width: 240px;">
-              <el-option label="未繳費" :value="0">
-                <span>未繳費</span>
-              </el-option>
-              <el-option label="待審核" :value="1">
-                <span style="color:gray;">已繳費-待確認</span>
-              </el-option>
-              <el-option label="繳費成功" :value="2">
-                <span style="color:green;">繳費成功</span>
-              </el-option>
-              <el-option label="繳費失敗" :value="3">
-                <span style="color:red;">繳費失敗</span>
-              </el-option>
-
-              <template #label="{ label, value }">
-                <span
-                  :style="{ color: value == '1' ? 'gray' : value == '2' ? 'green' : value == '3' ? 'red' : 'black' }">{{
-                    label }}</span>
-              </template>
-            </el-select>
-
-          </el-form-item>
-
-
-        </el-form>
-      </template>
-
-
-      <template #footer>
-        <div style="flex: auto">
-        </div>
-      </template>
-
+    <el-drawer v-model="updateMemberDrawerState.isOpen" title="更改資料" :size="updateMemberDrawerState.width"
+      :before-close="updateMemberDrawerState.closeDrawer">
+      <UpdateMemberForm :member-data="updateMemberForm" @update-member="handleUpdateSubmit" />
     </el-drawer>
 
 
-    <el-dialog v-model="dialogFormVisible" title="新增會員" :width="dialogWidth">
-      <InsertMemberForm @close="closeInsertDialog" />
+    <el-dialog v-model="insertMemberDialogState.isOpen" title="新增會員" :width="insertMemberDialogState.width">
+      <InsertMemberForm @close="insertMemberDialogState.closeDialog" />
     </el-dialog>
   </div>
-
-
-
-
-  <!-- </section> -->
-
 </template>
 
 <script setup lang='ts'>
 import BasicComponent from '@/layout/components/Basic/index.vue'
 
 import { ref, reactive } from 'vue'
-import { Delete, Phone, Plus } from '@element-plus/icons-vue'
-import { scrollbarProps, type FormInstance, type FormRules } from 'element-plus'
-import { fetchMembersWithPaginationAndStatusApi, getMemberCountApi, updateMemberApi, deleteMemberApi, batchDeleteMemberApi, downloadMemberExcelApi, assignTagsToMember, addVipMemberApi } from '@/api/member'
+import { Delete, Plus } from '@element-plus/icons-vue'
+import { fetchMembersWithPaginationAndStatusApi, updateMemberApi, deleteMemberApi, batchDeleteMemberApi, downloadMemberExcelApi, assignTagsToMember } from '@/api/member'
 import { getAllTagsApi } from '@/api/tag'
 
-import countriesData from '@/assets/data/countries.json'
 
-import { memberEnums } from '@/enums/memberEnum'
-
-import { Member } from '@/api/member/type'
+import { Member, PutMemberForAdminInterface } from '@/api/member/type'
 import { tryCatch } from '@/utils/tryCatch'
 import InsertMemberForm from './components/InsertMemberForm.vue'
+import UpdateMemberForm from './components/UpdateMemberForm.vue'
+import MemberTable from './components/MemberTable.vue'
+import { useAppStore } from '@/store'
 
-const countries = ref(countriesData)
 
 
 
@@ -313,15 +119,6 @@ const downloadExcel = async () => {
   document.body.appendChild(link);
   link.click();
 }
-
-//查詢內容
-let input = ref('')
-
-//篩選審核狀態,預設找已經過審的
-let filterStatus = ref('')
-
-
-
 
 
 /**---------------------------
@@ -402,6 +199,7 @@ const useDeleteMemberManagement = () => {
       type: 'warning'
     }).then(async () => {
       // 用户選擇確認，繼續操作
+      console.log('Deleting member with ID:', memberId);
       const { res, error }: any = await tryCatch(deleteMemberApi(memberId));
       if (error || res.code !== 200) {
         ElMessage.error(error || res.msg || '刪除會員失敗');
@@ -455,46 +253,37 @@ const { selectedDeleteMemberList, deleteMember, handleSelectionChange, batchDele
 
 /**-------------表單相關variable及function------------------------- */
 
-//是否顯示表單dialog
-const dialogFormVisible = ref(false)
+const insertMemberDialogState = ref<DialogState>({
+  isOpen: false,
+  width: computed(() => (useAppStore().device === 'mobile') ? '90%' : '45%'),
+  openDialog: () => {
+    insertMemberDialogState.value.isOpen = true
+  },
+  closeDialog: () => {
+    insertMemberDialogState.value.isOpen = false
+    fetchMemberListWithPaginationAndStatus()
+  }
+})
 
 
-const checkConfirmPassword = (rule: any, value: string, callback: any) => {
-  // if (insertMemberFormData.password !== value) {
-  //   callback(new Error('兩次密碼不一致'))
-  // } else {
-  //   callback()
-  // }
-}
-
-
-
-//顯示新增Dialog
-const toggleAddDialog = () => {
-  dialogFormVisible.value = true
-}
-
-const closeInsertDialog = () => {
-  dialogFormVisible.value = false
-  fetchMemberListWithPaginationAndStatus()
-}
 
 
 /**------------編輯內容相關操作---------------------- */
-
-//drawer的開關
-const drawer = ref(false)
-
-//drawer內,取消按鈕
-const cancelClick = () => {
-  drawer.value = false
-}
+const updateMemberDrawerState = ref<DrawerState>({
+  isOpen: false,
+  width: computed(() => (useAppStore().device === 'mobile') ? '90%' : '45%'),
+  openDrawer: (member: Member) => {
+    updateMemberDrawerState.value.isOpen = true
+    Object.assign(updateMemberForm, member)
+  },
+  closeDrawer: () => {
+    updateMemberDrawerState.value.isOpen = false
+  }
+})
 
 //編輯的表單元素本身
 
-const updateMemberFormRef = ref()
-
-let updateMemberForm = reactive({
+let updateMemberForm = reactive<Member>({
   memberId: "",
   email: "",
   chineseName: "",
@@ -505,45 +294,38 @@ let updateMemberForm = reactive({
   affiliation: "",
   jobTitle: "",
   phone: "",
-  status: "",
+  status: 0,
   food: "",
   foodTaboo: "",
   receipt: "",
   idCard: "",
   category: 1,
-  amount: "",
+  amount: 0,
+  title: "",
+  tagList: [],
+  countryCode: "",
 })
 
 
-//drawer內,確認按鈕
-const confirmClick = async () => {
-  //沒有抓到的這個Dom直接返回
-  updateMemberFormRef.value.validate(async (valid: boolean) => {
-    if (valid) {
-      await updateMemberApi(updateMemberForm)
-      drawer.value = false
-      ElMessage.success("修改完成")
-      fetchMemberListWithPaginationAndStatus()
+// 更新資料
+const handleUpdateSubmit = async (updateData: PutMemberForAdminInterface) => {
+  const { res, error }: any = await tryCatch(updateMemberApi(updateData));
 
-      // await getMemberByPagination(currentPage.value, 10)
-
-
-    } else {
-      ElMessage.error("請完整填入資訊")
-    }
-  })
-
+  if (error || res.code !== 200) {
+    ElMessage.error(error || res.msg || "修改會員資料失敗");
+    return;
+  }
+  ElMessage.success("修改完成");
+  fetchMemberListWithPaginationAndStatus();
+  updateMemberDrawerState.value.closeDrawer();
 }
 
-const editRow = (member: any): void => {
-  Object.assign(updateMemberForm, member)
-  drawer.value = true
-}
+
 
 
 
 /**-------------------標籤-------------------- */
-let tagsDialogIsOpen = ref(false);
+// let tagsDialogIsOpen = ref(false);
 let assignMember = reactive<any>({});
 
 let tagsList = reactive<any>([]);
@@ -567,53 +349,48 @@ const getTagsList = async () => {
   })
 }
 
-const findFirstVaildTag = (tagSet: any) => {
-  for (let i = 0; i < tagSet.length; i++) {
-    if (tagSet[i].status === 0) {
-      return tagSet[i];
+const findFirstVaildTag = (tagList: any) => {
+  for (let i = 0; i < tagList.length; i++) {
+    if (tagList[i].status === 0) {
+      return tagList[i];
     }
   }
   return '';
 }
 
-const toggleTagsDialog = async (member: any) => {
-  assignMember = member;
-  assignMember.tagList = Array.from(member.tagSet).map((item: any) => item.tagId);
-  tagsDialogIsOpen.value = true;
-}
+const tagDialogState = ref<DialogState>({
+  isOpen: false,
+  width: computed(() => (useAppStore().device === 'mobile') ? '90%' : '70%'),
+  openDialog: (member: Member) => {
+    tagDialogState.value.isOpen = true;
+    Object.assign(assignMember, member);
+    if (member.tagList) {
+      assignMember.tagList = Array.from(member.tagList).map((item: any) => item.tagId);
+    }
+  },
+  closeDialog: () => {
+    fetchMemberListWithPaginationAndStatus()
+    tagDialogState.value.isOpen = false;
+  }
+});
 
-const cancelTransfer = () => {
-  tagsDialogIsOpen.value = false;
-}
 
 const submitTagsList = async () => {
   let data = {
     memberId: assignMember.memberId,
     targetTagIdList: assignMember.tagList
   }
-  let res = await assignTagsToMember(data);
-  fetchMemberListWithPaginationAndStatus()
 
-  // getMemberByPagination(currentPage.value, 10);
-  tagsDialogIsOpen.value = false;
+  const { res, error }: any = await tryCatch(assignTagsToMember(data));
+  if (error || res.code !== 200) {
+    ElMessage.error(error || res.msg || '分配標籤失敗');
+    return;
+  }
+  tagDialogState.value.closeDialog();
+
 }
 
 /**====================處理新增與修改RWD================== */
-const dialogWidth = ref('45%')
-const drawerSize = ref('45%')
-
-
-const handleDialogWidthAndDrawerSize = () => {
-  if (window.innerWidth < 768) {
-    dialogWidth.value = '90%'
-    drawerSize.value = '90%'
-  } else {
-    dialogWidth.value = '45%'
-    drawerSize.value = '45%'
-  }
-
-}
-
 
 const transferPanelRef = ref();
 watch(() => transferPanelRef.value, (newVal) => {
@@ -643,13 +420,36 @@ watch(() => transferPanelRef.value, (newVal) => {
 /**-------------------掛載頁面時執行-------------------- */
 
 onMounted(() => {
-  // getMemberByPagination(1, 10)
   fetchMemberListWithPaginationAndStatus()
   getTagsList()
-
-  window.addEventListener('resize', handleDialogWidthAndDrawerSize);
-
 })
+
+
+// 狀態選擇
+const statusList = ref<{ label: string, value: string }[]>([
+  {
+    label: '全選',
+    value: ''
+  }, {
+    label: '未繳費',
+    value: '0'
+  }, {
+    label: '待審核',
+    value: '1'
+  }, {
+    label: '繳費成功',
+    value: '2'
+  }, {
+    label: '繳費失敗',
+    value: '3'
+  }
+])
+
+const deleteButtonIsDisabled = computed(() => {
+  return selectedDeleteMemberList.value.length > 0 ? false : true;
+});
+
+const isDevice = computed(() => useAppStore().device === 'mobile' ? true : false);
 
 
 
@@ -686,12 +486,24 @@ onMounted(() => {
     font-weight: 600;
   }
 
+
+
 }
 
-.filter-status {
-  margin-left: 10px;
-}
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 
+  .el-input,
+  .el-select {
+    width: 15rem;
+  }
+
+  @media screen and (max-width: 760px) {
+    flex-direction: column;
+  }
+}
 
 .member-table {
   width: 100%;
@@ -834,6 +646,29 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+:deep(.el-transfer__buttons) {
+  @media screen and (max-width: 760px) {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+
+    .el-button {
+      &:first-child {
+        .el-icon {
+          transform: rotate(90deg);
+        }
+      }
+
+      &:last-child {
+        .el-icon {
+          transform: rotate(90deg);
+        }
+      }
+    }
+  }
+
 }
 
 

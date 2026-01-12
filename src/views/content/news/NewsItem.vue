@@ -4,22 +4,23 @@
     <el-card class="article-item-card-box">
 
 
-      <el-form :model="article" class="article-form" ref="articleForm" :rules="articleRules" label-position="top">
+      <el-form :model="putArticleForm" class="article-form" ref="articleForm" :rules="articleRules"
+        label-position="top">
 
         <div class="outer-input-box">
 
           <div class="text-input-box">
             <el-form-item label="文章類別" prop="type">
-              <el-input v-model="article.type" placeholder="消息類型" />
+              <el-input v-model="putArticleForm.type" placeholder="消息類型" />
             </el-form-item>
             <el-form-item label="文章標題" prop="title">
-              <el-input v-model="article.title" placeholder="消息標題" />
+              <el-input v-model="putArticleForm.title" placeholder="消息標題" />
             </el-form-item>
             <el-form-item label="文章描述" prop="description">
-              <el-input type="textarea" v-model="article.description" autocomplete="off" />
+              <el-input type="textarea" v-model="putArticleForm.description" autocomplete="off" />
             </el-form-item>
             <el-form-item label="公告日期" prop="announcementDate">
-              <el-date-picker v-model="article.announcementDate" type="date" placeholder="Pick a day"
+              <el-date-picker v-model="putArticleForm.announcementDate" type="date" placeholder="Pick a day"
                 format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
             </el-form-item>
           </div>
@@ -51,7 +52,7 @@
         :deleteApi="deleteArticleAttachmentApi" />
 
       <!-- CKEditor5 編輯器組件   -->
-      <CustomCKEditor :scope="scope" :htmlContent="article.content" :updateContent="updateContent">
+      <CustomCKEditor :scope="scope" :htmlContent="putArticleForm.content" :updateContent="updateContent">
       </CustomCKEditor>
 
     </el-card>
@@ -69,6 +70,7 @@ import type { FormInstance, FormRules, UploadRawFile, UploadProps } from 'elemen
 import { updateArticleApi, getArticleApi } from '@/api/article'
 import AttachmentComponent from '@/components/ArticleAttachment/index.vue'
 import { getAllArticleAttachmentApi, addArticleAttachmentApi, deleteArticleAttachmentApi } from '@/api/articleAttachment'
+import { PutArticleInterface } from '@/api/article/type'
 
 
 //路由參數,這邊注意解構賦值後,會失去響應式
@@ -86,13 +88,23 @@ const article = reactive<Record<string, any>>({
   announcementDate: '',
   content: '',
   coverThumbnailUrl: ''
-
 });
+
+const putArticleForm = ref<PutArticleInterface>({
+  articleId: '',
+  type: '',
+  title: '',
+  description: null,
+  announcementDate: '',
+  content: '',
+  tempUploadUrl: [],
+  groupType: '',
+})
 
 
 //方法,子傳父
 const updateContent = (newValue: string) => {
-  article.content = newValue;
+  putArticleForm.value.content = newValue;
 };
 
 /** 當前組件的配置  */
@@ -175,6 +187,15 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
 const getArticle = async () => {
   let res = await getArticleApi(id)
   Object.assign(article, res.data)
+
+  putArticleForm.value.articleId = res.data.articleId;
+  putArticleForm.value.groupType = res.data.groupType;
+  putArticleForm.value.type = res.data.type;
+  putArticleForm.value.title = res.data.title;
+  putArticleForm.value.description = res.data.description;
+  putArticleForm.value.announcementDate = res.data.announcementDate;
+  putArticleForm.value.content = res.data.content;
+
 }
 
 //返回列表
@@ -223,10 +244,11 @@ const submitArticleForm = (form: FormInstance) => {
       }
       //賦予進article響應式對象中
       article.tempUploadUrl = tempUploadUrlList
+      putArticleForm.value.tempUploadUrl = tempUploadUrlList;
 
       let formData = new FormData();
       // 將響應式對象轉換為普通對象，然後轉換為 JSON 字符串
-      const jsonData = JSON.stringify(article)
+      const jsonData = JSON.stringify(putArticleForm.value);
       formData.append('data', new Blob([jsonData], { type: "application/json" }))
       formData.append('file', imgFile)
 

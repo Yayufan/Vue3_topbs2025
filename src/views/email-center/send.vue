@@ -94,7 +94,6 @@ import { fetchEmailQuotaApi, getEmailTemplateApi, sendEmailApi, sendEmailByCateg
 import { ref, reactive } from 'vue'
 import { FormInstance, FormRules } from 'element-plus'
 import { getAllTagsApi, getTagsByPaginationApi } from '@/api/tag'
-import { stubObject } from 'lodash'
 import { tryCatch } from '@/utils/tryCatch'
 
 import BasicComponent from '@/layout/components/Basic/index.vue'

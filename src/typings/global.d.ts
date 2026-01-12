@@ -82,5 +82,19 @@ declare global {
     /** 子列表  */
     children?: OptionType[];
   }
+
+  interface DialogState {
+    isOpen: boolean;
+    width: ComputedRef<string>;
+    openDialog: (option: any) => void;
+    closeDialog: () => void;
+  }
+
+  interface DrawerState {
+    isOpen: boolean;
+    width: ComputedRef<string>;
+    openDrawer: (option: any) => void;
+    closeDrawer: () => void;
+  }
 }
 export { };

@@ -6,7 +6,7 @@ export function getAttendeeListByTagAndPaginationApi(
   queryText: string
 ): AxiosPromise {
   return request({
-    url: "/attendees/tag/pagination-by-query",
+    url: "/attendees/tag/pagination",
     method: "get",
     params: {
       page: page,

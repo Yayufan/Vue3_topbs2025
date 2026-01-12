@@ -4,7 +4,7 @@
       <el-row justify="space-between">
         <el-col :span="18" :xs="24">
           <div class="flex h-full items-center">
-            <img class="w-20 h-20 mr-5 rounded-full" src="/public/bunny.gif" />
+            <img class="w-20 h-20 mr-5 rounded-full" src="/bunny.gif" />
             <div>
               <p>{{ }}</p>
               <p class="text-sm text-gray">
