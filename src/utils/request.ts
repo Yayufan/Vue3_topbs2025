@@ -58,30 +58,51 @@ service.interceptors.response.use(
     return Promise.reject(new Error(msg || "Error"));
   },
   (error: any) => {
+
+    console.log(error)
     if (error.response.data) {
-      const { code, msg } = error.response.data;
-      // token 过期,重新登录
-      if (code === "A0230") {
-        ElMessageBox.confirm("当前页面已失效，请重新登录", "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
-        }).then(() => {
+      const { status, data } = error.response;
+
+      if (status == 401) {
+        if (localStorage.getItem("Authorization-paper-reviewer")) {
+          localStorage.removeItem("Authorization-paper-reviewer");
+          localStorage.setItem("paper-reviewer-logout", "true");
           const userStore = useUserStoreHook();
-          if (localStorage.getItem("Authorization-paper-reviewer")) {
-            userStore.resetReviewerToken().then(() => {
-              location.reload();
-            });
-          } else {
-            userStore.resetToken().then(() => {
-              location.reload();
-            });
-          }
-        });
-      } else {
-        ElMessage.error(msg || "系统出错");
+          userStore.resetReviewerToken().then(() => {
+            location.reload();
+          });
+
+        }
+        localStorage.removeItem("Authorization");
+        window.location.reload();
       }
+
     }
+
+    // if (error.response.data) {
+    //   const { code, msg } = error.response.data;
+    //   // token 过期,重新登录
+    //   if (code === "A0230") {
+    //     ElMessageBox.confirm("当前页面已失效，请重新登录", "提示", {
+    //       confirmButtonText: "确定",
+    //       cancelButtonText: "取消",
+    //       type: "warning",
+    //     }).then(() => {
+    //       const userStore = useUserStoreHook();
+    //       if (localStorage.getItem("Authorization-paper-reviewer")) {
+    //         userStore.resetReviewerToken().then(() => {
+    //           location.reload();
+    //         });
+    //       } else {
+    //         userStore.resetToken().then(() => {
+    //           location.reload();
+    //         });
+    //       }
+    //     });
+    //   } else {
+    //     ElMessage.error(msg || "系统出错");
+    //   }
+    // }
     return Promise.reject(error.message);
   }
 );

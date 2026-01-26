@@ -453,7 +453,7 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
     ],
   },
 
-  //---------------------------
+  //--------- 檔案中心 ------------------
   {
     path: "/file-center",
     component: Layout,
@@ -542,6 +542,51 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+
+  /**--------------- 自定義表單 -----------------  */
+  {
+    path: "/form",
+    component: Layout,
+    name: "Form",
+    meta: {
+      title: "表單管理",
+      icon: "el-icon-EditPen",
+      hidden: false,
+      roles: ["ADMIN"],
+    },
+    children: [
+      /** 表單管理 路由 */
+      {
+        // 沿用 /form 當作 index , 記住只能有一個
+        path: "",
+        component: () => import("@/views/form/index.vue"),
+        name: "FormIndex",
+        meta: {
+          title: "表單基本管理",
+          icon: "menu",
+          hidden: true,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+      /** 表單欄位 路由 */
+      {
+        path: ":formId/field",
+        component: () => import("@/views/form/field.vue"),
+        name: "FormFieldEditor",
+        meta: {
+          title: "表單欄位管理",
+          icon: "menu",
+          hidden: true,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+        props: true,
+      }
+    ]
+
+  }
+
 ]
 
 export const reviewerDynamicRoutes: RouteRecordRaw[] = [
