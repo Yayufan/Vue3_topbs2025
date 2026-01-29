@@ -57,8 +57,10 @@
   </div>
 
 
-  <QuestionFooter :is-required="props.field.isRequired" @update:isRequired="handleRequiredChange"
-    @delete="handleFieldDelete" @copy="handleFieldCopy"></QuestionFooter>
+  <QuestionFooter :index="props.index" :total="props.total" :is-required="props.field.isRequired"
+    @update:isRequired="handleRequiredChange" @delete="handleFieldDelete" @copy="handleFieldCopy"
+    @move-up="handleMoveUp" @move-down="handleMoveDown">
+  </QuestionFooter>
 </template>
 
 <script setup lang="ts">
@@ -73,13 +75,19 @@ import arrowDownSng from "@/assets/icons/arrow-down.svg"
 import arrowUpSng from "@/assets/icons/arrow-up.svg"
 
 // 誰能進來 父 -> 子
-const props = defineProps<{ field: FormField }>();
+const props = defineProps<{
+  field: FormField,
+  index: number;
+  total: number;
+}>();
 // 誰能出去 子 -> 父
 const emit = defineEmits<{
   (e: "update-local", patch: Partial<FormField>): void;
   (e: "commit"): void;
   (e: "copy"): void;
   (e: "delete"): void;
+  (e: "move-up"): void;
+  (e: "move-down"): void;
 }>();
 
 /** QestionHeader事件 */
@@ -126,6 +134,14 @@ const handleFieldDelete = () => {
 const handleFieldCopy = () => {
   emit("copy");
 }
+
+const handleMoveUp = () => {
+  emit("move-up");
+};
+
+const handleMoveDown = () => {
+  emit("move-down");
+};
 
 /** --------------------------------------------- */
 

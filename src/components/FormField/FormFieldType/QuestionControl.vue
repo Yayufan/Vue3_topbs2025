@@ -1,7 +1,10 @@
 <template>
-  <component :is="componentMap[props.field.fieldType]" :field="props.field" @update-local="emitUpdateLocal"
-    @commit="emitCommit(props.field.formFieldId!)" @delete="emitDelete(props.field.formFieldId!)"
-    @copy="emitCopy(props.field.formFieldId!)" />
+  <div>
+    <component :is="componentMap[props.field.fieldType]" :field="props.field" :index="props.index" :total="props.total"
+      @update-local="emitUpdateLocal" @commit="emitCommit(props.field.formFieldId!)"
+      @delete="emitDelete(props.field.formFieldId!)" @copy="emitCopy(props.field.formFieldId!)" @move-up="emitMoveUp"
+      @move-down="emitMoveDown" />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -19,14 +22,21 @@ import DateQuestionEditor from "@/components/FormField/FormFieldType/DateQuestio
 import { FieldType, type FormField } from "@/api/formField/types";
 
 // 誰能進來 父 -> 子
-const props = defineProps<{ field: FormField }>();
+const props = defineProps<{
+  field: FormField,
+  index: number;
+  total: number;
+}>();
 // 誰能出去 子 -> 父
 const emit = defineEmits<{
   (e: "update-local", patch: Partial<FormField>): void;
   (e: "commit", fieldId: string): void;
   (e: "copy", fieldId: string): void;
   (e: "delete", fieldId: string): void;
+  (e: "move-up"): void;
+  (e: "move-down"): void;
 }>();
+
 
 /**
  * 本地更新
@@ -58,6 +68,20 @@ const emitDelete = (fieldId: string) => {
  */
 const emitCopy = (fieldId: string) => {
   emit("copy", fieldId);
+};
+
+/**
+ * 觸發上移
+ */
+const emitMoveUp = () => {
+  emit("move-up");
+};
+
+/**
+ * 觸發下移
+ */
+const emitMoveDown = () => {
+  emit("move-down");
 };
 
 const componentMap: Record<FieldType, any> = {

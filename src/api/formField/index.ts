@@ -53,6 +53,14 @@ export function updateFormFieldApi(data: any): AxiosPromise {
   });
 }
 
+export function batchUpdateFieldOrderApi(data: any): AxiosPromise {
+  return request({
+    url: "/form-field/batch-order",
+    method: "put",
+    data,
+  });
+}
+
 /**
  * 刪除單一表單欄位
  * @param id

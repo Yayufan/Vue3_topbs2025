@@ -4,6 +4,18 @@
     <div class="function-box left-function-box">
 
       <div class="function-item">
+        <el-tooltip content="題目上移" placement="bottom">
+          <img :src="arrowUpSng" @click="handleMoveUp" :class="{ disabled: isFirst }">
+        </el-tooltip>
+      </div>
+
+      <div class="function-item">
+        <el-tooltip content="題目下移" placement="bottom">
+          <img :src="arrowDownSng" @click="handleMoveDown" :class="{ disabled: isLast }">
+        </el-tooltip>
+      </div>
+
+      <div class="function-item">
         <el-tooltip content="複製" placement="bottom">
           <img @click="handleFieldCopy" :src="copySvg">
         </el-tooltip>
@@ -50,6 +62,8 @@ import { ref, reactive } from "vue";
 import copySvg from "@/assets/icons/copy.svg";
 import deleteTrashCanSvg from "@/assets/icons/delete-trash-can.svg";
 import moreSvg from "@/assets/icons/more-vertical.svg";
+import arrowDownSng from "@/assets/icons/arrow-down.svg"
+import arrowUpSng from "@/assets/icons/arrow-up.svg"
 import { NumericBoolean } from "@/api/formField/types"
 
 const value = ref(false)
@@ -57,6 +71,8 @@ const value = ref(false)
 // 誰能進來 父 -> 子
 const props = defineProps<{
   isRequired: NumericBoolean;
+  index: number;
+  total: number;
 }>();
 
 // 誰能出去 子 -> 父
@@ -64,7 +80,14 @@ const emit = defineEmits<{
   (e: "update:isRequired", value: NumericBoolean): void;
   (e: 'delete'): void; // 定義刪除事件
   (e: 'copy'): void; // 定義複製事件
+  (e: 'move-up'): void;
+  (e: 'move-down'): void;
 }>();
+
+// 判斷是否是第一個或最後一個
+const isFirst = computed(() => props.index === 0);
+const isLast = computed(() => props.index === props.total - 1);
+
 
 const handleRequiredChange = (value: any) => {
   emit("update:isRequired", value as NumericBoolean)
@@ -77,6 +100,18 @@ const handleFieldDelete = () => {
 const handleFieldCopy = () => {
   emit("copy");
 }
+
+const handleMoveUp = () => {
+  if (!isFirst.value) {
+    emit("move-up");
+  }
+};
+
+const handleMoveDown = () => {
+  if (!isLast.value) {
+    emit("move-down");
+  }
+};
 
 </script>
 
