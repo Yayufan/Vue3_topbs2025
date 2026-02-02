@@ -15,7 +15,7 @@
 
     <div class="floating-bar" :style="{ top: floatingTop + 'px' }">
       <el-tooltip content="新增問題" placement="right">
-        <div class="floating-item" @click="handleAddFieldBelow(focusedIndex)">
+        <div class="floating-item" @click="handleAddField(focusedIndex)">
           <img :src="addEllipseSvg">
         </div>
       </el-tooltip>
@@ -47,7 +47,7 @@ import {
   UploadUserFile,
 } from "element-plus";
 import { useRoute, useRouter } from "vue-router";
-import { getFormFieldApi, copyFormFieldApi, updateFormFieldApi, deleteFormFieldApi, batchUpdateFieldOrderApi } from "@/api/formField";
+import { getFormFieldApi, addFormFieldApi, copyFormFieldApi, updateFormFieldApi, deleteFormFieldApi, batchUpdateFieldOrderApi } from "@/api/formField";
 import { FieldType, type FormField } from "@/api/formField/types";
 import addEllipseSvg from "@/assets/icons/add-ellipse.svg"
 import imageSvg from "@/assets/icons/image.svg"
@@ -180,15 +180,14 @@ let formFieldList = reactive<FormField[]>([]);
 
 const getFormFieldList = async (formId: string) => {
   let res = await getFormFieldApi(props.formId);
-  // 清理過去資料
-  formFieldList.length = 0;
-  // 重新賦值資料
-  Object.assign(formFieldList, res.data);
+
+  // 使用 splice 原子化替換整個陣列內容，這是 Vue 3 最穩定的作法
+  formFieldList.splice(0, formFieldList.length, ...(res.data || []));
+
   // 如果裡面沒有元素則要內建一個元素給它
   if (formFieldList.length < 1) {
     // 這邊最後要直接呼叫新增API , 然後重新呼叫一次
-    formFieldList.push(createDefaultField());
-    focusedIndex.value = 0;
+    handleAddField(-1)
   }
 
   console.log(formFieldList);
@@ -231,11 +230,9 @@ const commitField = async (fieldId: string) => {
  * @param index 當前問題的索引
  */
 const handleCopyField = async (index: number) => {
-  console.log("複製問題，索引:", index);
 
-  // 要複製的目標
-  const targetField = formFieldList[index];
-  console.log("複製問題:", targetField);
+  // 1. 先還原成普通物件，這會過濾掉 Vue 的響應式干擾
+  const targetField = toRaw(formFieldList[index]);
 
   // 計算複製問題的 fieldOrder
   let newOrder: number;
@@ -255,6 +252,7 @@ const handleCopyField = async (index: number) => {
       newOrder = currentOrder + Math.floor(gap / CONFIG.MIN_GAP_FOR_INSERT);
     } else {
       // 空間不足，先重新排序
+      console.log("空間不足 , 重排序之前顯示:" + formFieldList.values)
       await reorderAllFields();
       const newCurrentOrder = formFieldList[index].fieldOrder;
       const newNextOrder = formFieldList[index + 1].fieldOrder;
@@ -310,7 +308,7 @@ const handleDeleteField = async (fieldId: string) => {
 
 /**----------------- 新增問題相關 -------------------------------- */
 
-const handleAddFieldBelow = async (afterIndex: number) => {
+const handleAddField = async (afterIndex: number) => {
   const newField = createDefaultField();
 
   if (formFieldList.length === 0) {
@@ -324,20 +322,20 @@ const handleAddFieldBelow = async (afterIndex: number) => {
     const gap = nextOrder - prevOrder;
 
     if (gap > CONFIG.MIN_GAP_FOR_INSERT) {
-      newField.fieldOrder = prevOrder + Math.floor(gap / 2);
+      newField.fieldOrder = prevOrder + Math.floor(gap / CONFIG.MIN_GAP_FOR_INSERT);
     } else {
       await reorderAllFieldsBeforeInsert(afterIndex + 1);
       const newPrevOrder = formFieldList[afterIndex].fieldOrder;
       const newNextOrder = formFieldList[afterIndex + 1].fieldOrder;
-      newField.fieldOrder = newPrevOrder + Math.floor((newNextOrder - newPrevOrder) / 2);
+      newField.fieldOrder = newPrevOrder + Math.floor((newNextOrder - newPrevOrder) / CONFIG.MIN_GAP_FOR_INSERT);
     }
   }
 
   // 呼叫新增API
-  // const res = await createFormFieldApi({
-  //   formId: props.formId,
-  //   ...newField,
-  // });
+  const res = await addFormFieldApi({
+    ...newField,
+    formId: props.formId,
+  });
 
   await getFormFieldList(props.formId);
 
@@ -472,6 +470,8 @@ const batchUpdateFieldOrder = async () => {
     formFieldId: field.formFieldId!,
     fieldOrder: field.fieldOrder
   }));
+
+  console.log("批量更新排序" + updates)
 
   await batchUpdateFieldOrderApi(updates);
 

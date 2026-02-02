@@ -1,3 +1,14 @@
+
+/** QuestionEditor 共用的 Emits 介面 */
+export interface QuestionEditorBaseEmits {
+  (e: "update-local", patch: Partial<FormField>): void;
+  (e: "commit"): void;
+  (e: "copy"): void;
+  (e: "delete"): void;
+  (e: "move-up"): void;
+  (e: "move-down"): void;
+}
+
 export enum FieldType {
   TEXT = "text",
   TEXTAREA = "textarea",
@@ -44,7 +55,7 @@ export interface ShowIf {
 export interface ValidationRule {
   max: number;
   min: number;
-  showIf: ShowIf;
+  showIf: ShowIf | null;
 }
 
 // 定義一個純 Type，用於更寬鬆的場景
@@ -52,6 +63,7 @@ export type NumericBoolean = 0 | 1;
 
 export interface FormField {
   formFieldId?: string;
+  formId: string;
   fieldType: FieldType;
   label: string;
   description: string;

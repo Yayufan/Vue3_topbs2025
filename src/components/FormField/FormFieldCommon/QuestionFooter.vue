@@ -3,27 +3,27 @@
 
     <div class="function-box left-function-box">
 
-      <div class="function-item">
+      <div class="function-item" @click="handleMoveUp">
         <el-tooltip content="題目上移" placement="bottom">
-          <img :src="arrowUpSng" @click="handleMoveUp" :class="{ disabled: isFirst }">
+          <img :src="arrowUpSng" :class="{ disabled: isFirst }">
         </el-tooltip>
       </div>
 
-      <div class="function-item">
+      <div class="function-item" @click="handleMoveDown">
         <el-tooltip content="題目下移" placement="bottom">
-          <img :src="arrowDownSng" @click="handleMoveDown" :class="{ disabled: isLast }">
+          <img :src="arrowDownSng" :class="{ disabled: isLast }">
         </el-tooltip>
       </div>
 
-      <div class="function-item">
+      <div class="function-item" @click="handleFieldCopy">
         <el-tooltip content="複製" placement="bottom">
-          <img @click="handleFieldCopy" :src="copySvg">
+          <img :src="copySvg">
         </el-tooltip>
       </div>
 
-      <div class="function-item">
+      <div class="function-item" @click="handleFieldDelete">
         <el-tooltip content="刪除" placement="bottom">
-          <img @click="handleFieldDelete" :src="deleteTrashCanSvg">
+          <img :src="deleteTrashCanSvg">
         </el-tooltip>
       </div>
     </div>
