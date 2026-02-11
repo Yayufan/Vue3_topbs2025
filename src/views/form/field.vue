@@ -1,6 +1,15 @@
 <template>
   <section class="field-section" ref="sectionRef">
-    <h1>表單欄位編輯</h1>
+
+    <el-card class="form-info">
+      <div>
+        <el-input class="info-title" v-model="formInfo.title" placeholder="表單標題" @blur="handleFormInfoBlur('title')" />
+
+        <el-input class="info-description" v-model="formInfo.description" :autosize="true" type="textarea" :rows="1"
+          placeholder="表單說明" @blur="handleFormInfoBlur('description')" />
+      </div>
+    </el-card>
+
     <transition-group name="move" tag="div">
       <el-card :ref="el => setFieldCardRef(el, index)" @click="focusedIndex = index" class="field-card"
         v-for="(formField, index) in formFieldList" :key="formField.formFieldId"
@@ -47,7 +56,9 @@ import {
   UploadUserFile,
 } from "element-plus";
 import { useRoute, useRouter } from "vue-router";
+import { getFormApi, updateFormApi } from "@/api/form"
 import { getFormFieldApi, addFormFieldApi, copyFormFieldApi, updateFormFieldApi, deleteFormFieldApi, batchUpdateFieldOrderApi } from "@/api/formField";
+import { Form, FormStatusEnum } from "@/api/form/types"
 import { FieldType, type FormField } from "@/api/formField/types";
 import addEllipseSvg from "@/assets/icons/add-ellipse.svg"
 import imageSvg from "@/assets/icons/image.svg"
@@ -74,6 +85,14 @@ const CONFIG = {
    */
   MIN_GAP_FOR_INSERT: 2,
 };
+
+/** ---------------- 從路由中取出 formId 參數 --------------------------*/
+const props = defineProps({
+  formId: {
+    type: String,
+    required: true,
+  },
+});
 
 /**----------------- 滾動懸浮bar -------------------------------*/
 const floatingTop = ref(0);
@@ -150,13 +169,58 @@ watch(focusedIndex, () => {
   updateFloatingBarPosition();
 });
 
-/** ---------------- 從路由中取出 formId 參數 --------------------------*/
-const props = defineProps({
-  formId: {
-    type: String,
-    required: true,
-  },
+/**--------------------- form相關 --------------------------------- */
+
+let formInfo = reactive<Form>({
+  formId: "",
+  title: "",
+  description: "",
+  status: FormStatusEnum.DRAFT,
+  requireLogin: 0,
+  requiredForCheckout: 0,
+  allowMultipleSubmissions: 0,
+  startTime: "",
+  endTime: ""
 });
+
+// 表單資訊的快照
+const formInfoSnapshot = ref<Pick<Form, "title" | "description">>({
+  title: "",
+  description: "",
+});
+
+const getForm = async (formId: string) => {
+  let res = await getFormApi(formId);
+  Object.assign(formInfo, res.data)
+
+  formInfoSnapshot.value = {
+    title: res.data.title ?? "",
+    description: res.data.description ?? "",
+  };
+
+}
+
+const handleFormInfoBlur = async (field: "title" | "description") => {
+  const newValue = formInfo[field];
+  const oldValue = formInfoSnapshot.value[field];
+
+
+  // 無變化，不打 API
+  if (newValue === oldValue) return;
+
+  // title 為必填
+  if (field === "title" && !newValue?.trim()) {
+    ElMessage.error("表單標題為必填");
+    formInfo.title = oldValue; // 回滾
+    return;
+  }
+
+  await updateFormApi(formInfo);
+
+  // 更新 snapshot
+  formInfoSnapshot.value[field] = newValue;
+};
+
 
 /**----------------- formField相關 -------------------------------- */
 
@@ -483,11 +547,14 @@ const batchUpdateFieldOrder = async () => {
 // 掛載時讀取
 onMounted(async () => {
 
+  // 獲取表單資訊
+  getForm(props.formId)
+
+  // 監聽滾動
   window.addEventListener("scroll", updateFloatingBarPosition, { passive: true });
 
   // 獲取表單欄位列表
   await getFormFieldList(props.formId);
-
   handleScroll();
 
 });
@@ -544,52 +611,94 @@ onUnmounted(() => {
   width: 95%;
   margin: 0 auto;
 
-  .floating-bar {
-    position: absolute;
-    right: 11%;
-    z-index: 1000;
-    background: #fff;
-    border-radius: 5px;
-    /* 加入這行，讓 top 變化時有動畫效果 */
-    transition: top 0.3s ease-in-out;
-
-    .floating-item {
-
-      margin: 8px 2px;
-
-
-      img {
-        width: 100%;
-        width: 35px;
-        padding: 5px;
-      }
-
-      &:hover {
-        img {
-          cursor: pointer;
-          background-color: rgba(128, 127, 127, 0.1);
-          border-radius: 50%;
-
-        }
-
-      }
-    }
-
-  }
-
-  .field-card {
+  /** 表單基本資訊 */
+  .form-info {
     max-width: 768px;
     margin: 1% auto;
+    border-top: 13px solid rgb(75, 61, 239);
 
-    &.focused {
-      box-shadow: 0 0 0 2px #409eff;
+    .info-title {
+      font-size: 32px;
+      margin: 1% auto;
+
+      :deep(.el-input__wrapper) {
+        border-radius: 0;
+        box-shadow: 0 2px 0 0 #ccc;
+      }
+
+      :deep(.el-input__wrapper:focus-within) {
+        box-shadow: 0 2px 0 0 #2b71ea;
+      }
+
+      :deep(.el-input__inner) {
+        height: 100%;
+        padding-bottom: 10px;
+      }
     }
   }
 
-  h1 {
-    text-align: left;
-    font-size: 2rem;
-    margin: 1% 0;
+  .info-description {
+    margin: 1% auto;
+
+    :deep(.el-textarea__inner) {
+      border-radius: 0;
+      box-shadow: 0 2px 0 0 #ccc;
+
+      &:focus {
+        box-shadow: 0 2px 0 0 #2b71ea;
+      }
+    }
   }
+
+
+}
+
+
+.floating-bar {
+  position: absolute;
+  right: 11%;
+  z-index: 1000;
+  background: #fff;
+  border-radius: 5px;
+  /* 加入這行，讓 top 變化時有動畫效果 */
+  transition: top 0.3s ease-in-out;
+
+  .floating-item {
+
+    margin: 8px 2px;
+
+
+    img {
+      width: 100%;
+      width: 35px;
+      padding: 5px;
+    }
+
+    &:hover {
+      img {
+        cursor: pointer;
+        background-color: rgba(128, 127, 127, 0.1);
+        border-radius: 50%;
+
+      }
+
+    }
+  }
+
+}
+
+.field-card {
+  max-width: 768px;
+  margin: 1% auto;
+
+  &.focused {
+    box-shadow: 0 0 0 2px #409eff;
+  }
+}
+
+h1 {
+  text-align: left;
+  font-size: 2rem;
+  margin: 1% 0;
 }
 </style>
