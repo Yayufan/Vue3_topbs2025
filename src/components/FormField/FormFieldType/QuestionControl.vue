@@ -89,12 +89,13 @@ const componentMap: Record<FieldType, any> = {
   [FieldType.TEXTAREA]: TextareaQuestionEditor,
   [FieldType.RADIO]: RadioQuestionEditor,
   [FieldType.CHECKBOX]: CheckboxQuestionEditor,
-  [FieldType.NUMBER]: NumberQuestionEditor,
-  [FieldType.EMAIL]: EmailQuestionEditor,
   [FieldType.SELECT]: SelectQuestionEditor,
   [FieldType.RATE]: RateQuestionEditor,
-  [FieldType.DATE]: DateQuestionEditor,
+
   // 尚未製作
+  [FieldType.NUMBER]: NumberQuestionEditor,
+  [FieldType.EMAIL]: EmailQuestionEditor,
+  [FieldType.DATE]: DateQuestionEditor,
   [FieldType.SECTION]: CheckboxQuestionEditor,
   [FieldType.IMAGE]: CheckboxQuestionEditor,
 };
