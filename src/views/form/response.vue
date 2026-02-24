@@ -2,24 +2,34 @@
   <section class="file-section">
     <el-card class="file-card">
       <h1>回覆管理</h1>
-
       <div class="function-bar">
-        <el-button type="primary" @click="createForm()">
-          新增表單<el-icon class="el-icon--right">
-            <Plus />
-          </el-icon>
+        <el-button type="info" @click="back">
+          返回表單頁
+        </el-button>
+        <el-button type="success" @click="downloadExcel">
+          下載表單回覆
         </el-button>
       </div>
 
+      <el-table class="no-img-article-table" :data="responseList.records" empty-text="No Data">
 
-      <el-table class="no-img-article-table" :data="formList.records" empty-text="No Data">
-        <el-table-column prop="title" label="名稱" min-width="120" />
-        <el-table-column prop="description" label="描述" min-width="120" />
-        <el-table-column prop="status" label="發佈狀態" width="200" />
+        <el-table-column label="編號" min-width="40">
+          <template #default="scope">
+            <div>{{ scope.$index + 1 }}
+            </div>
+          </template>
+        </el-table-column>
 
-        <el-table-column fixed="right" label="操作" width="150">
 
+        <!-- 動態前三個問題欄位 -->
+        <el-table-column v-for="question in topThreeQuestions" :key="question.formFieldId" :label="question.label"
+          min-width="160" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ getAnswer(row, question.formFieldId) || '—' }}
+          </template>
+        </el-table-column>
 
+        <el-table-column>
           <!-- 透過#default="scope" , 獲取到當前的對象值 , scope.row則是拿到當前那個row的數據  -->
           <template #default="scope">
 
@@ -28,22 +38,10 @@
               <el-button link type="primary" size="small" @click="editRow(scope.row)">
                 修改
               </el-button>
-              <el-button link type="danger" size="small" @click="deleteRow(scope.row.formId, scope.row.title)">
+              <el-button link type="danger" size="small" @click="deleteRow(scope.row.formResponseId, scope.row.title)">
                 刪除
               </el-button>
-              <el-dropdown type="info" trigger="click">
-                <template #default>
-                  <More style="width: 16px; margin-left: 12px;"></More>
-                </template>
 
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="jumpToFormField(scope.row.formId)">表單欄位</el-dropdown-item>
-                    <el-dropdown-item @click="jumpToFormResponse(scope.row.formId)">表單回覆</el-dropdown-item>
-                    <el-dropdown-item @click="copyFillLink(scope.row.formId, scope.row.status)">複製連結</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
             </div>
           </template>
 
@@ -56,72 +54,11 @@
       current-page當前頁數,官方建議使用v-model與current-page去與自己設定的變量做綁定,
     -->
       <div class="example-pagination-block no-img-article-pagination">
-        <el-pagination layout="prev, pager, next" :page-count="Number(formList.pages)"
-          :default-page-size="Number(formList.size)" v-model:current-page="currentPage" :hide-on-single-page="true" />
+        <el-pagination layout="prev, pager, next" :page-count="Number(responseList.pages)"
+          :default-page-size="Number(responseList.size)" v-model:current-page="currentPage"
+          :hide-on-single-page="true" />
       </div>
 
-
-
-      <!-- 創建活動對話框 -->
-      <ElDialog v-model="dialogFormVisible" title="表單資訊" width="500">
-
-        <el-form :model="formInfoData" ref="form" :rules="formInfoRules" label-position="top">
-
-          <el-form-item label="開放填寫時間 (可不填)" prop="startTime">
-            <el-date-picker v-model="datetimeRange" type="datetimerange" range-separator="To"
-              value-format="YYYY-MM-DD HH:mm:ss" start-placeholder="Start date" end-placeholder="End date"
-              :change="timeChanger()" />
-          </el-form-item>
-
-          <el-form-item label="名稱" prop="title">
-            <el-input v-model="formInfoData.title" autocomplete="off" />
-          </el-form-item>
-
-          <el-form-item label="描述" prop="description">
-            <el-input type="textarea" v-model="formInfoData.description" autocomplete="off" />
-          </el-form-item>
-
-          <el-form-item v-if="Boolean(formInfoData.formId)" label="發佈狀態" prop="status">
-            <el-select v-model="formInfoData.status" placeholder="Select">
-              <el-option key="draft" value="draft" />
-              <el-option key="published" value="published" />
-              <el-option key="closed" value="closed" />
-            </el-select>
-          </el-form-item>
-
-          <el-form-item label="是否綁定登入狀態">
-            <el-radio-group v-model="formInfoData.requireLogin">
-              <el-radio :value=1 border>是</el-radio>
-              <el-radio :value=0 border>否</el-radio>
-            </el-radio-group>
-          </el-form-item>
-
-          <el-form-item label="是否為會後表單 (僅能有一份 會後/簽退 表單)">
-            <el-radio-group v-model="formInfoData.requiredForCheckout">
-              <el-radio :value=1 border>是</el-radio>
-              <el-radio :value=0 border>否</el-radio>
-            </el-radio-group>
-          </el-form-item>
-
-          <el-form-item label="是否允許多次填寫">
-            <el-radio-group v-model="formInfoData.allowMultipleSubmissions">
-              <el-radio :value=1 border>是</el-radio>
-              <el-radio :value=0 border>否</el-radio>
-            </el-radio-group>
-          </el-form-item>
-
-
-        </el-form>
-
-        <template #footer>
-          <div class="dialog-footer">
-            <ElButton @click="dialogFormVisible = false">取消</ElButton>
-            <ElButton type="primary" @click="sumbitForm(form)">
-              儲存
-            </ElButton>
-          </div>
-        </template>
-      </ElDialog>
 
     </el-card>
 
@@ -136,7 +73,7 @@ import { ref, reactive, computed, watch } from 'vue'
 import { More, Delete, Plus } from '@element-plus/icons-vue'
 import { type FormInstance, type FormRules, type UploadRawFile, type UploadProps, ElMessageBox, ElMessage, UploadUserFile } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router';
-import { getFormApi, fetchFormPageByQueryApi, addFormApi, updateFormApi, deleteFormApi } from "@/api/form"
+import { fetchResponsePageApi, deleteResponseApi, downloadExcelApi } from "@/api/formResponse"
 
 const envAPI = import.meta.env.VITE_APP_BASE_API;
 //獲取路由
@@ -145,6 +82,14 @@ const route = useRoute()
 const router = useRouter()
 //formLabel 寬度
 const formLabelWidth = '140px'
+
+/** ---------------- 從路由中取出 formId 參數 --------------------------*/
+const props = defineProps({
+  formId: {
+    type: String,
+    required: true,
+  },
+});
 
 //顯示表單dialog變量
 const dialogFormVisible = ref(false)
@@ -157,125 +102,104 @@ const toggleAddDialog = () => {
 
 /** --------------- 表單API功能封裝 ----------------- */
 
-const getFormPage = async (page: number, size: number, formStatus?: string, queryText?: string) => {
-  let formPage = await fetchFormPageByQueryApi(page, size, formStatus, queryText);
-  Object.assign(formList, formPage.data)
+const getResponsePage = async (page: number, size: number, formId: string) => {
+  let responsePage = await fetchResponsePageApi(page, size, formId);
+  Object.assign(responseList, responsePage.data)
+  console.log(responseList)
+}
+
+// ★ 這就是使用 computed() 定義的前三個問題標題
+const topThreeQuestions = computed(() => {
+  if (!responseList.records?.length) return []
+
+  const first = responseList.records[0]
+  if (!first?.formFields?.length) return []
+
+  return [...first.formFields]
+    .sort((a, b) => a.fieldOrder - b.fieldOrder)
+    .slice(0, 4)
+    .map(field => ({
+      label: field.label,
+      formFieldId: field.formFieldId
+    }))
+})
+
+// 取得答案的函式
+const getAnswer = (row: any, formFieldId: string) => {
+  if (!row?.formFields) return null
+  const field = row.formFields.find((f: any) => f.formFieldId === formFieldId)
+  return field?.answer?.answerValue ?? null
 }
 
 
-/** --------------- 表單操作 --------------------------*/
+/** --------------- 表單回覆操作 --------------------------*/
 
-const createForm = () => {
-  // 1.初始化基本資訊 
-  Object.assign(formInfoData, initFormInfo())
-  // 2.初始化日期範圍
-  datetimeRange.value = []
-  // 3.顯示創建Dialog
-  toggleAddDialog()
-
+/**
+ * 返回表單頁
+ */
+const back = () => {
+  router.push("/form")
 }
 
 /**
- * 跳轉到表單欄位設置
- * @param id 
+ * 下載表單回覆Excel
  */
-const jumpToFormField = (id: string) => {
-  router.push({
-    name: "FormFieldEditor",
-    params: {
-      formId: id,
+const downloadExcel = async () => {
+  ElMessage.success("正在準備下載")
+  try {
+    let res = await downloadExcelApi(props.formId)
+    if (res.data !== null) {
+      const url = envAPI + res.data
+      // 開新分頁避免當前頁面跳走
+      window.open(url, '_blank')
     }
-  })
-}
-
-/**
- * 跳轉到表單響應
- * @param id 
- */
-const jumpToFormResponse = (id: string) => {
-  const currentPath = route.fullPath
-  router.push(currentPath + '/' + id)
-}
-
-/**
- * 將表單填寫連結,複製到剪貼簿
- * @param id 
- * @param status 
- */
-const copyFillLink = async (id: string, status: string) => {
-
-  if (status !== 'published') {
-    ElMessage.error("表單尚未處於發布狀態，無法複製連結")
-    return
+  } catch (err) {
+    ElMessage.error("下載失敗，請稍後再試")
+    console.error(err)
   }
 
-  const url = new URL(`form/${id}`, import.meta.env.VITE_DOMAIN).toString()
-  await navigator.clipboard.writeText(url)
-  ElMessage.success("複製連結成功")
 }
+
 
 /**
  * 編輯表單
  * @param id 
  */
 const editRow = (row: any): void => {
-  console.log("傳入資料: ", row)
-  Object.assign(formInfoData, row)
-  datetimeRange.value =
-    row.startTime && row.endTime
-      ? [row.startTime, row.endTime]
-      : []
-  toggleAddDialog()
+
+  //response/:responseId
+  // 跳轉至可編輯的表單回覆頁面
+  router.push({
+    name: "EditResponse",
+    params: {
+      responseId: row.formResponseId,
+    }
+  })
 
 }
 
 /**
- * 刪除表單
+ * 刪除表單回覆
  * @param id 
  * @param title 
  */
 const deleteRow = (id: string, title: string): void => {
-  ElMessageBox.confirm(`確定要刪除此表單嗎？ 所有回覆也將一併刪除`, '確認刪除', {
+  ElMessageBox.confirm(`確定要刪除此表單回覆嗎？ `, '確認刪除', {
     confirmButtonText: '確定',
     cancelButtonText: '取消',
     type: 'warning'
   }).then(async () => {
     // 用户選擇確認，繼續操作
-    await deleteFormApi(id)
+    await deleteResponseApi(id)
 
     ElMessage.success('刪除成功');
     // 重新獲取資料
-    getFormPage(1, 10)
+    getResponsePage(currentPage.value, 10, props.formId)
 
   }).catch((err) => {
     console.log(err)
   });
 }
-
-/** --------------- 表單時間range ------------------- */
-
-// 日期範圍變量
-let datetimeRange = ref<[string, string] | []>([]);
-
-// datetime component 監聽器使用的function
-const timeChanger = () => {
-
-  // 如果有時間則賦值
-  if (datetimeRange.value !== null && datetimeRange.value.length === 2) {
-    formInfoData.startTime = datetimeRange.value[0]
-    formInfoData.endTime = datetimeRange.value[1]
-  } else {
-    // 沒有則回歸初始值
-    formInfoData.startTime = ""
-    formInfoData.endTime = ""
-  }
-
-
-  console.log("起始時間:" + formInfoData.startTime)
-  console.log("結束時間:" + formInfoData.endTime)
-
-}
-
 
 
 /**--------------顯示數據相關---------------------------- */
@@ -283,8 +207,8 @@ const timeChanger = () => {
 //分頁組件， 從查詢參數中獲取初始值从查询参数中獲取初始值
 let currentPage = ref<number>(parseInt(route.query.page as string) || 1);
 
-//獲取的最新表單List
-let formList = reactive<Record<string, any>>({})
+//獲取的最新表單回覆List
+let responseList = reactive<Record<string, any>>({})
 
 
 //更新URL會帶動頁面更新,
@@ -299,103 +223,10 @@ watch(currentPage, (value, oldValue) => {
 })
 
 
-/**-------------表單相關variable及function------------------------- */
-
-
-
-//表單實例
-const form = ref()
-
-const initFormInfo = () => {
-  return {
-    formId: '',
-    title: '',
-    description: null,
-    status: 'draft',
-    requireLogin: 0,
-    requiredForCheckout: 0,
-    allowMultipleSubmissions: 0,
-    startTime: '',
-    endTime: ''
-  }
-}
-
-//表單數據
-let formInfoData = reactive(initFormInfo())
-
-
-//表單校驗規則
-const formInfoRules = reactive<FormRules>({
-  title: [
-    {
-      required: true,
-      message: '顯示名稱不能為空',
-      trigger: 'blur',
-    },
-    {
-      max: 255,
-      message: '內容長度不能超過 255 字符',
-      trigger: 'blur'
-    }
-  ],
-  description: [
-    {
-      required: true,
-      message: '描述信息不能為空',
-      trigger: 'blur',
-    },
-    {
-      max: 255,
-      message: '內容長度不能超過 255 字符',
-      trigger: 'blur'
-    }
-  ],
-
-})
-
-
-
-
-//送出表單方法
-const sumbitForm = (form: FormInstance | undefined) => {
-
-  //沒有抓到的這個Dom直接返回
-  if (!form) return
-  form.validate(async (valid) => {
-    if (valid) {
-
-      //呼叫父組件給的新增function API
-      // await props.addApi(formData)
-
-      //如果formId有值,觸發更新 , 沒有則是新增
-      if (Boolean(formInfoData.formId)) {
-        await updateFormApi(formInfoData)
-      } else {
-        await addFormApi(formInfoData)
-      }
-
-      //重製表單
-      form.resetFields()
-
-      ElMessage.success('送出成功');
-
-      //最終都將這個dialog關掉
-      dialogFormVisible.value = false
-
-      // 重新獲取資料
-      getFormPage(1, 10)
-
-    }
-    // else {
-    //   ElMessage.error("請完整填入資訊")
-    // }
-  })
-}
-
 
 // 掛載時讀取
 onMounted(() => {
-  getFormPage(1, 10)
+  getResponsePage(currentPage.value, 10, props.formId)
 })
 
 </script>

@@ -16,7 +16,13 @@
       <el-table class="no-img-article-table" :data="formList.records" empty-text="No Data">
         <el-table-column prop="title" label="名稱" min-width="120" />
         <el-table-column prop="description" label="描述" min-width="120" />
-        <el-table-column prop="status" label="發佈狀態" width="200" />
+        <el-table-column label="發佈狀態" width="200">
+          <template #default="{ row }">
+            <span v-if="row.status == FormStatusEnum.PUBLISHED" style="color: green;">Published</span>
+            <span v-else-if="row.status == FormStatusEnum.CLOSED" style="color: red;">Closed</span>
+            <span v-else-if="row.status == FormStatusEnum.DRAFT">Draft</span>
+          </template>
+        </el-table-column>
 
         <el-table-column fixed="right" label="操作" width="150">
 
@@ -39,7 +45,7 @@
 
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item @click="jumpToFormField(scope.row.formId)">表單欄位</el-dropdown-item>
+                    <el-dropdown-item @click="jumpToFormField(scope.row)">表單欄位</el-dropdown-item>
                     <el-dropdown-item @click="jumpToFormResponse(scope.row.formId)">表單回覆</el-dropdown-item>
                     <el-dropdown-item @click="copyFillLink(scope.row.formId, scope.row.status)">複製連結</el-dropdown-item>
                   </el-dropdown-menu>
@@ -138,6 +144,7 @@ import { More, Delete, Plus } from '@element-plus/icons-vue'
 import { type FormInstance, type FormRules, type UploadRawFile, type UploadProps, ElMessageBox, ElMessage, UploadUserFile } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router';
 import { getFormApi, fetchFormPageByQueryApi, addFormApi, updateFormApi, deleteFormApi } from "@/api/form"
+import { Form, FormStatusEnum } from "@/api/form/types"
 
 const envAPI = import.meta.env.VITE_APP_BASE_API;
 //獲取路由
@@ -180,11 +187,15 @@ const createForm = () => {
  * 跳轉到表單欄位設置
  * @param id 
  */
-const jumpToFormField = (id: string) => {
+const jumpToFormField = (row: any) => {
+  if (row.status == FormStatusEnum.PUBLISHED) {
+    ElMessage.error("表單處於發佈狀態,無法編輯欄位")
+    return
+  }
   router.push({
     name: "FormFieldEditor",
     params: {
-      formId: id,
+      formId: row.formId,
     }
   })
 }
@@ -194,8 +205,12 @@ const jumpToFormField = (id: string) => {
  * @param id 
  */
 const jumpToFormResponse = (id: string) => {
-  const currentPath = route.fullPath
-  router.push(currentPath + '/' + id)
+  router.push({
+    name: "FormResponse",
+    params: {
+      formId: id,
+    }
+  })
 }
 
 /**

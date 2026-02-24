@@ -582,7 +582,36 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
           keepAlive: true,
         },
         props: true,
+      },
+      /** 表單回覆 路由 */
+      {
+        path: ":formId/response",
+        component: () => import("@/views/form/response.vue"),
+        name: "FormResponse",
+        meta: {
+          title: "表單回覆管理",
+          icon: "menu",
+          hidden: true,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+        props: true,
+      },
+      /** 表單修改 路由 */
+      {
+        path: "response/:responseId",
+        component: () => import("@/views/form/editResponse.vue"),
+        name: "EditResponse",
+        meta: {
+          title: "表單回覆修改",
+          icon: "menu",
+          hidden: true,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+        props: true,
       }
+
     ]
 
   }
