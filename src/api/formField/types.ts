@@ -9,6 +9,20 @@ export interface QuestionEditorBaseEmits {
   (e: "move-down"): void;
 }
 
+
+export interface FormDto {
+  formId: string
+  title: string
+  description: string
+  status: string
+  requireLogin: number
+  requiredForCheckout: number
+  allowMultipleSubmissions: number
+  startTime: string
+  endTime: string
+  formFields: FormField[]
+}
+
 export enum FieldType {
   TEXT = "text",
   TEXTAREA = "textarea",
@@ -74,4 +88,5 @@ export interface FormField {
   fieldOrder: number;
   options: null | Option;
   validationRules: null | ValidationRule;
+  answer?: any
 }

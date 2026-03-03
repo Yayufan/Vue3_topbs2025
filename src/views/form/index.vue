@@ -16,7 +16,13 @@
       <el-table class="no-img-article-table" :data="formList.records" empty-text="No Data">
         <el-table-column prop="title" label="名稱" min-width="120" />
         <el-table-column prop="description" label="描述" min-width="120" />
-        <el-table-column prop="status" label="發佈狀態" width="200" />
+        <el-table-column label="發佈狀態" width="200">
+          <template #default="{ row }">
+            <span v-if="row.status == FormStatusEnum.PUBLISHED" style="color: green;">Published</span>
+            <span v-else-if="row.status == FormStatusEnum.CLOSED" style="color: red;">Closed</span>
+            <span v-else-if="row.status == FormStatusEnum.DRAFT">Draft</span>
+          </template>
+        </el-table-column>
 
         <el-table-column fixed="right" label="操作" width="150">
 
@@ -39,9 +45,9 @@
 
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item @click="jumpToFormField(scope.row.formId)">表單欄位</el-dropdown-item>
+                    <el-dropdown-item @click="jumpToFormField(scope.row)">表單欄位</el-dropdown-item>
                     <el-dropdown-item @click="jumpToFormResponse(scope.row.formId)">表單回覆</el-dropdown-item>
-                    <el-dropdown-item>複製連結</el-dropdown-item>
+                    <el-dropdown-item @click="copyFillLink(scope.row.formId, scope.row.status)">複製連結</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -90,7 +96,7 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item label="是否綁定登入狀態">
+          <el-form-item label="是否綁定登入狀態" prop="requireLogin">
             <el-radio-group v-model="formInfoData.requireLogin">
               <el-radio :value=1 border>是</el-radio>
               <el-radio :value=0 border>否</el-radio>
@@ -105,7 +111,7 @@
           </el-form-item>
 
           <el-form-item label="是否允許多次填寫">
-            <el-radio-group v-model="formInfoData.allowMultipleSubmissions">
+            <el-radio-group v-model="formInfoData.allowMultipleSubmissions" prop="allowMultipleSubmissions">
               <el-radio :value=1 border>是</el-radio>
               <el-radio :value=0 border>否</el-radio>
             </el-radio-group>
@@ -138,6 +144,7 @@ import { More, Delete, Plus } from '@element-plus/icons-vue'
 import { type FormInstance, type FormRules, type UploadRawFile, type UploadProps, ElMessageBox, ElMessage, UploadUserFile } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router';
 import { getFormApi, fetchFormPageByQueryApi, addFormApi, updateFormApi, deleteFormApi } from "@/api/form"
+import { Form, FormStatusEnum } from "@/api/form/types"
 
 const envAPI = import.meta.env.VITE_APP_BASE_API;
 //獲取路由
@@ -180,11 +187,15 @@ const createForm = () => {
  * 跳轉到表單欄位設置
  * @param id 
  */
-const jumpToFormField = (id: string) => {
+const jumpToFormField = (row: any) => {
+  if (row.status == FormStatusEnum.PUBLISHED) {
+    ElMessage.error("表單處於發佈狀態,無法編輯欄位")
+    return
+  }
   router.push({
     name: "FormFieldEditor",
     params: {
-      formId: id,
+      formId: row.formId,
     }
   })
 }
@@ -194,8 +205,29 @@ const jumpToFormField = (id: string) => {
  * @param id 
  */
 const jumpToFormResponse = (id: string) => {
-  const currentPath = route.fullPath
-  router.push(currentPath + '/' + id)
+  router.push({
+    name: "FormResponse",
+    params: {
+      formId: id,
+    }
+  })
+}
+
+/**
+ * 將表單填寫連結,複製到剪貼簿
+ * @param id 
+ * @param status 
+ */
+const copyFillLink = async (id: string, status: string) => {
+
+  if (status !== 'published') {
+    ElMessage.error("表單尚未處於發布狀態，無法複製連結")
+    return
+  }
+
+  const url = new URL(`form/${id}`, import.meta.env.VITE_DOMAIN).toString()
+  await navigator.clipboard.writeText(url)
+  ElMessage.success("複製連結成功")
 }
 
 /**
@@ -307,6 +339,15 @@ const initFormInfo = () => {
 //表單數據
 let formInfoData = reactive(initFormInfo())
 
+// 校驗 「重複填寫」開啟時 , 「綁定登入狀態」也必須開啟
+const validateLoginRequirement = (rule: any, value: any, callback: any) => {
+  // 如果「允許多次填寫」為 1 (是)，則「綁定登入狀態」必須為 1
+  if (formInfoData.allowMultipleSubmissions === 1 && formInfoData.requireLogin !== 1) {
+    callback(new Error('當「重複填寫」設置開啟，「綁定登入狀態」也必須設置為開啟'))
+  } else {
+    callback()
+  }
+}
 
 //表單校驗規則
 const formInfoRules = reactive<FormRules>({
@@ -334,9 +375,32 @@ const formInfoRules = reactive<FormRules>({
       trigger: 'blur'
     }
   ],
+  // 使用自定義驗證器,新增針對 requireLogin 的校驗
+  requireLogin: [
+    { validator: validateLoginRequirement, trigger: 'change' }
+  ],
+  // 使用自定義驗證器,新增針對 allowMultipleSubmissions 的校驗（確保切換時也能觸發檢查）
+  allowMultipleSubmissions: [
+    { validator: validateLoginRequirement, trigger: 'change' }
+  ]
 
 })
 
+// 監聽 allowMultipleSubmissions 的變化
+watch(() => formInfoData.allowMultipleSubmissions, () => {
+  if (form.value) {
+    // 當這個欄位改變時，強制要求 form 重新驗證 requireLogin
+    // 這樣當你勾選「否」時，對方的紅字警告會立刻消失
+    form.value.validateField('requireLogin')
+  }
+})
+
+// 監聽 requireLogin 的變化
+watch(() => formInfoData.requireLogin, () => {
+  if (form.value) {
+    form.value.validateField('allowMultipleSubmissions')
+  }
+})
 
 
 
@@ -370,9 +434,9 @@ const sumbitForm = (form: FormInstance | undefined) => {
       getFormPage(1, 10)
 
     }
-    // else {
-    //   ElMessage.error("請完整填入資訊")
-    // }
+    else {
+      ElMessage.error("請完整填入資訊")
+    }
   })
 }
 

@@ -63,6 +63,9 @@ service.interceptors.response.use(
     if (error.response.data) {
       const { status, data } = error.response;
 
+      // 統一返回後端錯誤信息
+      ElMessage.error(data.msg)
+
       if (status == 401) {
         if (localStorage.getItem("Authorization-paper-reviewer")) {
           localStorage.removeItem("Authorization-paper-reviewer");
