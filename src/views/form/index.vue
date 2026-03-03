@@ -96,7 +96,7 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item label="是否綁定登入狀態">
+          <el-form-item label="是否綁定登入狀態" prop="requireLogin">
             <el-radio-group v-model="formInfoData.requireLogin">
               <el-radio :value=1 border>是</el-radio>
               <el-radio :value=0 border>否</el-radio>
@@ -111,7 +111,7 @@
           </el-form-item>
 
           <el-form-item label="是否允許多次填寫">
-            <el-radio-group v-model="formInfoData.allowMultipleSubmissions">
+            <el-radio-group v-model="formInfoData.allowMultipleSubmissions" prop="allowMultipleSubmissions">
               <el-radio :value=1 border>是</el-radio>
               <el-radio :value=0 border>否</el-radio>
             </el-radio-group>
@@ -339,6 +339,15 @@ const initFormInfo = () => {
 //表單數據
 let formInfoData = reactive(initFormInfo())
 
+// 校驗 「重複填寫」開啟時 , 「綁定登入狀態」也必須開啟
+const validateLoginRequirement = (rule: any, value: any, callback: any) => {
+  // 如果「允許多次填寫」為 1 (是)，則「綁定登入狀態」必須為 1
+  if (formInfoData.allowMultipleSubmissions === 1 && formInfoData.requireLogin !== 1) {
+    callback(new Error('當「重複填寫」設置開啟，「綁定登入狀態」也必須設置為開啟'))
+  } else {
+    callback()
+  }
+}
 
 //表單校驗規則
 const formInfoRules = reactive<FormRules>({
@@ -366,9 +375,32 @@ const formInfoRules = reactive<FormRules>({
       trigger: 'blur'
     }
   ],
+  // 使用自定義驗證器,新增針對 requireLogin 的校驗
+  requireLogin: [
+    { validator: validateLoginRequirement, trigger: 'change' }
+  ],
+  // 使用自定義驗證器,新增針對 allowMultipleSubmissions 的校驗（確保切換時也能觸發檢查）
+  allowMultipleSubmissions: [
+    { validator: validateLoginRequirement, trigger: 'change' }
+  ]
 
 })
 
+// 監聽 allowMultipleSubmissions 的變化
+watch(() => formInfoData.allowMultipleSubmissions, () => {
+  if (form.value) {
+    // 當這個欄位改變時，強制要求 form 重新驗證 requireLogin
+    // 這樣當你勾選「否」時，對方的紅字警告會立刻消失
+    form.value.validateField('requireLogin')
+  }
+})
+
+// 監聽 requireLogin 的變化
+watch(() => formInfoData.requireLogin, () => {
+  if (form.value) {
+    form.value.validateField('allowMultipleSubmissions')
+  }
+})
 
 
 
@@ -402,9 +434,9 @@ const sumbitForm = (form: FormInstance | undefined) => {
       getFormPage(1, 10)
 
     }
-    // else {
-    //   ElMessage.error("請完整填入資訊")
-    // }
+    else {
+      ElMessage.error("請完整填入資訊")
+    }
   })
 }
 
